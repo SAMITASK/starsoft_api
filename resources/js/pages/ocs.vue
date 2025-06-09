@@ -1,5 +1,7 @@
 <script setup>
 
+import { Spanish } from 'flatpickr/dist/l10n/es.js'
+import OCDetailDialog from '@/components/dialogs/OCDetailDialog.vue'
 //Companies
 const selectedCompany = ref('003')
 const companies = ref([])
@@ -36,43 +38,54 @@ onMounted(async () => {
 })
 // End Companies
 
+
+// Date Range Picker
+
+const today = new Date()
+
+// Hace 6 días
+const sixDaysAgo = new Date()
+sixDaysAgo.setDate(today.getDate() - 6)
+
+// Formatear en 'YYYY-MM-DD'
+function formatDate(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Rango: de hace 6 días a hoy
+const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`)
+
+
+// End Date Range Picker
+
 const status = ref([
-  {
-    title: 'EMITIDA',
-    value: '00',
-  },
-  {
-    title: 'APROBADA',
-    value: '01',
-  },
-  {
-    title: 'REC. PARCIALMENTE',
-    value: '03',
-  },
-  {
-    title: 'REC. TOTALMENTE',
-    value: '04',
-  },
-  {
-    title: 'LOQUIDADA',
-    value: '05',
-  },
-  {
-    title: 'ANULADA',
-    value: '06',
-  }
+  { title: 'EMITIDA', value: '00', color: 'secondary' },
+  { title: 'APROBADA', value: '01', color: 'primary' },
+  { title: 'REC. PARCIALMENTE', value: '03', color: 'warning' },
+  { title: 'REC. TOTALMENTE', value: '04', color: 'success' },
+  { title: 'LIQUIDADA', value: '05', color: 'info' },
+  { title: 'ANULADA', value: '06', color: 'error' }
 ])
 
+function getStatusColor(value) {
+  const s = status.value.find(s => s.value === value)
+  return s ? s.color : 'grey'
+}
 
 // Data table options
 const itemsPerPage = ref(10)
 const page = ref(1)
 const sortBy = ref()
 const orderBy = ref()
+const isDialogVisible = ref(false)
+const selectedItem = ref(null)
 const selectedRows = ref([])
 
   // Headers
-  const headers = [
+const headers = [
     {
       title: 'Empresa',
       key: 'company',
@@ -116,6 +129,7 @@ const selectedRows = ref([])
       q: searchQuery,
       company: selectedCompany,
       status: selectedStatus,
+      date: dateRange,
       itemsPerPage,
       page,
       sortBy,
@@ -131,6 +145,12 @@ const updateOptions = options => {
 
 const ocs = computed(() => ocsData.value.ocs)
 const total = computed(() => ocsData.value.total)
+
+const handleRowClick = (item) => {
+  selectedItem.value = item
+  isDialogVisible.value = true
+  console.log(item);
+}
 
 </script>
 
@@ -169,20 +189,25 @@ const total = computed(() => ocsData.value.total)
               clear-icon="ri-close-line"
             />
           </VCol>
-
+        <VCol cols="12" sm="4">
+          <AppDateTimePicker
+              v-model="dateRange"
+              label="Rango de fechas"
+              placeholder="Selecciona el rango"
+              :config="{
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                locale: Spanish,
+                 maxDate: new Date()
+              }"
+            />
+          </VCol>
       </VRow>
     </VCardText>
 
     <VDivider />
 
     <VCardText class="d-flex flex-wrap gap-4 align-center">
-        <VBtn
-          variant="outlined"
-          color="secondary"
-          prepend-icon="ri-upload-2-line"
-        >
-          Export
-        </VBtn>
         <VSpacer />
         <div class="d-flex align-center gap-4 flex-wrap">
           <div class="app-user-search-filter">
@@ -192,9 +217,6 @@ const total = computed(() => ocsData.value.total)
               density="compact"
             />
           </div>
-          <VBtn>
-            Algun Boton
-          </VBtn>
         </div>
       </VCardText>
 
@@ -209,79 +231,100 @@ const total = computed(() => ocsData.value.total)
         :items-length="total"
         class="text-no-wrap rounded-0"
         @update:options="updateOptions"
+        hover
       >
-        <template #item.company="{ item }">
-          <div class="d-flex align-center gap-x-3" style="inline-size: 300px; white-space: normal; word-wrap: break-word;">
-            <div class="d-flex flex-column">
-              <span class="text-base">
-                {{ item.company_name }}
-              </span>
-            </div>
+      <template #item.company="{ item }">
+        <div
+          class="d-flex align-center gap-x-3"
+          style="inline-size: 300px; white-space: normal; word-wrap: break-word; cursor: pointer;"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base">{{ item.company_name }}</span>
           </div>
-        </template>
-        <template #item.module="{ item }">
-          <div class="d-flex align-center gap-x-3">
-            <div class="d-flex flex-column">
-              <span class="text-base text-high-emphasis font-weight-medium">{{ item.module }}</span>
-            </div>
-          </div>
-        </template>
-        <template #item.type="{ item }">
-          <div class="d-flex align-center gap-x-3">
-            <div class="d-flex flex-column">
-              <span class="text-base text-high-emphasis font-weight-medium">{{ item.type }}</span>
-            </div>
-          </div>
-        </template>
-                <template #item.code="{ item }">
-          <div class="d-flex align-center gap-x-3">
-            <div class="d-flex flex-column">
-              <span class="text-base text-high-emphasis font-weight-medium">{{ item.code }}</span>
-            </div>
-          </div>
-        </template>
-        <template #item.issue="{ item }">
-          <div class="d-flex align-center gap-x-3">
-            <div class="d-flex flex-column">
-              <span class="text-base text-high-emphasis font-weight-medium">{{ item.issue }}</span>
-            </div>
-          </div>
-        </template>
-        <template #item.status="{ item }">
-          <div class="d-flex align-center gap-x-3">
-            <div class="d-flex flex-column">
-              <span class="text-base text-high-emphasis font-weight-medium">
-                {{ status.find(s => s.value === item.status)?.title ?? item.status }}
-              </span>
-            </div>
-          </div>
-        </template>
+        </div>
+      </template>
 
-        <template #item.actions="{ item }">
-          <IconBtn
-            size="small"
-          >
-            <VIcon icon="ri-delete-bin-7-line" />
-          </IconBtn>
-          <IconBtn
-            size="small"
-          >
-            <VIcon icon="ri-eye-line" />
-          </IconBtn>
-          <IconBtn
-            size="small"
-            color="medium-emphasis"
-          >
-          </IconBtn>
-        </template>
+      <template #item.module="{ item }">
+        <div
+          class="d-flex align-center gap-x-3"
+          style="cursor: pointer;"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base text-high-emphasis font-weight-medium">{{ item.module }}</span>
+          </div>
+        </div>
+      </template>
 
-                <!-- Pagination -->
+      <template #item.type="{ item }">
+        <div
+          class="d-flex align-center gap-x-3"
+          style="cursor: pointer;"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base text-high-emphasis font-weight-medium">{{ item.type }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.code="{ item }">
+        <div
+          class="d-flex align-center gap-x-3"
+          style="cursor: pointer;"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base text-high-emphasis font-weight-medium">{{ item.code }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.issue="{ item }">
+        <div
+          class="d-flex align-center gap-x-3"
+          style="cursor: pointer;"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base text-high-emphasis font-weight-medium">{{ item.issue }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.status="{ item }">
+        <div
+          class="d-flex align-center gap-x-3"
+          style="cursor: pointer;"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <VChip :color="getStatusColor(item.status)" class="text-white" dense outlined>
+              {{ status.find(s => s.value === item.status)?.title ?? item.status }}
+            </VChip>
+          </div>
+        </div>
+      </template>
+      <template #item.actions="{ item }">
+        <div class="d-flex align-center gap-x-3">
+          <div class="d-flex flex-column">
+            <IconBtn
+                size="large"
+              >
+              <VIcon icon="ri-eye-line" />
+            </IconBtn>
+          </div>
+        </div>
+      </template>
+
+        <!-- Pagination -->
         <template #bottom>
           <VDivider />
 
           <div class="d-flex justify-end flex-wrap gap-x-6 px-2 py-1">
             <div class="d-flex align-center gap-x-2 text-medium-emphasis text-base">
-              Rows Per Page:
+              Registros por página:
               <VSelect
                 v-model="itemsPerPage"
                 class="per-page-select"
@@ -318,10 +361,17 @@ const total = computed(() => ocsData.value.total)
           </div>
         </template>
     
-    </VDataTableServer>
+      </VDataTableServer>
 
   </VCard>
+
+  <OCDetailDialog
+    v-model:isDialogVisible="isDialogVisible"
+    :item="selectedItem"
+  />
 </template>
+
+
 
 <style lang="scss" scoped>
 .app-user-search-filter {

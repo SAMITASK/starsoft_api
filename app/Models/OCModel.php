@@ -14,10 +14,6 @@ class OCModel extends Model
 
     public $timestamps = false;
 
-    public function company()
-    {
-        return $this->belongsTo(CompanyModel::class, 'OC_CEMPRESA', 'EMP_CODIGO');
-    }
 
     public function products()
     {
@@ -48,10 +44,10 @@ class OCModel extends Model
             ->get();
     }
 
-    public function getAllOCs()
+    public function getAllOC()
     {
         return $this->setConnection($this->connection)
-            ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD')
+            ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD', 'OC_DFECENT','TipoDocumento')
             ->get();
     }
 }
