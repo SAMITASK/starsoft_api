@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\OCApi;
+use App\Http\Controllers\Api\OrdersApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +11,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('/purchase-orders', [OCApi::class, 'getAllCompaniesOCs']);
+Route::get('/purchase-orders', [OrdersApi::class, 'getOrders']);
+Route::post('/details-order', [OrdersApi::class, 'getOrder']);
 Route::get('/ocs', [OCApi::class, 'showOrder']);
 Route::get('/companies', [CompanyController::class, 'show']);

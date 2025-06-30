@@ -1,26 +1,26 @@
 <script setup>
 const props = defineProps({
-  billingAddress: {
-    type: Object,
-    required: false,
-    default: () => ({
-      firstName: '',
-      lastName: '',
-      selectedCountry: null,
-      addressLine1: '',
-      addressLine2: '',
-      landmark: '',
-      contact: '',
-      country: null,
-      state: '',
-      zipCode: null,
-    }),
-  },
   isDialogVisible: {
     type: Boolean,
     required: true,
   },
+  company: String,
+  code: String,
+  type: String,
+  module: String,
 })
+
+const details = ref({
+  required: {
+    TDESCRI: ''
+  },
+  responsible: {
+    RESPONSABLE_NOMBRE: ''
+  },
+  products: []
+})
+
+const isLoading = ref(false)
 
 const emit = defineEmits([
   'update:isDialogVisible',
@@ -38,23 +38,53 @@ const onFormSubmit = () => {
   emit('update:isDialogVisible', false)
   emit('submit', billingAddress.value)
 }
+watch(
+  () => props.isDialogVisible,
+  async (visible) => {
+    if (visible && props.code && props.type) {
+      isLoading.value = true
+      try {
+        const response = await fetch('/api/details-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: props.code,
+            type: props.type,
+            company: props.company,
+          }),
+        })
 
-const selectedAddress = ref('Home')
+        if (!response.ok) throw new Error('Error al obtener detalles')
 
-const addressTypes = [
-  {
-    title: 'Home',
-    desc: 'Delivery Time (7am - 9pm)',
-    value: 'Home',
-    icon: 'ri-home-smile-2-line',
-  },
-  {
-    title: 'Office',
-    desc: 'Delivery Time (10am - 6pm)',
-    value: 'Office',
-    icon: 'ri-building-line',
-  },
-]
+        details.value = await response.json()
+
+        console.log(details.value);
+        
+      } catch (err) {
+        console.error(err)
+      } finally {
+        isLoading.value = false
+      }
+    }
+  }
+)
+
+const toolbarTitle = computed(() => {
+  return `${props.type}-${props.code} - ${props.module}`
+})
+
+const formatCurrency = (value) => {
+  const number = parseFloat(value)
+  if (isNaN(number)) return ''
+  return new Intl.NumberFormat('es-PE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: true, // <-- activa separador de miles
+  }).format(number)
+}
+
 </script>
 
 <template>
@@ -63,150 +93,337 @@ const addressTypes = [
     :model-value="props.isDialogVisible"
     @update:model-value="val => $emit('update:isDialogVisible', val)"
   >
-    <VCard
-      v-if="props.billingAddress"
-      class="pa-sm-11 pa-3"
-    >
-      <VCardText class="pt-5">
-        <!-- 👉 dialog close btn -->
-        <DialogCloseBtn
-          variant="text"
-          size="default"
-          @click="resetForm"
-        />
+    <VCard>
+       <div>
+        <VToolbar color="primary">
 
-        <!-- 👉 Title -->
-        <div class="text-center mb-6">
-          <h4 class="text-h4 mb-2">
-            {{ props.billingAddress.firstName ? 'Edit' : 'Add New' }} Address
-          </h4>
 
-          <p class="text-body-1">
-            Add Address for future billing
-          </p>
-        </div>
+          <VToolbarTitle> {{ toolbarTitle }} </VToolbarTitle>
 
-        <CustomRadios
-          v-model:selected-radio="selectedAddress"
-          :radio-content="addressTypes"
-          :grid-column="{ sm: '6', cols: '12' }"
-          class="mb-5"
-        >
-          <template #default="items">
-            <div class="d-flex flex-column">
-              <div class="d-flex mb-2 align-center gap-x-1">
-                <VIcon
-                  :icon="items.item.icon"
-                  size="20"
-                  class="text-high-emphasis"
-                />
-                <div class="text-body-1 font-weight-medium text-high-emphasis">
-                  {{ items.item.title }}
-                </div>
-              </div>
-              <p class="text-body-2 mb-0">
-                {{ items.item.desc }}
-              </p>
-            </div>
-          </template>
-        </CustomRadios>
+          <VSpacer />
+
+          <VBtn
+            icon
+            variant="plain"
+            @click="resetForm"
+          >
+            <VIcon
+              color="white"
+              icon="ri-close-line"
+            />
+          </VBtn>
+        </VToolbar>
+      </div>
+
+      <VCardText class="pt-5">  
         <!-- 👉 Form -->
         <VForm @submit.prevent="onFormSubmit">
           <VRow>
-            <!-- 👉 First Name -->
             <VCol
               cols="12"
-              md="6"
+              md="4"
             >
               <VTextField
-                v-model="billingAddress.firstName"
-                label="First Name"
-                placeholder="John"
+                label="Ruc Proveedor"
+                v-model="details.OC_CCODPRO"
+                readonly
+                density="compact"
               />
             </VCol>
 
-            <!-- 👉 Last Name -->
             <VCol
               cols="12"
-              md="6"
+              md="8"
             >
               <VTextField
-                v-model="billingAddress.lastName"
-                label="Last Name"
-                placeholder="Doe"
+                v-model="details.OC_CRAZSOC"
+                label="Razon Social Proveedor"
+                readonly
+                density="compact"
               />
             </VCol>
 
-            <!-- 👉 Select country -->
-
-            <VCol cols="12">
-              <VSelect
-                v-model="billingAddress.selectedCountry"
-                label="Select Country"
-                placeholder="Select Country"
-                :items="['USA', 'Canada', 'NZ', 'Aus']"
-              />
-            </VCol>
-
-            <!-- 👉 Address Line 1 -->
-
-            <VCol cols="12">
-              <VTextField
-                v-model="billingAddress.addressLine1"
-                label="Address Line 1"
-                placeholder="1, New Street"
-              />
-            </VCol>
-
-            <!-- 👉 Address Line 2 -->
-
-            <VCol cols="12">
-              <VTextField
-                v-model="billingAddress.addressLine2"
-                label="Address Line 2"
-                placeholder="Near hospital"
-              />
-            </VCol>
-
-            <!-- 👉 Landmark -->
-
-            <VCol cols="12">
-              <VTextField
-                v-model="billingAddress.landmark"
-                label="Landmark & City"
-                placeholder="Near hospital, New York"
-              />
-            </VCol>
-
-            <!-- 👉 State -->
             <VCol
               cols="12"
-              md="6"
+              md="4"
             >
               <VTextField
-                v-model="billingAddress.state"
-                label="State/Province"
-                placeholder="New York"
+                v-model="details.OC_DFECDOC"
+                label="Fecha de Emision"
+                readonly
+                density="compact"
               />
             </VCol>
 
-            <!-- 👉 Zip Code -->
             <VCol
               cols="12"
-              md="6"
+              md="4"
             >
               <VTextField
-                v-model="billingAddress.zipCode"
-                label="Zip Code"
-                placeholder="123123"
-                type="number"
+                v-model="details.OC_DFECENT"
+                label="Fecha de Entrega"
+                readonly
+                density="compact"
               />
             </VCol>
 
-            <VCol cols="12">
-              <VSwitch label="Make this default shipping address" />
+            <VCol
+              cols="12"
+              md="4"
+            >
+            <VTextField
+                v-model="details.OC_CCODMON"
+                label="Moneda"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
             </VCol>
 
+            <VCol
+              cols="12"
+              md="3"
+            >
+            <VTextField
+                v-model="details.OC_NTIPCAM"
+                :prefix="details.OC_CCONVER"
+                label="Tipo de Cambio"
+                readonly
+                density="compact"
+              />
+            </VCol>
+            
+            <VCol
+              cols="12"
+              md="5"
+            >
+            <VTextField
+                v-model="details.OC_CFORPAG"
+                label="Forma de Pago"
+                persistent-placeholder
+                readonly
+                density="compact"
+              />
+            </VCol> 
+
+            <VCol
+              cols="12"
+              md="4"
+            >
+            <VTextField
+                v-model="details.required.TDESCRI"
+                label="Solicitado por"
+                persistent-placeholder
+                readonly
+                density="compact"
+              />
+            </VCol>
+
+            <VCol
+              cols="12"
+              md="4"
+            >
+            <VTextField
+                v-model="details.responsible.RESPONSABLE_NOMBRE"
+                label="Responsable de Compra"
+                persistent-placeholder
+                readonly
+                density="compact"
+              />
+            </VCol>
+
+
+            <VCol
+              cols="12"
+              md="8"
+            >
+            <VTextField
+                v-model="details.OC_CFACNOMBRE"
+                label="Facturar a nombre de"
+                persistent-placeholder
+                readonly
+                density="compact"
+              />
+            </VCol>
+
+            <VCol
+              sm="12"
+            >
+              <VTextarea
+                label="Observación"
+                auto-grow
+                rows="1"
+                row-height="15"
+                persistent-placeholder
+                v-model="details.OC_COBSERV"
+                readonly
+                density="compact"
+              />
+            </VCol> 
+
+          </VRow>
+          
+            <!-- 👉 table products -->
+
+          <VTable class="invoice-preview-table border text-high-emphasis overflow-hidden mt-6 mb-6">
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  #
+                </th>  
+                <th scope="col">
+                  CODIGO
+                </th>
+                <th scope="col">
+                  DESCRIPCION
+                </th>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  UNI.
+                </th>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  CANTIDAD
+                </th>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  PU
+                </th>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  PRECIO
+                </th>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  %DESC
+                </th>
+                <th
+                  scope="col"
+                  class="text-center"
+                >
+                  TOTAL
+                </th>                                            
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                v-for="(item, index) in details.products"
+                :key="index"
+              >
+                <td class="text-center">{{ item.REQITEM_REF }}</td>
+                <td>{{ item.OC_CCODIGO }}</td>
+                <td>{{ item.OC_CDESREF }}</td>
+                <td class="text-center">{{ item.OC_CUNIDAD }}</td>
+                <td class="text-center">{{ formatCurrency(item.OC_NCANTID) }}</td>
+                <td class="text-center">{{ formatCurrency(item.OC_NPREUNI) }}</td>
+                <td class="text-center">{{ formatCurrency(item.OC_NTOTVEN) }}</td>
+                <td class="text-center">{{ formatCurrency(item.OC_NDSCPOR) }}%</td>
+                <td class="text-center">
+                      {{
+                        formatCurrency(
+                          parseFloat(item.OC_NPREUNI) *
+                          parseFloat(item.OC_NCANTID) *
+                          (1 - parseFloat(item.OC_NDSCPOR) / 100)
+                        )
+                      }}
+                </td>
+              </tr>
+            </tbody>
+          </VTable>
+
+          <VRow>
+
+            <VCol
+              cols="6"
+              md="4"
+            >
+              <VTextField
+                label="Importe"
+                :value="formatCurrency(details.OC_NIMPORT)"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
+            </VCol>
+
+            <VCol
+              cols="6"
+              md="4"
+            >
+              <VTextField
+                label="Total"
+                :value="formatCurrency(details.OC_NIMPORT)"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
+            </VCol>
+
+            <VCol
+              cols="6"
+              md="4"
+            >
+              <VTextField
+                label="I.G.V."
+                :value="formatCurrency(details.OC_NIGV)"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
+            </VCol>
+
+                        <VCol
+              cols="6"
+              md="4"
+            >
+              <VTextField
+                label="Descuento"
+                :value="formatCurrency(details.OC_NDESCUE)"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
+            </VCol>
+
+            <VCol
+              cols="6"
+              md="4"
+            >
+              <VTextField
+                label="Percepción"
+                :value="formatCurrency(details.OC_NIMPPERC)"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
+            </VCol>
+
+            <VCol
+              cols="6"
+              md="4"
+            >
+              <VTextField
+                label="Compra"
+                :value="formatCurrency(details.OC_NVENTA)"
+                readonly
+                persistent-placeholder
+                density="compact"
+              />
+            </VCol>
             <!-- 👉 Submit and Cancel button -->
             <VCol
               cols="12"
@@ -214,9 +431,10 @@ const addressTypes = [
             >
               <VBtn
                 type="submit"
+                color="success"
                 class="me-3"
               >
-                submit
+                Aceptar
               </VBtn>
 
               <VBtn
@@ -224,7 +442,7 @@ const addressTypes = [
                 color="secondary"
                 @click="resetForm"
               >
-                Cancel
+                Rechazar
               </VBtn>
             </VCol>
           </VRow>

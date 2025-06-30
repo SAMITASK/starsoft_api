@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\OCModel;
+use App\Models\OCSModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class OCApi extends Controller
 
     return response()->json($order);
   }
+  
 
   public function getAllCompaniesOCs()
   {
@@ -106,10 +108,10 @@ class OCApi extends Controller
     $connection = 'sqlsrv_' . $company;
 
     $ocQuery = DB::connection($connection)->table('COMOVC')
-      ->selectRaw("'COMPRA' AS origen, OC_CNUMORD, OC_CSITORD, TipoDocumento, OC_DFECENT");
+      ->selectRaw("'COMPRA' AS origen, OC_CNUMORD, OC_CSITORD, TipoDocumento, CONVERT(DATE, OC_DFECENT) AS OC_DFECENT");
 
     $ocsQuery = DB::connection($connection)->table('COMOVC_S')
-      ->selectRaw("'SERVICIO' AS origen, OC_CNUMORD, OC_CSITORD, TipoDocumento, OC_DFECENT");
+      ->selectRaw("'SERVICIO' AS origen, OC_CNUMORD, OC_CSITORD, TipoDocumento, CONVERT(DATE, OC_DFECENT) AS OC_DFECENT");
 
     // Filtros comunes
     $applyFilters = function ($query) use ($status, $searchQuery, $dateRange) {
@@ -117,24 +119,29 @@ class OCApi extends Controller
         $query->where('OC_CSITORD', $status);
       }
 
-      if ($searchQuery !== null) {
+      if (!empty($searchQuery)) {
         $query->where(function ($q) use ($searchQuery) {
           $q->where('OC_CNUMORD', 'like', '%' . $searchQuery . '%')
             ->orWhere('TipoDocumento', 'like', '%' . $searchQuery . '%');
         });
       }
 
-      if ($dateRange) {
+      if (!empty($dateRange)) {
         if (strpos($dateRange, ' a ') !== false) {
           [$startDate, $endDate] = explode(' a ', $dateRange);
-          $startDate = Carbon::parse(trim($startDate))->startOfDay();
-          $endDate = Carbon::parse(trim($endDate))->endOfDay();
+
+          $startDate = Carbon::parse(trim($startDate))->format('Y-m-d');
+          $endDate   = Carbon::parse(trim($endDate))->format('Y-m-d');
+
           if ($startDate > $endDate) {
             [$startDate, $endDate] = [$endDate, $startDate];
           }
-          $query->whereBetween('OC_DFECENT', [$startDate, $endDate]);
+
+          $query->whereBetween(DB::raw("CONVERT(DATE, OC_DFECENT)"), [$startDate, $endDate]);
         } else {
-          $query->whereDate('OC_DFECENT', Carbon::parse(trim($dateRange)));
+          // ✅ Caso para una sola fecha:
+          $singleDate = Carbon::parse(trim($dateRange))->format('Y-m-d');
+          $query->whereDate(DB::raw("CONVERT(DATE, OC_DFECENT)"), $singleDate);
         }
       }
     };
@@ -145,11 +152,12 @@ class OCApi extends Controller
     // Unión de ambas consultas
     $unifiedQuery = $ocQuery->unionAll($ocsQuery);
 
-    // Convertir a queryBuilder
-    return DB::connection($connection)->table(DB::raw("({$unifiedQuery->toSql()}) as unified"))
-      ->mergeBindings($ocQuery) // Necesario para que funcionen los bindings
+    return DB::connection($connection)
+      ->table(DB::raw("({$unifiedQuery->toSql()}) as unified"))
+      ->mergeBindings($ocQuery)
       ->orderByDesc('OC_DFECENT');
   }
+
 
 
   /**
@@ -172,9 +180,13 @@ class OCApi extends Controller
         'status' => $oc->OC_CSITORD,
         'date' => $oc->OC_DFECENT,
         'issue' => ($oc->origen === 'COMPRA' ? 'Orden de Compra' : 'Orden de Servicio') . ' - Nro. ' . $code,
+        'issue_date' => $oc->OC_DFECENT ? Carbon::parse($oc->OC_DFECENT)->format('Y-m-d') : null,
       ];
     }
 
     return $mapped;
   }
+
+
+
 }

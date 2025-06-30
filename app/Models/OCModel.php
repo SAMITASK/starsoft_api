@@ -20,10 +20,18 @@ class OCModel extends Model
         return $this->hasMany(OCDModel::class, 'OC_CNUMORD', 'OC_CNUMORD');
     }
 
+    public function responsible()
+    {
+        return $this->belongsTo(Responsible::class, 'OC_CSOLICT', 'RESPONSABLE_CODIGO');
+    }
+
+    public function required(){
+        return $this->belongsTo(Required::class, 'OC_SOLICITA', 'TCLAVE');
+    }
 
     public static function getOrderWithProducts($connectionName, $orderId)
     {
-        $order = self::on($connectionName)->where('OC_CNUMORD', $orderId)->first();
+        $order = self::on($connectionName)->where('OC_CNUMORD', $orderId)->with('responsible')->with('required')->first();
 
         if ($order) {
             $order->setRelation('products', OCDModel::on($connectionName)
@@ -41,13 +49,14 @@ class OCModel extends Model
 
         return self::on($connectionName)
             ->with('products') // Ya no necesitas pasarle nada
+            ->with('responsible')
             ->get();
     }
 
     public function getAllOC()
     {
         return $this->setConnection($this->connection)
-            ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD', 'OC_DFECENT','TipoDocumento')
+            ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD', 'OC_DFECENT', 'TipoDocumento')
             ->get();
     }
 }

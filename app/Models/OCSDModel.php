@@ -6,15 +6,15 @@ use App\Traits\HasDynamicConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OCDModel extends Model
+class OCSDModel extends Model
 {
     use HasFactory, HasDynamicConnection;
 
-    protected $table = 'COMOVD';
+    protected $table = 'COMOVD_S';
     public $timestamps = false;
 
     public function order()
     {
-        return $this->belongsTo(OCModel::class, 'OC_CNUMORD', 'OC_CNUMORD');
+        return $this->belongsTo(OCSModel::class, 'OC_CNUMORD', 'OC_CNUMORD');
     }
 }
