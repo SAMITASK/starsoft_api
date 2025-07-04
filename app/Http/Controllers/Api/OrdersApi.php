@@ -152,4 +152,42 @@ class OrdersApi extends Controller
 
         return response()->json($order);
     }
+
+    public function markAsRead(Request $request)
+    {
+        $oc = Orders::where('tipo', $request->type)
+            ->where('identificador', $request->code)
+            ->where('codigoEmpresa', $request->company)
+            ->first();
+
+
+        if (!$oc) {
+            return response()->json(['error' => 'Orden no encontrada'], 404);
+        }
+
+        $oc->leido = 1;
+        $oc->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function handleApproval(Request $request)
+    {
+        $oc = Orders::where('tipo', $request->type)
+            ->where('identificador', $request->code)
+            ->where('codigoEmpresa', $request->company)
+            ->firstOrFail();
+
+        if ($request->action === 'approve') {
+            $oc->estado = 'APROBADA';
+        } elseif ($request->action === 'reject') {
+            $oc->estado = 'RECHAZADA';
+        }
+
+        $oc->fechaAprobacion = Carbon::now();
+
+        $oc->save();
+
+        return response()->json(['success' => true]);
+    }
 }

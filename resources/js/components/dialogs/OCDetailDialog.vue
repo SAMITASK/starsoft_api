@@ -34,10 +34,39 @@ const resetForm = () => {
   billingAddress.value = structuredClone(toRaw(props.billingAddress))
 }
 
-const onFormSubmit = () => {
-  emit('update:isDialogVisible', false)
-  emit('submit', billingAddress.value)
+const onFormSubmit = async () => {
+  const payload = {
+    code: props.code,
+    type: props.type,
+    company: props.company,
+    action: actionType.value, // 'approve' o 'reject'
+  }
+
+  try {
+    const response = await fetch('/api/handle-approval', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+    const result = await response.json()
+
+    // ✅ Cerrar el diálogo
+    emit('update:isDialogVisible', false) // cerrar diálogo
+    emit('refresh') // pedir al padre que actualice la tabla
+
+    // ✅ (Opcional) Mostrar mensaje de éxito
+    alert('Acción realizada correctamente')
+
+  } catch (error) {
+    console.error('Error al enviar acción:', error)
+    alert('Hubo un error al procesar la acción.')
+  }
 }
+
+
 watch(
   () => props.isDialogVisible,
   async (visible) => {
@@ -84,6 +113,8 @@ const formatCurrency = (value) => {
     useGrouping: true, // <-- activa separador de miles
   }).format(number)
 }
+
+const actionType = ref(null)
 
 </script>
 
@@ -192,7 +223,6 @@ const formatCurrency = (value) => {
                 density="compact"
               />
             </VCol>
-            
             <VCol
               cols="12"
               md="5"
@@ -205,7 +235,6 @@ const formatCurrency = (value) => {
                 density="compact"
               />
             </VCol> 
-
             <VCol
               cols="12"
               md="4"
@@ -231,8 +260,6 @@ const formatCurrency = (value) => {
                 density="compact"
               />
             </VCol>
-
-
             <VCol
               cols="12"
               md="8"
@@ -386,7 +413,7 @@ const formatCurrency = (value) => {
               />
             </VCol>
 
-                        <VCol
+            <VCol
               cols="6"
               md="4"
             >
@@ -425,25 +452,51 @@ const formatCurrency = (value) => {
               />
             </VCol>
             <!-- 👉 Submit and Cancel button -->
-            <VCol
-              cols="12"
-              class="text-center"
-            >
-              <VBtn
-                type="submit"
-                color="success"
-                class="me-3"
-              >
-                Aceptar
-              </VBtn>
+            <VCol cols="12">
+              <div class="d-flex justify-space-between align-center">
+                <!-- Botones a la izquierda -->
+                <div>
+                  <VBtn
+                    type="submit"
+                    color="success"
+                    class="me-3"
+                    @click="actionType = 'approve'"
+                  >
+                    Aceptar
+                     <VIcon
+                      end
+                      icon="ri-checkbox-circle-line"
+                    />
+                  </VBtn>
 
-              <VBtn
-                variant="outlined"
-                color="secondary"
-                @click="resetForm"
-              >
-                Rechazar
-              </VBtn>
+                  <VBtn
+                    type="submit"
+                    color="error"
+                    @click="actionType = 'reject'"
+                  >
+                    Rechazar
+                     <VIcon
+                        end
+                        icon="ri-close-circle-line"
+                      />
+                  </VBtn>
+                </div>
+
+                <!-- Botón a la derecha -->
+                <div>
+                  <VBtn
+                    color="secondary"
+                    variant="flat"
+                    @click="resetForm"
+                  >
+                      <VIcon
+                        start
+                        icon="ri-logout-circle-line"
+                      />
+                    Cancelar
+                  </VBtn>
+                </div>
+              </div>
             </VCol>
           </VRow>
         </VForm>

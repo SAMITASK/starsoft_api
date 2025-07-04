@@ -143,10 +143,32 @@ const ocs = computed(() => ocsData.value.ocs);
 const total = computed(() => ocsData.value.total);
 
 const handleRowClick = (item) => {
-  selectedItem.value = item;
-  isDialogVisible.value = true;
-  console.log(item);
-};
+  selectedItem.value = item
+  isDialogVisible.value = true
+  markAsRead(item)
+}
+
+const markAsRead = async (item) => {
+  if (!item.read) {
+    item.read = true
+    try {
+      await fetch('/api/mark-as-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: item.code,
+          type: item.type,
+          company: item.company,
+        }),
+      })
+      
+      await fetchOcs();
+    } catch (error) {
+      console.error('Error al marcar como leído', error)
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -383,6 +405,7 @@ const handleRowClick = (item) => {
     :code="selectedItem?.code"
     :type="selectedItem?.type"
     :module="selectedItem?.module"
+    @refresh="fetchOcs"
   />
 </template>
 

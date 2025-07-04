@@ -13,5 +13,7 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/purchase-orders', [OrdersApi::class, 'getOrders']);
 Route::post('/details-order', [OrdersApi::class, 'getOrder']);
+Route::post('/mark-as-read', [OrdersApi::class, 'markAsRead']);
+Route::post('/handle-approval', [OrdersApi::class, 'handleApproval']);
 Route::get('/ocs', [OCApi::class, 'showOrder']);
 Route::get('/companies', [CompanyController::class, 'show']);
