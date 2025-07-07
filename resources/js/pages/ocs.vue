@@ -150,23 +150,24 @@ const handleRowClick = (item) => {
 const markAsRead = async (item) => {
   if (!item.read) {
     item.read = true
+
     try {
-      await fetch('/api/mark-as-read', {
+      await $api('/mark-as-read', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           code: item.code,
           type: item.type,
           company: item.company,
-        }),
+        },
       })
-      
-      await fetchOcs();
+
+      await fetchOcs()
     } catch (error) {
       console.error('Error al marcar como leído', error)
     }
   }
 }
+
 
 </script>
 

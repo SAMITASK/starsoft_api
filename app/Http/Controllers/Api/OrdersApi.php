@@ -173,21 +173,52 @@ class OrdersApi extends Controller
 
     public function handleApproval(Request $request)
     {
-        $oc = Orders::where('tipo', $request->type)
-            ->where('identificador', $request->code)
-            ->where('codigoEmpresa', $request->company)
-            ->firstOrFail();
+        try {
+            // Paso 1: actualiza BDWENCO
+            $oc = Orders::where('tipo', $request->type)
+                ->where('identificador', $request->code)
+                ->where('codigoEmpresa', $request->company)
+                ->firstOrFail();
 
-        if ($request->action === 'approve') {
-            $oc->estado = 'APROBADA';
-        } elseif ($request->action === 'reject') {
-            $oc->estado = 'RECHAZADA';
+            $estado = match ($request->action) {
+                'approve' => 'APROBADA',
+                'reject'  => 'RECHAZADA',
+                default   => null,
+            };
+
+            $oc->estado = $estado;
+            $oc->fechaAprobacion = now();
+            $oc->save();
+
+            // Paso 2: actualiza COMOVC o COMOVC_S en la misma conexión
+            $connection = 'sqlsrv_' . $request->company;
+            $table = $request->type === 'OC' ? 'dbo.COMOVC' : 'dbo.COMOVC_S';
+            $fieldId = $request->type === 'OC' ? 'OC_CNUMORD' : 'OC_CNUMORD';
+            $fieldStatus = $request->type === 'OC' ? 'OC_CSITORD' : 'OCS_CSITORD';
+
+            $user = $request->user();
+
+            DB::connection($connection)
+                ->table($table)
+                ->where($fieldId, $request->code)
+                ->update([
+                    $fieldStatus               => $request->action === 'approve' ? '01' : '06',
+                    'NOMBRE_USUARIO'          => $user->name,
+                    'CARGO_USUARIO'           => $user->cargo ?? '',
+                    'FECHAHORA_CAMBIOESTADO'  => now(),
+                ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            Log::error('Error en handleApproval', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'Error al aprobar/rechazar la orden',
+                'details' => $e->getMessage(),
+            ], 500);
         }
-
-        $oc->fechaAprobacion = Carbon::now();
-
-        $oc->save();
-
-        return response()->json(['success' => true]);
     }
 }

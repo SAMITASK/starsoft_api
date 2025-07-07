@@ -43,28 +43,25 @@ const onFormSubmit = async () => {
   }
 
   try {
-    const response = await fetch('/api/handle-approval', {
+    const response = await $api('/handle-approval', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: payload,
     })
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-
-    const result = await response.json()
-
     // ✅ Cerrar el diálogo
-    emit('update:isDialogVisible', false) // cerrar diálogo
-    emit('refresh') // pedir al padre que actualice la tabla
+    emit('update:isDialogVisible', false)
+
+    // ✅ Solicitar actualización de la tabla
+    emit('refresh')
 
     // ✅ (Opcional) Mostrar mensaje de éxito
     alert('Acción realizada correctamente')
-
   } catch (error) {
     console.error('Error al enviar acción:', error)
     alert('Hubo un error al procesar la acción.')
   }
 }
+
 
 
 watch(
