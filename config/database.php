@@ -237,7 +237,16 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
         ],
-
+        'auth_db' => [
+            'driver' => 'sqlsrv',
+            'host' => env('AUTH_DB_HOST', '192.168.100.2'),
+            'port' => env('AUTH_DB_PORT', '1433'),
+            'database' => env('AUTH_DB_DATABASE', 'ACCOUNT'),
+            'username' => env('AUTH_DB_USERNAME', 'lector_api'),
+            'password' => env('AUTH_DB_PASSWORD', 'ClavePrueba2024*'),
+            'charset' => 'utf8',
+            'prefix' => '',
+        ],
     ],
 
     /*
