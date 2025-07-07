@@ -1,19 +1,29 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\OCApi;
 use App\Http\Controllers\Api\OrdersApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('/purchase-orders', [OrdersApi::class, 'getOrders']);
+    Route::post('/details-order', [OrdersApi::class, 'getOrder']);
+    Route::post('/mark-as-read', [OrdersApi::class, 'markAsRead']);
+    Route::post('/handle-approval', [OrdersApi::class, 'handleApproval']);
+    Route::get('/ocs', [OCApi::class, 'showOrder']);
+    Route::get('/companies', [CompanyController::class, 'show']);
+});
 
 
-Route::get('/purchase-orders', [OrdersApi::class, 'getOrders']);
-Route::post('/details-order', [OrdersApi::class, 'getOrder']);
-Route::post('/mark-as-read', [OrdersApi::class, 'markAsRead']);
-Route::post('/handle-approval', [OrdersApi::class, 'handleApproval']);
-Route::get('/ocs', [OCApi::class, 'showOrder']);
-Route::get('/companies', [CompanyController::class, 'show']);
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']);
+
+    Route::group(['middleware' => 'auth:sanctum'], function () {
+        Route::get('logout', [AuthController::class, 'logout']);
+        Route::get('user', [AuthController::class, 'user']);
+    });
+});

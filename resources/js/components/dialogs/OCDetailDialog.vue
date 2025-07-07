@@ -72,33 +72,32 @@ watch(
   async (visible) => {
     if (visible && props.code && props.type) {
       isLoading.value = true
+
       try {
-        const response = await fetch('/api/details-order', {
+        const res = await $api('/api/details-order', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+          body: {
             code: props.code,
             type: props.type,
             company: props.company,
-          }),
+          },
+          onResponseError({ response }) {
+            throw new Error(response._data?.message || 'Error al obtener detalles')
+          },
         })
 
-        if (!response.ok) throw new Error('Error al obtener detalles')
+        details.value = res
+        console.log(details.value)
 
-        details.value = await response.json()
-
-        console.log(details.value);
-        
       } catch (err) {
-        console.error(err)
+        console.error('Error al cargar detalles:', err)
       } finally {
         isLoading.value = false
       }
     }
   }
 )
+
 
 const toolbarTitle = computed(() => {
   return `${props.type}-${props.code} - ${props.module}`

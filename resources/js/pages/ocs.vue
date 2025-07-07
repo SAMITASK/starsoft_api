@@ -9,32 +9,31 @@ const errorMessage = ref(null);
 
 onMounted(async () => {
   try {
-    const response = await fetch("/api/companies");
+    const res = await $api('/api/companies', {
+      method: 'GET',
+      onResponseError({ response }) {
+        throw new Error(response._data?.message || 'Error al obtener empresas')
+      },
+    })
 
-    if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+    if (!Array.isArray(res)) {
+      throw new Error('Formato de datos inválido')
     }
 
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error("Formato de datos inválido");
-    }
-
-    companies.value = data.map((company) => ({
+    companies.value = res.map((company) => ({
       title: company.id,
       value: company.name,
       rawData: company,
-    }));
+    }))
   } catch (error) {
-    console.error("Error cargando empresas:", error);
-    errorMessage.value =
-      "No se pudieron cargar las empresas. Intente nuevamente.";
-    companies.value = [];
+    console.error('Error cargando empresas:', error)
+    errorMessage.value = 'No se pudieron cargar las empresas. Intente nuevamente.'
+    companies.value = []
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-});
+})
+
 // End Companies
 
 // Date Range Picker

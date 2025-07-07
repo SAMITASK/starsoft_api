@@ -2,6 +2,23 @@
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import avatar1 from '@images/avatars/avatar-1.png'
 
+const router = useRouter()
+const userData = useCookie('userData')
+
+
+const logout = async () => {
+
+  // Remove "accessToken" from cookie
+  useCookie('accessToken').value = null
+
+  // Remove "userData" from cookie
+  userData.value = null
+
+  // Redirect to login page
+  await router.push('/login')
+
+}
+
 const userProfileList = [
   { type: 'divider' },
   {
@@ -15,36 +32,14 @@ const userProfileList = [
     icon: 'ri-settings-4-line',
     title: 'Settings',
     href: '#',
-  },
-  {
-    type: 'navItem',
-    icon: 'ri-file-text-line',
-    title: 'Billing Plan',
-    href: '#',
-    chipsProps: {
-      color: 'error',
-      text: '4',
-      size: 'small',
-    },
-  },
-  { type: 'divider' },
-  {
-    type: 'navItem',
-    icon: 'ri-money-dollar-circle-line',
-    title: 'Pricing',
-    href: '#',
-  },
-  {
-    type: 'navItem',
-    icon: 'ri-question-line',
-    title: 'FAQ',
-    href: '#',
-  },
+  }
 ]
+
 </script>
 
 <template>
   <VBadge
+    v-if="userData"
     dot
     bordered
     location="bottom right"
@@ -56,8 +51,17 @@ const userProfileList = [
     <VAvatar
       class="cursor-pointer"
       size="38"
+      :color="!(userData && userData.avatar) ? 'primary' : undefined"
+      :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
     >
-      <VImg :src="avatar1" />
+      <VImg
+        v-if="userData && userData.avatar"
+        :src="userData.avatar"
+      />
+      <VIcon
+        v-else
+        icon="ri-user-line"
+      />
 
       <!-- SECTION Menu -->
       <VMenu
@@ -69,16 +73,26 @@ const userProfileList = [
         <VList>
           <VListItem class="px-4">
             <div class="d-flex gap-x-2 align-center">
-              <VAvatar>
-                <VImg :src="avatar1" />
+              <VAvatar
+                :color="!(userData && userData.avatar) ? 'primary' : undefined"
+                :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
+              >
+                <VImg
+                  v-if="userData && userData.avatar"
+                  :src="userData.avatar"
+                />
+                <VIcon
+                  v-else
+                  icon="ri-user-line"
+                />
               </VAvatar>
 
               <div>
                 <div class="text-body-2 font-weight-medium text-high-emphasis">
-                  John Doe
+                  {{ userData.name }}
                 </div>
                 <div class="text-capitalize text-caption text-disabled">
-                  Admin
+                  {{ userData.cargo }}
                 </div>
               </div>
             </div>
@@ -91,7 +105,7 @@ const userProfileList = [
             >
               <VListItem
                 v-if="item.type === 'navItem'"
-                :href="item.href"
+                :to="item.to"
                 class="px-4"
               >
                 <template #prepend>
@@ -126,9 +140,9 @@ const userProfileList = [
                 color="error"
                 size="small"
                 append-icon="ri-logout-box-r-line"
-                :to="{ name: 'login' }"
+                @click="logout"
               >
-                Logout
+                Salir
               </VBtn>
             </VListItem>
           </PerfectScrollbar>
