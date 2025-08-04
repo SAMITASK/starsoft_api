@@ -7,7 +7,6 @@ const props = defineProps({
   company: String,
   code: String,
   type: String,
-  module: String,
 })
 
 const details = ref({
@@ -34,34 +33,6 @@ const resetForm = () => {
   billingAddress.value = structuredClone(toRaw(props.billingAddress))
 }
 
-const onFormSubmit = async () => {
-  const payload = {
-    code: props.code,
-    type: props.type,
-    company: props.company,
-    action: actionType.value, // 'approve' o 'reject'
-  }
-
-  try {
-    const response = await $api('/handle-approval', {
-      method: 'POST',
-      body: payload,
-    })
-
-    // ✅ Cerrar el diálogo
-    emit('update:isDialogVisible', false)
-
-    // ✅ Solicitar actualización de la tabla
-    emit('refresh')
-
-    // ✅ (Opcional) Mostrar mensaje de éxito
-    alert('Acción realizada correctamente')
-  } catch (error) {
-    console.error('Error al enviar acción:', error)
-    alert('Hubo un error al procesar la acción.')
-  }
-}
-
 watch(
   () => props.isDialogVisible,
   async (visible) => {
@@ -82,7 +53,6 @@ watch(
         })
 
         details.value = res
-        console.log(details.value)
 
       } catch (err) {
         console.error('Error al cargar detalles:', err)
@@ -95,7 +65,7 @@ watch(
 
 
 const toolbarTitle = computed(() => {
-  return `${props.type}-${props.code} - ${props.module}`
+  return `${props.type}-${props.code} - COMPRAS`
 })
 
 const formatCurrency = (value) => {
@@ -108,7 +78,22 @@ const formatCurrency = (value) => {
   }).format(number)
 }
 
-const actionType = ref(null)
+function formatDate(fecha) {
+  if (!fecha) return '';
+
+  // Asegura que sea en formato ISO
+  const d = new Date(fecha.replace(' ', 'T'));
+
+  if (isNaN(d)) return 'Fecha inválida';
+
+  const day = d.getDate();  
+  const month = d.getMonth() + 1;
+  const year = d.getFullYear();
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+
+  return `${day}/${month}/${year} /${hours}:${minutes}`;
+}
 
 </script>
 
@@ -141,16 +126,15 @@ const actionType = ref(null)
       </div>
 
       <VCardText class="pt-5">  
-
-        <template v-if="isLoading">
-          <div class="d-flex justify-center align-center py-10">
-            <v-progress-circular indeterminate color="primary" size="40" />
-            <span class="ms-4">Cargando información...</span>
-          </div>
-        </template>        
+          <template v-if="isLoading">
+            <div class="d-flex justify-center align-center py-10">
+              <v-progress-circular indeterminate color="primary" size="40" />
+              <span class="ms-4">Cargando información...</span>
+            </div>
+          </template>
         <!-- 👉 Form -->
         <template v-else>
-          <VForm @submit.prevent="onFormSubmit">
+          <VForm>
             <VRow>
               <VCol
                 cols="12"
@@ -456,35 +440,13 @@ const actionType = ref(null)
               <!-- 👉 Submit and Cancel button -->
               <VCol cols="12">
                 <div class="d-flex justify-space-between align-center">
-                  <!-- Botones a la izquierda -->
-                  <div>
-                    <VBtn
-                      type="submit"
-                      color="success"
-                      class="me-3"
-                      @click="actionType = 'approve'"
+                  <div 
+                    class="d-flex align-center gap-x-3"
                     >
-                      Aceptar
-                      <VIcon
-                        end
-                        icon="ri-checkbox-circle-line"
-                      />
-                    </VBtn>
-
-                    <VBtn
-                      type="submit"
-                      color="error"
-                      @click="actionType = 'reject'"
-                    >
-                      Rechazar
-                      <VIcon
-                          end
-                          icon="ri-close-circle-line"
-                        />
-                    </VBtn>
-                  </div>
-
-                  <!-- Botón a la derecha -->
+                      <div class="d-flex flex-column">
+                        <span class="text-dark font-weight-bold">Aprobado por  {{ details.NOMBRE_USUARIO }} el día {{ formatDate(details.FECHAHORA_CAMBIOESTADO)}}</span>
+                      </div>
+                    </div>
                   <div>
                     <VBtn
                       color="secondary"
@@ -495,7 +457,7 @@ const actionType = ref(null)
                           start
                           icon="ri-logout-circle-line"
                         />
-                      Cancelar
+                      Cerrar
                     </VBtn>
                   </div>
                 </div>

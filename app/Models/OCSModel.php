@@ -16,7 +16,7 @@ class OCSModel extends Model
 
     public function products()
     {
-        return $this->hasMany(OCDModel::class, 'OC_CNUMORD', 'OC_CNUMORD');
+        return $this->hasMany(OCSDModel::class, 'OC_CNUMORD', 'OC_CNUMORD');
     }
 
     public function responsible()
@@ -41,7 +41,7 @@ class OCSModel extends Model
         $order = self::on($connectionName)->where('OC_CNUMORD', $orderId)->with('responsible')->with('required')->first();
 
         if ($order) {
-            $order->setRelation('products', OCDModel::on($connectionName)
+            $order->setRelation('products', OCSDModel::on($connectionName)
                 ->where('OC_CNUMORD', $order->OC_CNUMORD)
                 ->get());
         }

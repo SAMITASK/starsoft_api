@@ -11,13 +11,12 @@ const props = defineProps({
 <template>
   <VRow>
     <!-- SECTION User Details -->
-    <VCol cols="12">
+    <VCol cols="12" md="12" lg="4">
       <VCard v-if="props.supplierData">
         <VCardText class="text-center pt-12 pb-6">
-          <!-- 👉 Avatar -->
           <VAvatar
             rounded="lg"
-            :size="120"
+            :size="80"
             :color="!props.supplierData.avatar ? 'primary' : undefined"
             :variant="!props.supplierData.avatar ? 'tonal' : undefined"
           >
@@ -27,12 +26,11 @@ const props = defineProps({
             />
             <span
               v-else
-              class="text-5xl font-weight-medium"
+              class="text-2xl font-weight-medium"
             >
               {{ avatarText(props.supplierData.reason ) }}
             </span>
           </VAvatar>
-
           <!-- 👉 User fullName -->
           <h5 class="text-h5 mt-4">
             {{ props.supplierData.reason }}
@@ -59,7 +57,7 @@ const props = defineProps({
               <h5 class="text-h5">
                 {{ kFormatter(props.supplierData.purchase_orders_count) }}
               </h5>
-              <span>Ord. Compra</span>
+              <span>OC</span>
             </div>
           </div>
 
@@ -82,11 +80,17 @@ const props = defineProps({
               <h5 class="text-h5">
                 {{ kFormatter(props.supplierData.service_orders_count) }}
               </h5>
-              <span>Ord. Servicio</span>
+              <span>OS</span>
             </div>
           </div>
         </VCardText>
 
+
+      </VCard>
+    </VCol>
+
+    <VCol cols="12" md="12" lg="8">
+      <VCard v-if="props.supplierData">
         <!-- 👉 Details -->
         <VCardText class="pb-6">
           <h5 class="text-h5">
@@ -113,9 +117,28 @@ const props = defineProps({
                 <span class="font-weight-medium">
                   Usuario:
                 </span>
-                <span class="text-body-1">{{ props.supplierData.user }}</span>
+                <span class="text-body-1">{{ props.supplierData.user?.trim() || 'No especificado' }}</span>
               </VListItemTitle>
             </VListItem>
+
+            <VListItem>
+              <VListItemTitle class="text-sm">
+                <span class="font-weight-medium">
+                  Empresa:
+                </span>
+                <span class="text-body-1">{{ props.supplierData.company_name }}</span>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle class="text-sm">
+                <span class="font-weight-medium">
+                  Fecha Creación:
+                </span>
+                <span class="text-body-1">{{ props.supplierData.issue_date }}</span>
+              </VListItemTitle>
+            </VListItem>
+
           </VList>
         </VCardText>
       </VCard>

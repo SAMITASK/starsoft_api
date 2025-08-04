@@ -1,6 +1,9 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
-import OCDetailDialog from "@/components/dialogs/OCDetailDialog.vue";
+
+const router = useRouter()
+
+
 //Companies
 const selectedCompany = ref("003");
 const companies = ref([]);
@@ -9,7 +12,7 @@ const errorMessage = ref(null);
 
 onMounted(async () => {
   try {
-    const res = await $ ('/api/companies', {
+    const res = await $api('/api/companies', {
       method: 'GET',
       onResponseError({ response }) {
         throw new Error(response._data?.message || 'Error al obtener empresas')
@@ -42,7 +45,7 @@ const today = new Date();
 
 // Hace 6 días
 const sixDaysAgo = new Date();
-sixDaysAgo.setDate(today.getDate() - 6);
+sixDaysAgo.setDate(today.getDate() - 30);
 
 // Formatear en 'YYYY-MM-DD'
 function formatDate(date) {
@@ -57,69 +60,46 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
 
 // End Date Range Picker
 
-const status = ref([
-  { title: "EMITIDA", value: "EMITIDA", color: "secondary" },
-  { title: "APROBADA", value: "APROBADA", color: "primary" },
-  { title: "RECHAZADO", value: "RECHAZADO", color: "error" },
-]);
-
-function getStatusColor(value) {
-  const s = status.value.find((s) => s.value === value);
-  return s ? s.color : "grey";
-}
 
 // Data table options
-const itemsPerPage = ref(30);
+const itemsPerPage = ref(10);
 const page = ref(1);
 const sortBy = ref();
 const orderBy = ref();
-const isDialogVisible = ref(false);
-const selectedItem = ref(null);
 const selectedRows = ref([]);
 
 // Headers
 const headers = [
   {
-    title: "Empresa",
-    key: "company",
-  },
-  {
-    title: "Modulo",
-    key: "module",
-  },
-  {
-    title: "Tipo",
-    key: "type",
-  },
-  {
-    title: "Codigo",
+    title: "CODIGO",
     key: "code",
   },
   {
-    title: "Asunto",
-    key: "issue",
+    title: "RUC",
+    key: "ruc",
   },
   {
-    title: "Fecha Envio",
+    title: "RAZON SOCIAL",
+    key: "reason",
+  },
+  {
+    title: "USUARIO",
+    key: "user",
+  },
+  {
+    title: "FECHA",
     key: "issue_date",
     sortable: true,
-  },
-  {
-    title: "Estado",
-    key: "status",
   },
 ];
 
 const searchQuery = ref("");
-const selectedStatus = ref("EMITIDA");
-const selectedType = ref();
 
-const { data: ocsData, execute: fetchOcs } = await useApi(
-  createUrl("purchase-orders", {
+const { data: suppliersData, execute: fetchSuppliers } = await useApi(
+  createUrl("suppliers", {
     query: {
       q: searchQuery,
       company: selectedCompany,
-      status: selectedStatus,
       date: dateRange,
       itemsPerPage,
       page,
@@ -135,36 +115,17 @@ const updateOptions = (options) => {
   orderBy.value = options.sortBy[0]?.order;
 };
 
-const ocs = computed(() => ocsData.value.ocs);
-const total = computed(() => ocsData.value.total);
+
+const suppliers = computed(() => suppliersData.value.suppliers);
+const total = computed(() => suppliersData.value.total);
 
 const handleRowClick = (item) => {
-  selectedItem.value = item
-  isDialogVisible.value = true
-  markAsRead(item)
+  router.push({
+      name: 'apps-supplier-id',
+      params: { id: item.code },
+      state: { company: selectedCompany.value }, // <-- aquí pasas el objeto completo
+    })
 }
-
-const markAsRead = async (item) => {
-  if (!item.read) {
-    item.read = true
-
-    try {
-      await $api('/mark-as-read', {
-        method: 'POST',
-        body: {
-          code: item.code,
-          type: item.type,
-          company: item.company,
-        },
-      })
-
-      await fetchOcs()
-    } catch (error) {
-      console.error('Error al marcar como leído', error)
-    }
-  }
-}
-
 
 </script>
 
@@ -190,16 +151,7 @@ const markAsRead = async (item) => {
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
-        <VCol cols="12" sm="4">
-          <VSelect
-            v-model="selectedStatus"
-            label="Select Status"
-            placeholder="Select Status"
-            :items="status"
-            clearable
-            clear-icon="ri-close-line"
-          />
-        </VCol>
+
         <VCol cols="12" sm="4">
           <AppDateTimePicker
             v-model="dateRange"
@@ -238,56 +190,15 @@ const markAsRead = async (item) => {
       v-model:page="page"
       :headers="headers"
       show-select
-      :items="ocs"
+      :items="suppliers"
       :items-length="total"
       class="text-no-wrap rounded-0"
       @update:options="updateOptions"
       hover
     >
-      <template #item.company="{ item }">
+        <template #item.code="{ item }">
         <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="inline-size: 300px; white-space: normal; word-wrap: break-word;"
-          @click="handleRowClick(item)"
-        >
-          <div class="d-flex flex-column">
-            <span class="text-base">{{ item.company_name }}</span>
-          </div>
-        </div>
-      </template>
-
-      <template #item.module="{ item }">
-        <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="cursor: pointer;"
-          @click="handleRowClick(item)"
-        >
-          <div class="d-flex flex-column">
-            <span class="text-base">{{ item.module }}</span>
-          </div>
-        </div>
-      </template>
-
-      <template #item.type="{ item }">
-        <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="cursor: pointer;"
-          @click="handleRowClick(item)"
-        >
-          <div class="d-flex flex-column">
-            <span class="text-base">{{ item.type }}</span>
-          </div>
-        </div>
-      </template>
-
-      <template #item.code="{ item }">
-        <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="cursor: pointer;"
+          class="d-flex align-center gap-x-3 cursor-pointer"
           @click="handleRowClick(item)"
         >
           <div class="d-flex flex-column">
@@ -295,52 +206,46 @@ const markAsRead = async (item) => {
           </div>
         </div>
       </template>
-
-      <template #item.issue="{ item }">
+      <template #item.ruc="{ item }">
         <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="cursor: pointer;"
+          class="d-flex align-center gap-x-3 cursor-pointer"
           @click="handleRowClick(item)"
         >
           <div class="d-flex flex-column">
-            <span class="text-base">{{ item.issue }}</span>
+            <span class="text-base">{{ item.ruc }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.reason="{ item }">
+        <div
+          class="d-flex align-center gap-x-3 cursor-pointer"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base">{{ item.reason }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.user="{ item }">
+        <div
+          class="d-flex align-center gap-x-3 cursor-pointer"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base">{{ item.user }}</span>
           </div>
         </div>
       </template>
 
       <template #item.issue_date="{ item }">
         <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="cursor: pointer;"
+          class="d-flex align-center gap-x-3 cursor-pointer"
           @click="handleRowClick(item)"
         >
           <div class="d-flex flex-column">
             <span class="text-base">{{ item.issue_date }}</span>
-          </div>
-        </div>
-      </template>
-
-      <template #item.status="{ item }">
-        <div
-          class="d-flex align-center gap-x-3"
-          :class="{ 'row-unread': item.read === false }"
-          style="cursor: pointer;"
-          @click="handleRowClick(item)"
-        >
-          <div class="d-flex flex-column">
-            <VChip
-              :color="getStatusColor(item.status)"
-              class="text-white"
-              dense
-              outlined
-            >
-              {{
-                status.find((s) => s.value === item.status)?.title ??
-                item.status
-              }}
-            </VChip>
           </div>
         </div>
       </template>
@@ -395,15 +300,6 @@ const markAsRead = async (item) => {
       </template>
     </VDataTableServer>
   </VCard>
-
-  <OCDetailDialog
-    v-model:isDialogVisible="isDialogVisible"
-    :company="selectedItem?.company"
-    :code="selectedItem?.code"
-    :type="selectedItem?.type"
-    :module="selectedItem?.module"
-    @refresh="fetchOcs"
-  />
 
 </template>
 
