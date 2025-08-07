@@ -86,13 +86,18 @@ function formatDate(fecha) {
 
   if (isNaN(d)) return 'Fecha inválida';
 
-  const day = d.getDate();  
+  const day = d.getDate();
   const month = d.getMonth() + 1;
   const year = d.getFullYear();
-  const hours = d.getHours().toString().padStart(2, '0');
+
+  let hours = d.getHours();
   const minutes = d.getMinutes().toString().padStart(2, '0');
 
-  return `${day}/${month}/${year} /${hours}:${minutes}`;
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // el 0 se convierte en 12
+
+  return `${day}/${month}/${year} ${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
 }
 
 </script>
