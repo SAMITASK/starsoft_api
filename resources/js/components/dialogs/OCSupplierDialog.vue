@@ -40,7 +40,7 @@ watch(
       isLoading.value = true
 
       try {
-        const res = await $api('/api/details-order', {
+        const res = await $api('/details-order', {
           method: 'POST',
           body: {
             code: props.code,
