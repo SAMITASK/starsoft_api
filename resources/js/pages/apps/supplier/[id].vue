@@ -36,7 +36,7 @@ const { data: supplierData } = await useApi(`suppliers/view/${supplier}?company=
         :touch="false"
       >
         <VWindowItem>
-          <SupplierTabOverview :company="company", :supplier="supplier" />
+          <SupplierTabOverview :company="company" :supplier="supplier" />
         </VWindowItem>
       </VWindow>
     </VCol>
