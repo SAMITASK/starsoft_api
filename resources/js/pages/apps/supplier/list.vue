@@ -12,7 +12,7 @@ const errorMessage = ref(null);
 
 onMounted(async () => {
   try {
-    const res = await $api('/api/companies', {
+    const res = await $api(import.meta.env.VITE_API_BASE_URL + '/companies', {
       method: 'GET',
       onResponseError({ response }) {
         throw new Error(response._data?.message || 'Error al obtener empresas')
