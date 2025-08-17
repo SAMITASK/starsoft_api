@@ -457,7 +457,7 @@ const actionType = ref(null)
               <VCol cols="12">
                 <div class="d-flex justify-space-between align-center">
                   <!-- Botones a la izquierda -->
-                  <div>
+                  <div v-if="!details.NOMBRE_USUARIO">
                     <VBtn
                       type="submit"
                       color="success"
@@ -478,10 +478,18 @@ const actionType = ref(null)
                     >
                       Rechazar
                       <VIcon
-                          end
-                          icon="ri-close-circle-line"
-                        />
+                        end
+                        icon="ri-close-circle-line"
+                      />
                     </VBtn>
+                  </div>
+
+                  <div v-else class="d-flex align-center gap-x-3">
+                    <div class="d-flex flex-column">
+                      <span class="text-dark font-weight-bold">
+                        Aprobado por {{ details.NOMBRE_USUARIO }} el día {{ formatDate(details.FECHAHORA_CAMBIOESTADO) }}
+                      </span>
+                    </div>
                   </div>
 
                   <!-- Botón a la derecha -->

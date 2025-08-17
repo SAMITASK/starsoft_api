@@ -25,7 +25,8 @@ class OCModel extends Model
         return $this->belongsTo(Responsible::class, 'OC_CSOLICT', 'RESPONSABLE_CODIGO');
     }
 
-    public function required(){
+    public function required()
+    {
         return $this->belongsTo(Required::class, 'OC_SOLICITA', 'TCLAVE');
     }
 
@@ -56,7 +57,7 @@ class OCModel extends Model
     public function getAllOC()
     {
         return $this->setConnection($this->connection)
-            ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD', 'OC_DFECENT', 'TipoDocumento', 'NOMBRE_USUARIO' )
+            ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD', 'OC_DFECENT', 'TipoDocumento', 'NOMBRE_USUARIO')
             ->get();
     }
 }

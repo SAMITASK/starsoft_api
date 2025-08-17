@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\OCApi;
 use App\Http\Controllers\Api\OrdersApi;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SupplierController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/ocs', 'getSupplierOrders');
         });
 
+    Route::controller(ProductController::class)
+        ->prefix('products')
+        ->group(function () {
+            Route::get('/', 'getProducts');
+            Route::get('/view/{id}', 'getProduct');
+            Route::get('/ocs', 'getProductOrders');
+            Route::get('/os', 'getProductServices');
+        });
 });
 
 
@@ -37,4 +46,3 @@ Route::group(['prefix' => 'auth'], function () {
         Route::get('user', [AuthController::class, 'user']);
     });
 });
-
