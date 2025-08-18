@@ -21,8 +21,8 @@ onMounted(async () => {
     }
 
     companies.value = res.map((company) => ({
-      title: company.id,
-      value: company.name,
+      title: company.name,
+      value: company.id,
       rawData: company,
     }))
   } catch (error) {

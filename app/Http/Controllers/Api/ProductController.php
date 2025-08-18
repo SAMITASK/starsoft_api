@@ -14,10 +14,19 @@ class ProductController extends Controller
     {
         try {
             $conexion = 'sqlsrv_' . $request->input('company');
-            $query = ProductModel::on($conexion);
+            $table = (new ProductModel())->getTable();
+
+            $query = ProductModel::on($conexion)
+                ->leftJoin('TIPO_ARTICULO', 'TIPO_ARTICULO.COD_TIPO', '=', $table . '.ATIPO')
+                ->leftJoin('FAMILIA', 'FAMILIA.FAM_CODIGO', '=', $table . '.AFAMILIA')
+                ->select(
+                    $table . '.*',
+                    'TIPO_ARTICULO.DES_TIPO as type_name',
+                    'FAMILIA.FAM_NOMBRE as family_name'
+                );
 
             $this->applyFilters($query, $request);
-            $this->applySorting($query, $request);
+            $this->applySorting($query, $request, $table);
 
             $itemsPerPage = max((int) $request->input('itemsPerPage', 10), 1);
             $results = $query->paginate($itemsPerPage);
@@ -65,31 +74,43 @@ class ProductController extends Controller
                 $query->whereDate(DB::raw("CONVERT(DATE, AFECHA)"), $date);
             }
         }
+
+        // Filtro por tipo (opcional)
+        if ($request->filled('type')) {
+            $query->where('ATIPO', $request->input('type'));
+        }
+
+        // Filtro por familia (opcional)
+        if ($request->filled('family')) {
+            $query->where('AFAMILIA', $request->input('family'));
+        }
     }
 
-    private function applySorting($query, Request $request): void
+    private function applySorting($query, Request $request, $table): void
     {
         $sortBy = $request->input('sortBy');
         $orderBy = $request->input('orderBy', 'asc');
 
         $allowedSorts = [
-            'code'        => 'ACODIGO',
-            'description' => 'ADESCRI',
-            'measure'     => 'AUNIDAD',
-            'serie'       => 'AFSERIE',
-            'batch'       => 'AFLOTE',
-            'family'      => 'AFAMILIA',
-            'line'        => 'AMODELO',
-            'group'       => 'AGRUPO',
-            'type'        => 'ATIPO',
-            'user'        => 'AUSER',
-            'date'        => 'AFECHA',
+            'code'        => $table . '.ACODIGO',
+            'description' => $table . '.ADESCRI',
+            'measure'     => $table . '.AUNIDAD',
+            'serie'       => $table . '.AFSERIE',
+            'batch'       => $table . '.AFLOTE',
+            'family'      => $table . '.AFAMILIA',
+            'family_name'  => 'FAMILIA.FAM_NOMBRE',
+            'line'        => $table . '.AMODELO',
+            'group'       => $table . '.AGRUPO',
+            'type'        => $table . '.ATIPO',
+            'type_name'   => 'TIPO_ARTICULO.DES_TIPO', // 👈 importante
+            'user'        => $table . '.AUSER',
+            'date'        => $table . '.AFECHA',
         ];
 
         if ($sortBy && isset($allowedSorts[$sortBy])) {
             $query->orderBy($allowedSorts[$sortBy], $orderBy === 'desc' ? 'desc' : 'asc');
         } else {
-            $query->orderByDesc('AFECHA'); // por defecto
+            $query->orderByDesc($table . '.AFECHA'); // por defecto
         }
     }
 
@@ -103,9 +124,11 @@ class ProductController extends Controller
                 'serie'       => $item->AFSERIE,
                 'batch'       => $item->AFLOTE,
                 'family'      => $item->AFAMILIA,
+                'family_name' => $item->family_name,
                 'line'        => $item->AMODELO,
                 'group'       => $item->AGRUPO,
                 'type'        => $item->ATIPO,
+                'type_name'   => $item->type_name,
                 'user'        => $item->AUSER,
                 'date'        => $item->AFECHA ? Carbon::parse($item->AFECHA)->format('d/m/Y') : null,
             ];

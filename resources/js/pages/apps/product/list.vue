@@ -4,40 +4,77 @@ import { Spanish } from "flatpickr/dist/l10n/es.js";
 const router = useRouter()
 
 
-//Companies
-const selectedCompany = ref("003");
-const companies = ref([]);
-const isLoading = ref(true);
-const errorMessage = ref(null);
+// Valores seleccionados
+const selectedCompany = ref("003")
+const selectedType = ref(null)
+const selectedFamily = ref(null)
 
-onMounted(async () => {
+// Opciones para los selects
+const companies = ref([])
+const types = ref([])
+const families = ref([])
+
+// Estados de carga y error (individuales para cada select)
+const isLoading = ref(false)
+const isLoadingTypes = ref(false)
+const isLoadingFamilies = ref(false)
+
+const errorMessage = ref(null)
+const errorMessageTypes = ref(null)
+const errorMessageFamilies = ref(null)
+
+// Función genérica para cargar datos
+async function fetchData(url, params, loadingRef, errorRef) {
+  loadingRef.value = true
+  errorRef.value = null
+  
   try {
-    const res = await $api('/companies', {
-      method: 'GET',
-      onResponseError({ response }) {
-        throw new Error(response._data?.message || 'Error al obtener empresas')
-      },
-    })
-
-    if (!Array.isArray(res)) {
-      throw new Error('Formato de datos inválido')
-    }
-
-    companies.value = res.map((company) => ({
-      title: company.id,
-      value: company.name,
-      rawData: company,
-    }))
-  } catch (error) {
-    console.error('Error cargando empresas:', error)
-    errorMessage.value = 'No se pudieron cargar las empresas. Intente nuevamente.'
-    companies.value = []
+    const query = new URLSearchParams(params).toString()
+    const fullUrl = query ? `${url}?${query}` : url
+    return await $api(fullUrl)
+  } catch (err) {
+    errorRef.value = err.message || "Error al cargar datos"
+    throw err
   } finally {
-    isLoading.value = false
+    loadingRef.value = false
+  }
+}
+
+// Cargar empresas
+async function loadCompanies() {
+  companies.value = await fetchData('/companies', {}, isLoading, errorMessage)
+}
+
+// Watchers
+watch(selectedCompany, async (company) => {
+  if (!company) {
+    types.value = []
+    families.value = []
+    selectedType.value = null
+    selectedFamily.value = null
+    return
+  }
+  
+  // Cargar tipos y familias en paralelo (mejor performance)
+  const [typesData, familiesData] = await Promise.all([
+    fetchData('/types', { company }, isLoadingTypes, errorMessageTypes),
+    fetchData('/families', { company }, isLoadingFamilies, errorMessageFamilies)
+  ])
+  
+  types.value = typesData
+  families.value = familiesData
+}, { immediate: true })
+
+// Watcher para type (solo limpia family si es necesario)
+watch(selectedType, (type) => {
+  if (!type) {
+    selectedFamily.value = null
   }
 })
 
-// End Companies
+// Carga inicial
+loadCompanies()
+
 
 // Date Range Picker
 
@@ -83,12 +120,12 @@ const headers = [
     key: "measure",
   },
   {
-    title: "FAMILIA",
-    key: "family",
+    title: "TIPO",
+    key: "type_name",
   },
   {
-    title: "TIPO",
-    key: "type",
+    title: "FAMILIA",
+    key: "family_name",
   },
   {
     title: "USUARIO",
@@ -103,11 +140,13 @@ const headers = [
 
 const searchQuery = ref("");
 
-const { data: suppliersData, execute: fetchSuppliers } = await useApi(
+const { data: productsData, execute: fetchSuppliers } = await useApi(
   createUrl("products", {
     query: {
       q: searchQuery,
       company: selectedCompany,
+      type: selectedType,
+      family: selectedFamily,
       date: dateRange,
       itemsPerPage,
       page,
@@ -124,8 +163,8 @@ const updateOptions = (options) => {
 };
 
 
-const suppliers = computed(() => suppliersData.value.products);
-const total = computed(() => suppliersData.value.total);
+const suppliers = computed(() => productsData.value.products);
+const total = computed(() => productsData.value.total);
 
 const handleRowClick = (item) => {
   router.push({
@@ -144,14 +183,14 @@ const handleRowClick = (item) => {
     </VCardItem>
     <VCardText>
       <VRow>
-        <VCol cols="12" sm="4">
+        <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedCompany"
             label="Selecciona empresa"
             placeholder="Selecciona empresa"
             :items="companies"
-            item-title="title"
-            item-value="value"
+            item-title="name"
+            item-value="id"
             :loading="isLoading"
             :error-messages="errorMessage"
             clearable
@@ -160,7 +199,39 @@ const handleRowClick = (item) => {
           />
         </VCol>
 
-        <VCol cols="12" sm="4">
+        <VCol cols="12" sm="3">
+          <VSelect
+            v-model="selectedType"
+            label="Selecciona tipo"
+            placeholder="Selecciona tipo"
+            :items="types"
+            item-title="name"
+            item-value="id"
+            :loading="isLoadingTypes"
+            :error-messages="errorMessageTypes"
+            clearable
+            clear-icon="ri-close-line"
+            no-data-text="No hay tipos disponibles"
+          />
+        </VCol>
+
+        <VCol cols="12" sm="3">
+          <VSelect
+            v-model="selectedFamily"
+            label="Selecciona familia"
+            placeholder="Selecciona familia"
+            :items="families"
+            item-title="name"
+            item-value="id"
+            :loading="isLoadingFamilies"
+            :error-messages="errorMessageFamilies"
+            clearable
+            clear-icon="ri-close-line"
+            no-data-text="No hay familias disponibles"
+          />
+        </VCol>
+
+        <VCol cols="12" sm="3">
           <AppDateTimePicker
             v-model="dateRange"
             label="Rango de fechas"

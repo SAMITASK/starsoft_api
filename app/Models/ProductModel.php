@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Product\FamilyModel;
 use App\Models\Product\TypeModel;
 use App\Traits\HasDynamicConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,6 +35,11 @@ class ProductModel extends Model
     public function type()
     {
         return $this->belongsTo(TypeModel::class, 'ATIPO', 'COD_TIPO');
+    }
+
+    public function family()
+    {
+        return $this->belongsTo(FamilyModel::class, 'AFAMILIA', 'FAM_CODIGO');
     }
 
     public function oc()

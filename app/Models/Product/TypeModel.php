@@ -3,9 +3,13 @@
 namespace App\Models\Product;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasDynamicConnection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class TypeModel extends Model
 {
+    use HasFactory, HasDynamicConnection;
+    
     protected $table = 'TIPO_ARTICULO';
     protected $primaryKey = 'COD_TIPO';
     public $incrementing = false; // porque es varchar

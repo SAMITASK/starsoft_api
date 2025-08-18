@@ -79,6 +79,7 @@ declare global {
   const mapGetters: typeof import('pinia')['mapGetters']
   const mapState: typeof import('pinia')['mapState']
   const mapStores: typeof import('pinia')['mapStores']
+  const mapToSelectOptions: typeof import('./resources/js/utils/mapToSelectOptions.js')['mapToSelectOptions']
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
@@ -290,6 +291,7 @@ declare global {
   const useScriptTag: typeof import('@vueuse/core')['useScriptTag']
   const useScroll: typeof import('@vueuse/core')['useScroll']
   const useScrollLock: typeof import('@vueuse/core')['useScrollLock']
+  const useSelectLoader: typeof import('./resources/js/composables/useSelectLoader.js')['useSelectLoader']
   const useSessionStorage: typeof import('@vueuse/core')['useSessionStorage']
   const useShare: typeof import('@vueuse/core')['useShare']
   const useSkins: typeof import('./resources/js/@core/composable/useSkins.js')['useSkins']
@@ -438,6 +440,7 @@ declare module 'vue' {
     readonly mapGetters: UnwrapRef<typeof import('pinia')['mapGetters']>
     readonly mapState: UnwrapRef<typeof import('pinia')['mapState']>
     readonly mapStores: UnwrapRef<typeof import('pinia')['mapStores']>
+    readonly mapToSelectOptions: UnwrapRef<typeof import('./resources/js/utils/mapToSelectOptions.js')['mapToSelectOptions']>
     readonly mapWritableState: UnwrapRef<typeof import('pinia')['mapWritableState']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
@@ -649,6 +652,7 @@ declare module 'vue' {
     readonly useScriptTag: UnwrapRef<typeof import('@vueuse/core')['useScriptTag']>
     readonly useScroll: UnwrapRef<typeof import('@vueuse/core')['useScroll']>
     readonly useScrollLock: UnwrapRef<typeof import('@vueuse/core')['useScrollLock']>
+    readonly useSelectLoader: UnwrapRef<typeof import('./resources/js/composables/useSelectLoader.js')['useSelectLoader']>
     readonly useSessionStorage: UnwrapRef<typeof import('@vueuse/core')['useSessionStorage']>
     readonly useShare: UnwrapRef<typeof import('@vueuse/core')['useShare']>
     readonly useSkins: UnwrapRef<typeof import('./resources/js/@core/composable/useSkins.js')['useSkins']>

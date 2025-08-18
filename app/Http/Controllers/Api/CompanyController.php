@@ -14,8 +14,8 @@ class CompanyController extends Controller
             ->get()
             ->map(function ($company) {
                 return [
-                    'id' => $company->EMP_RAZON_NOMBRE,
-                    'name' => $company->EMP_CODIGO,
+                    'id' => $company->EMP_CODIGO,
+                    'name' => $company->EMP_RAZON_NOMBRE,
                 ];
             });
 
