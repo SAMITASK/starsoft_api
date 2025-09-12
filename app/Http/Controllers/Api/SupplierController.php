@@ -112,7 +112,6 @@ class SupplierController extends Controller
         })->toArray();
     }
 
-
     public function getSupplier(Request $request, $id)
     {
         try {

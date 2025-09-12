@@ -168,7 +168,7 @@ const total = computed(() => productsData.value.total);
 
 const handleRowClick = (item) => {
   router.push({
-      name: 'apps-supplier-id',
+      name: 'apps-product-id',
       params: { id: item.code },
       state: { company: selectedCompany.value }, // <-- aquí pasas el objeto completo
     })
@@ -186,8 +186,8 @@ const handleRowClick = (item) => {
         <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedCompany"
-            label="Selecciona empresa"
-            placeholder="Selecciona empresa"
+            label="Filtrar por empresa"
+            placeholder="Filtrar empresa"
             :items="companies"
             item-title="name"
             item-value="id"
@@ -202,8 +202,8 @@ const handleRowClick = (item) => {
         <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedType"
-            label="Selecciona tipo"
-            placeholder="Selecciona tipo"
+            label="Filtrar por tipo"
+            placeholder="Filtrar por tipo"
             :items="types"
             item-title="name"
             item-value="id"
@@ -218,8 +218,8 @@ const handleRowClick = (item) => {
         <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedFamily"
-            label="Selecciona familia"
-            placeholder="Selecciona familia"
+            label="Filtrar por familia"
+            placeholder="Filtrar por familia"
             :items="families"
             item-title="name"
             item-value="id"
@@ -255,7 +255,7 @@ const handleRowClick = (item) => {
         <div class="app-user-search-filter">
           <VTextField
             v-model="searchQuery"
-            placeholder="Buscar OC"
+            placeholder="Buscar Producto"
             density="compact"
           />
         </div>
@@ -296,13 +296,35 @@ const handleRowClick = (item) => {
         </div>
       </template>
 
-      <template #item.reason="{ item }">
+            <template #item.type_name="{ item }">
         <div
           class="d-flex align-center gap-x-3 cursor-pointer"
           @click="handleRowClick(item)"
         >
           <div class="d-flex flex-column">
-            <span class="text-base">{{ item.reason }}</span>
+            <span class="text-base">{{ item.type_name }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.measure="{ item }">
+        <div
+          class="d-flex align-center gap-x-3 cursor-pointer"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base">{{ item.measure }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #item.family="{ item }">
+        <div
+          class="d-flex align-center gap-x-3 cursor-pointer"
+          @click="handleRowClick(item)"
+        >
+          <div class="d-flex flex-column">
+            <span class="text-base">{{ item.family }}</span>
           </div>
         </div>
       </template>
@@ -314,17 +336,6 @@ const handleRowClick = (item) => {
         >
           <div class="d-flex flex-column">
             <span class="text-base">{{ item.user }}</span>
-          </div>
-        </div>
-      </template>
-
-      <template #item.issue_date="{ item }">
-        <div
-          class="d-flex align-center gap-x-3 cursor-pointer"
-          @click="handleRowClick(item)"
-        >
-          <div class="d-flex flex-column">
-            <span class="text-base">{{ item.issue_date }}</span>
           </div>
         </div>
       </template>

@@ -36,7 +36,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/', 'getProducts');
             Route::get('/view/{id}', 'getProduct');
             Route::get('/ocs', 'getProductOrders');
-            Route::get('/os', 'getProductServices');
         });
 });
 

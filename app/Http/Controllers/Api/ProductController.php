@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyModel;
+use App\Models\OCDModel;
+use App\Models\OCSDModel;
 use App\Models\ProductModel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -134,4 +138,166 @@ class ProductController extends Controller
             ];
         })->toArray();
     }
+
+    public function getProduct(Request $request, $id)
+    {
+
+        try {
+            $companyCode = $request->query('company');
+            $conexion = 'sqlsrv_' . $companyCode;
+
+            $product = ProductModel::on($conexion)
+                ->leftJoin('TIPO_ARTICULO', 'TIPO_ARTICULO.COD_TIPO', '=', 'MAEART.ATIPO')
+                ->leftJoin('FAMILIA', 'FAMILIA.FAM_CODIGO', '=', 'MAEART.AFAMILIA')
+                ->select(
+                    'MAEART.*',
+                    'TIPO_ARTICULO.DES_TIPO as type_name',
+                    'FAMILIA.FAM_NOMBRE as family_name'
+                )
+                ->where('MAEART.ACODIGO', $id)
+                ->firstOrFail();
+
+            // Obtener empresa (opcional)
+            $company = CompanyModel::where('EMP_CODIGO', $companyCode)->first();
+            $companyName = $company ? $company->EMP_RAZON_NOMBRE : 'Empresa desconocida';
+
+            return response()->json([
+                'product' => [
+                    'code'        => $product->ACODIGO,
+                    'description' => $product->ADESCRI,
+                    'measure'     => $product->AUNIDAD,
+                    'serie'       => $product->AFSERIE,
+                    'batch'       => $product->AFLOTE,
+                    'family'      => $product->AFAMILIA,
+                    'family_name' => $product->family_name,
+                    'line'        => $product->AMODELO,
+                    'group'       => $product->AGRUPO,
+                    'type'        => $product->ATIPO,
+                    'type_name'   => $product->type_name,
+                    'user'        => $product->AUSER,
+                    'date'        => $product->AFECHA ? Carbon::parse($product->AFECHA)->format('d/m/Y') : null,
+                ],
+                'company_name' => $companyName,
+                'stats' => [
+                    'oc' => $this->countPurcharseOrders($conexion, $product->ACODIGO),
+                    'ocs' => $this->countServiceOrders($conexion, $product->ACODIGO),
+                    // Puedes agregar más estadísticas si es necesario
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error en getProduct', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'product_id' => $id,
+                'company' => $companyCode ?? 'null'
+            ]);
+
+            return response()->json([
+                'error' => 'Error al obtener el producto',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function countPurcharseOrders(string $connection, string $productCode): int
+    {
+        return OCDModel::on($connection)
+            ->where('OC_CCODIGO', $productCode) // Ajusta este campo según tu DB de detalle
+            ->count();
+    }
+
+    private function countServiceOrders(string $connection, $productCode): int
+    {
+        return OCSDModel::on($connection)
+            ->where('OC_CODSERVICIO', $productCode)
+            ->count();
+    }
+
+    public function getProductOrders(Request $request)
+    {
+        try {
+            $conexion = 'sqlsrv_' . $request->query('company');
+            $product = $request->query('product');
+            $search = $request->query('q');
+
+            // Query para órdenes de compra (detalle)
+            $ocQuery = $this->buildOrderQuery(OCDModel::on($conexion), 'OC', $product, $search);
+
+            // Query para órdenes de servicio (detalle)
+            $osQuery = $this->buildOrderQuery(OCSDModel::on($conexion), 'OS', $product, $search);
+
+            // Unión de ambos
+            $union = $ocQuery->unionAll($osQuery);
+
+            // Ejecutar unión
+            $orders = DB::connection($conexion)
+                ->table(DB::raw("({$union->toSql()}) as combined"))
+                ->mergeBindings($union->getQuery())
+                ->orderBy('fecha', 'desc')
+                ->get();
+
+            return response()->json([
+                'orders' => $orders,
+                'total'  => $orders->count(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error en getProductOrders', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'product_code' => $product,
+            ]);
+
+            return response()->json([
+                'error' => 'No se pudieron obtener las órdenes del producto',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function buildOrderQuery($query, string $type, string $product, ?string $search)
+    {
+        if ($type === 'OC') {
+            $detalleTable = 'COMOVD';   // tabla detalle OC
+            $cabecera = 'COMOVC';        // tabla cabecera OC
+            $productoColumn = 'OC_CCODIGO';
+        } else {
+            $detalleTable = 'COMOVD_S';  // tabla detalle OS
+            $cabecera = 'COMOVC_S';      // tabla cabecera OS
+            $productoColumn = 'OC_CODSERVICIO';
+        }
+
+        // Asignar alias al detalle
+        $query->from("$detalleTable as d")
+            ->join("$cabecera as o", "d.OC_CNUMORD", '=', "o.OC_CNUMORD") // unir detalle con cabecera
+            ->selectRaw("
+            '{$type}' as type,
+            o.OC_CNUMORD as number,
+            o.OC_COBSERV as observ,
+            o.OC_CSOLICT as solicitante_codigo,
+            r.RESPONSABLE_NOMBRE as responsable,
+            ab.TDESCRI as solicita,
+            o.OC_CSITORD as status,
+            o.OC_DFECENT as fecha,
+            TipoDocumento as tipo_doc,
+            o.OC_CUSUARI as usuario,
+            o.FECHAHORA_CAMBIOESTADO as issue_date
+        ")
+            ->leftJoin('RESPONSABLECMP as r', 'o.OC_CSOLICT', '=', 'r.RESPONSABLE_CODIGO')
+            ->leftJoin('TABAYU as ab', 'o.OC_SOLICITA', '=', 'ab.TCLAVE')
+            ->where("d.$productoColumn", $product); // FILTRO por producto en detalle
+
+        // Búsqueda opcional
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('o.OC_CNUMORD', 'like', "%$search%")
+                    ->orWhere('o.OC_CRAZSOC', 'like', "%$search%")
+                    ->orWhere('o.OC_COBSERV', 'like', "%$search%")
+                    ->orWhere('r.RESPONSABLE_NOMBRE', 'like', "%$search%");
+            });
+        }
+
+        return $query;
+    }
+
+
 }

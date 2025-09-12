@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "samitask/approval-portal",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Web portal for purchase and service order approvals integrated with Starsoft ERP.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
