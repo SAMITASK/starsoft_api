@@ -179,7 +179,7 @@ const handleRowClick = (item) => {
 <template>
   <VCard class="mb-6">
     <VCardItem class="pb-4">
-      <VCardItem> Filtros </VCardItem>
+      <VCardTitle>Filtros</VCardTitle>
     </VCardItem>
     <VCardText>
       <VRow>

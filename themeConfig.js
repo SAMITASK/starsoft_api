@@ -19,11 +19,11 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
     overlayNavFromBreakpoint: breakpointsVuetifyV3.lg - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
     i18n: {
       enable: false,
-      defaultLocale: 'en',
+      defaultLocale: 'es',
       langConfig: [
         {
           label: 'English',
-          i18nLang: 'en',
+          i18nLang: 'es',
           isRTL: false,
         },
         {

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Product\FamilyController;
 use App\Http\Controllers\Api\Product\TypeController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/', 'getProducts');
             Route::get('/view/{id}', 'getProduct');
             Route::get('/ocs', 'getProductOrders');
+        });
+    Route::controller(UserController::class)
+        ->prefix('users')
+        ->group(function () {
+            Route::get('/list', 'getUsers');
+            Route::post('/add', 'store');
+            Route::put('/update/{id}', 'update');
+            Route::get('/view/{id}', 'getUser');
         });
 });
 

@@ -6,54 +6,112 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  editingUser: {
+    type: Object,
+    default: null,
+  },
 })
 
 const emit = defineEmits([
   'update:isDrawerOpen',
   'userData',
+  'userUpdated',
 ])
 
 const isFormValid = ref(false)
 const refForm = ref()
 const fullName = ref('')
-const userName = ref('')
 const email = ref('')
-const company = ref('')
-const country = ref()
-const contact = ref('')
-const role = ref()
-const plan = ref()
+const cargo = ref('')
 const status = ref()
+const password = ref('')
+const companies = ref([])
+const company = ref()
+const isEditing = ref(false)
 
-// 👉 drawer close
+watch(() => props.editingUser, (newUser) => {
+  if (newUser) {
+    isEditing.value = true
+    fullName.value = newUser.name || newUser.fullName || ''
+    email.value = newUser.email || ''
+    cargo.value = newUser.role || newUser.cargo || ''
+    status.value = newUser.status || ''
+    company.value = newUser.company_ids || []
+    password.value = ''
+  } else {
+    refForm.value?.reset()
+    refForm.value?.resetValidation()
+    isEditing.value = false
+  }
+}, { immediate: true })
+
+onMounted(async () => {
+  await loadCompanies()
+})
+
+const loadCompanies = async () => {
+  try {
+    const res = await $api('/companies', {
+      method: 'GET',
+      onResponseError({ response }) {
+        throw new Error(response._data?.message || 'Error al obtener empresas')
+      },
+    })
+
+    if (!Array.isArray(res)) {
+      throw new Error('Formato de datos inválido')
+    }
+
+    companies.value = res.map((company) => ({
+      title: company.name,
+      value: company.id,
+      rawData: company,
+    }))
+
+  } catch (error) {
+    console.error('Error cargando empresas:', error)
+    companies.value = []
+  }
+}
+
 const closeNavigationDrawer = () => {
   emit('update:isDrawerOpen', false)
   nextTick(() => {
     refForm.value?.reset()
     refForm.value?.resetValidation()
+    isEditing.value = false
   })
 }
+
 
 const onSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
-      emit('userData', {
-        id: 0,
+      const userData = {
         fullName: fullName.value,
+        cargo: cargo.value,
         company: company.value,
-        role: role.value,
-        username: userName.value,
-        country: country.value,
-        contact: contact.value,
         email: email.value,
-        currentPlan: plan.value,
         status: status.value,
         avatar: '',
-      })
+      }
+
+      if (!isEditing.value) {
+        userData.password = password.value
+      }
+
+      if (isEditing.value && props.editingUser) {
+        userData.id = props.editingUser.id
+        emit('userUpdated', userData)
+      } else {
+        emit('userData', userData)
+      }
+      
       emit('update:isDrawerOpen', false)
       nextTick(() => {
         refForm.value?.reset()
         refForm.value?.resetValidation()
+        isEditing.value = false
       })
     }
   })
@@ -74,9 +132,9 @@ const handleDrawerModelValueUpdate = val => {
     :model-value="props.isDrawerOpen"
     @update:model-value="handleDrawerModelValueUpdate"
   >
-    <!-- 👉 Title -->
+    <!-- 👉 Title dinámico -->
     <AppDrawerHeaderSection
-      title="Add User"
+      :title="isEditing ? 'Editar Usuario' : 'Agregar Usuario'"
       @cancel="closeNavigationDrawer"
     />
 
@@ -97,20 +155,21 @@ const handleDrawerModelValueUpdate = val => {
                 <VTextField
                   v-model="fullName"
                   :rules="[requiredValidator]"
-                  label="Full Name"
+                  label="Nombres y Apellidos"
                   placeholder="John Doe"
                 />
               </VCol>
 
-              <!-- 👉 Username -->
+              <!-- 👉 Cargo -->
               <VCol cols="12">
                 <VTextField
-                  v-model="userName"
+                  v-model="cargo"
                   :rules="[requiredValidator]"
-                  label="Username"
-                  placeholder="Johndoe"
+                  label="Cargo"
+                  placeholder="Gerente"
                 />
               </VCol>
+              
 
               <!-- 👉 Email -->
               <VCol cols="12">
@@ -119,60 +178,30 @@ const handleDrawerModelValueUpdate = val => {
                   :rules="[requiredValidator, emailValidator]"
                   label="Email"
                   placeholder="johndoe@email.com"
+                  :disabled="isEditing"
                 />
               </VCol>
 
-              <!-- 👉 company -->
+              <!-- 👉 Password (solo para nuevo usuario) -->
               <VCol cols="12">
                 <VTextField
+                  v-model="password"
+                  :rules="isEditing ? [] : [requiredValidator]"
+                  label="Contraseña"
+                  placeholder="********"
+                  type="password"
+                />
+              </VCol>
+
+              <!-- 👉 Companies -->
+              <VCol cols="12">
+                <VSelect
                   v-model="company"
+                  label="Selecciona empresa"
+                  placeholder="Selecciona empresa"
+                  multiple
                   :rules="[requiredValidator]"
-                  label="Company"
-                  placeholder="Pixinvent"
-                />
-              </VCol>
-
-              <!-- 👉 Country -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="country"
-                  label="Select Country"
-                  placeholder="Select Country"
-                  :rules="[requiredValidator]"
-                  :items="['United States', 'United Kingdom', 'France']"
-                />
-              </VCol>
-
-              <!-- 👉 Contact -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="contact"
-                  type="number"
-                  :rules="[requiredValidator]"
-                  label="Contact"
-                  placeholder="+1-541-754-3010"
-                />
-              </VCol>
-
-              <!-- 👉 Role -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="role"
-                  label="Select Role"
-                  placeholder="Select Role"
-                  :rules="[requiredValidator]"
-                  :items="['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']"
-                />
-              </VCol>
-
-              <!-- 👉 Plan -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="plan"
-                  label="Select Plan"
-                  placeholder="Select Plan"
-                  :rules="[requiredValidator]"
-                  :items="['Basic', 'Company', 'Enterprise', 'Team']"
+                  :items="companies"
                 />
               </VCol>
 
@@ -180,10 +209,10 @@ const handleDrawerModelValueUpdate = val => {
               <VCol cols="12">
                 <VSelect
                   v-model="status"
-                  label="Select Status"
-                  placeholder="Select Status"
+                  label="Seleccionar Estado"
+                  placeholder="Seleccionar Estado"
                   :rules="[requiredValidator]"
-                  :items="[{ title: 'Active', value: 'Active' }, { title: 'Inactive', value: 'Inactive' }, { title: 'Pending', value: 'Pending' }]"
+                  :items="[{ title: 'Activo', value: 'active' }, { title: 'Inactivo', value: 'inactive' }]"
                 />
               </VCol>
 
@@ -193,7 +222,7 @@ const handleDrawerModelValueUpdate = val => {
                   type="submit"
                   class="me-4"
                 >
-                  Submit
+                  {{ isEditing ? 'Actualizar' : 'Guardar' }}
                 </VBtn>
                 <VBtn
                   type="reset"
@@ -201,7 +230,7 @@ const handleDrawerModelValueUpdate = val => {
                   color="error"
                   @click="closeNavigationDrawer"
                 >
-                  Cancel
+                  Cancelar
                 </VBtn>
               </VCol>
             </VRow>

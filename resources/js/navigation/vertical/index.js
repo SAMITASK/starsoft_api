@@ -14,4 +14,14 @@ export default [
     to: { name: 'apps-supplier-list' },
     icon: { icon: 'ri-store-3-line' },
   },
+  {
+    title: 'Productos',
+    to: { name: 'apps-product-list' },
+    icon: { icon: 'ri-table-view' },
+  },
+  {
+    title: 'Usuarios',
+    to: { name: 'apps-user-list' },
+    icon: { icon: 'ri-group-line' },
+  },
 ]

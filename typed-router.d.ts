@@ -24,6 +24,8 @@ declare module 'vue-router/auto-routes' {
     'apps-product-list': RouteRecordInfo<'apps-product-list', '/apps/product/list', Record<never, never>, Record<never, never>>,
     'apps-supplier-id': RouteRecordInfo<'apps-supplier-id', '/apps/supplier/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'apps-supplier-list': RouteRecordInfo<'apps-supplier-list', '/apps/supplier/list', Record<never, never>, Record<never, never>>,
+    'apps-user-list': RouteRecordInfo<'apps-user-list', '/apps/user/list', Record<never, never>, Record<never, never>>,
+    'apps-user-view-id': RouteRecordInfo<'apps-user-view-id', '/apps/user/view/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'forgot-password': RouteRecordInfo<'forgot-password', '/forgot-password', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'not-authorized': RouteRecordInfo<'not-authorized', '/not-authorized', Record<never, never>, Record<never, never>>,

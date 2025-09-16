@@ -13,7 +13,15 @@ class CompanyModel extends Model
     public $timestamps = false;
 
     protected $fillable = ['EMP_CODIGO', 'EMP_RAZON_NOMBRE'];
-    
 
-    
+
+    public function users()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'company_user',
+            'company_id',
+            'user_id'
+        );
+    }
 }
