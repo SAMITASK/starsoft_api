@@ -6,22 +6,42 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-            'remember_me' => 'boolean'
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:5',
+            'remember_me' => 'nullable|boolean',
         ]);
 
-        $credentials = request(['email', 'password']);
-        if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return $this->errorResponse(
+                'Cuenta no encontrada',
+                'email',
+                'No existe una cuenta con este email.'
+            );
+        }
+
+        if ($user->status !== 'active') {
+            return $this->errorResponse(
+                'Cuenta inactiva',
+                'email',
+                'Su cuenta está inactiva. Contacte al administrador.'
+            );
+        }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return $this->errorResponse(
+                'Credenciales inválidas',
+                'password',
+                'La contraseña es incorrecta.'
+            );
         }
 
         $user = $request->user();
@@ -31,7 +51,12 @@ class AuthController extends Controller
         return response()->json([
             'accessToken' => $token,
             'token_type' => 'Bearer',
-            'userData' => $user,
+            'userData' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'status' => $user->status,
+            ],
         ]);
     }
 
@@ -40,40 +65,31 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 
-    public function register(Request $request)
+    /**
+     * Handle user logout
+     */
+    public function logout(Request $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|unique:users',
-            'password' => 'required|string',
-            'c_password' => 'required|same:password'
-        ]);
-
-        $user = new User([
-            'name'  => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
-
-        if ($user->save()) {
-            $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->plainTextToken;
+        try {
+            $request->user()->currentAccessToken()->delete();
 
             return response()->json([
-                'message' => 'Successfully created user!',
-                'accessToken' => $token,
-            ], 201);
-        } else {
-            return response()->json(['error' => 'Provide proper details']);
+                'message' => 'Sesión cerrada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al cerrar sesión'
+            ], 500);
         }
     }
 
-    public function logout(Request $request)
+    private function errorResponse(string $message, string $field, string $detail, int $code = 401)
     {
-        $request->user()->tokens()->delete();
-
         return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+            'message' => $message,
+            'errors' => [
+                $field => [$detail]
+            ]
+        ], $code);
     }
 }

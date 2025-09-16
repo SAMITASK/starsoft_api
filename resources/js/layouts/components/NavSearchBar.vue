@@ -17,17 +17,17 @@ const suggestionGroups = [
     content: [
       {
         icon: 'ri-bar-chart-line',
-        title: 'Analytics',
+        title: 'Ordernes de Compra',
         url: { name: 'dashboards-analytics' },
       },
       {
         icon: 'ri-pie-chart-2-line',
-        title: 'CRM',
+        title: 'Proveedores',
         url: { name: 'dashboards-crm' },
       },
       {
         icon: 'ri-shopping-bag-3-line',
-        title: 'eCommerce',
+        title: 'Productos',
         url: { name: 'dashboards-ecommerce' },
       },
       {

@@ -30,7 +30,7 @@ const rememberMe = ref(false)
 
 const login = async () => {
   try {
-    const res = await $api('/auth/login', {
+    const res = await $api('auth/login', {
       method: 'POST',
       body: {
         email: credentials.value.email,
@@ -124,7 +124,6 @@ const onSubmit = () => {
                   @click:append-inner="isPasswordVisible = !isPasswordVisible"
                 />
 
-              <!-- remember me checkbox -->
               <div class="d-flex align-center justify-space-between flex-wrap my-6">
                 <VCheckbox
                   v-model="rememberMe"
@@ -139,7 +138,6 @@ const onSubmit = () => {
                 </RouterLink>
               </div>
 
-              <!-- login button -->
               <VBtn
                 block
                 type="submit"
