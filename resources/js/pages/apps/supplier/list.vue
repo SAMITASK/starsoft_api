@@ -12,7 +12,7 @@ const errorMessage = ref(null);
 
 onMounted(async () => {
   try {
-    const res = await $api('/companies', {
+    const res = await $api('/users/companies', {
       method: 'GET',
       onResponseError({ response }) {
         throw new Error(response._data?.message || 'Error al obtener empresas')

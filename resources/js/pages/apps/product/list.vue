@@ -42,7 +42,7 @@ async function fetchData(url, params, loadingRef, errorRef) {
 
 // Cargar empresas
 async function loadCompanies() {
-  companies.value = await fetchData('/companies', {}, isLoading, errorMessage)
+  companies.value = await fetchData('/users/companies', {}, isLoading, errorMessage)
 }
 
 // Watchers
