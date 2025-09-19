@@ -8,9 +8,10 @@ const props = defineProps({
   code: String,
   type: String,
   module: String,
+  status: String,
 })
 
-const details = ref({
+const emptyDetails = {
   required: {
     TDESCRI: ''
   },
@@ -18,47 +19,49 @@ const details = ref({
     RESPONSABLE_NOMBRE: ''
   },
   products: []
-})
+}
+
+const details = ref({ ...emptyDetails })
 
 const isLoading = ref(false)
 
 const emit = defineEmits([
   'update:isDialogVisible',
+  'showSnackbar',
   'submit',
+  'refresh',
 ])
-
-const billingAddress = ref(structuredClone(toRaw(props.billingAddress)))
 
 const resetForm = () => {
   emit('update:isDialogVisible', false)
-  billingAddress.value = structuredClone(toRaw(props.billingAddress))
 }
 
-const onFormSubmit = async () => {
+const onFormSubmit = async (action) => {
   const payload = {
     code: props.code,
     type: props.type,
     company: props.company,
-    action: actionType.value, // 'approve' o 'reject'
+    action,
   }
 
   try {
-    const response = await $api('/handle-approval', {
+   const response = await $api('/handle-approval', {
       method: 'POST',
       body: payload,
     })
 
-    // ✅ Cerrar el diálogo
+     const data = response.json ? await response.json() : response
+
     emit('update:isDialogVisible', false)
 
-    // ✅ Solicitar actualización de la tabla
+    emit('showSnackbar', { message: response.message, color: response.color })
+
     emit('refresh')
 
-    // ✅ (Opcional) Mostrar mensaje de éxito
-    alert('Acción realizada correctamente')
+    console.log("Respuesta backend:", data)
+
   } catch (error) {
-    console.error('Error al enviar acción:', error)
-    alert('Hubo un error al procesar la acción.')
+    emit('showSnackbar', { message: 'Error inesperado al procesar la orden', color: 'error' })
   }
 }
 
@@ -67,7 +70,6 @@ watch(
   async (visible) => {
     if (visible && props.code && props.type) {
       isLoading.value = true
-
       try {
         const res = await $api('/details-order', {
           method: 'POST',
@@ -81,11 +83,15 @@ watch(
           },
         })
 
-        details.value = res
-        console.log(details.value)
+        if (res && Object.keys(res).length > 0) {
+          details.value = res
+        } else {
+          details.value = { ...emptyDetails }
+        }
 
       } catch (err) {
         console.error('Error al cargar detalles:', err)
+        details.value = { ...emptyDetails }
       } finally {
         isLoading.value = false
       }
@@ -108,7 +114,22 @@ const formatCurrency = (value) => {
   }).format(number)
 }
 
-const actionType = ref(null)
+
+const
+  formatDateHour = (fechaStr) => {
+    if (!fechaStr) return '';
+
+    const fecha = new Date(fechaStr);
+
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // meses empiezan en 0
+    const anio = fecha.getFullYear();
+    const hora = String(fecha.getHours()).padStart(2, '0');
+    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+
+    return `${dia}/${mes}/${anio} ${hora}:${minutos}`;
+  }
+
 
 </script>
 
@@ -121,7 +142,6 @@ const actionType = ref(null)
     <VCard>
        <div>
         <VToolbar color="primary">
-
 
           <VToolbarTitle> {{ toolbarTitle }} </VToolbarTitle>
 
@@ -349,7 +369,13 @@ const actionType = ref(null)
               </thead>
 
               <tbody>
+                <tr v-if="details.products.length === 0">
+                  <td colspan="9" class="text-center text-grey">
+                    No se encontraron productos
+                  </td>
+                </tr>
                 <tr
+                  v-else
                   v-for="(item, index) in details.products"
                   :key="index"
                 >
@@ -456,53 +482,36 @@ const actionType = ref(null)
               <!-- 👉 Submit and Cancel button -->
               <VCol cols="12">
                 <div class="d-flex justify-space-between align-center">
-                  <!-- Botones a la izquierda -->
-                  <div v-if="!details.NOMBRE_USUARIO">
-                    <VBtn
-                      type="submit"
-                      color="success"
-                      class="me-3"
-                      @click="actionType = 'approve'"
-                    >
+                  <!-- Si está EMITIDA -->
+                  <div v-if="props.status === 'EMITIDA'">
+                    <VBtn color="success" class="me-3" @click="onFormSubmit('approve')">
                       Aceptar
-                      <VIcon
-                        end
-                        icon="ri-checkbox-circle-line"
-                      />
+                      <VIcon end icon="ri-checkbox-circle-line" />
                     </VBtn>
-
-                    <VBtn
-                      type="submit"
-                      color="error"
-                      @click="actionType = 'reject'"
-                    >
+                    <VBtn color="error" @click="onFormSubmit('reject')">
                       Rechazar
-                      <VIcon
-                        end
-                        icon="ri-close-circle-line"
-                      />
+                      <VIcon end icon="ri-close-circle-line" />
                     </VBtn>
                   </div>
 
-                  <div v-else class="d-flex align-center gap-x-3">
-                    <div class="d-flex flex-column">
-                      <span class="text-dark font-weight-bold">
-                        Aprobado por {{ details.NOMBRE_USUARIO }} el día {{ formatDate(details.FECHAHORA_CAMBIOESTADO) }}
-                      </span>
-                    </div>
+                  <!-- Si está APROBADA -->
+                  <div v-else-if="props.status === 'APROBADA'" class="d-flex align-center gap-x-3">
+                    <span class="text-primary font-weight-bold">
+                      ✅ Aprobada por {{ details.NOMBRE_USUARIO }} el {{ formatDateHour(details.FECHAHORA_CAMBIOESTADO) }}
+                    </span>
                   </div>
 
-                  <!-- Botón a la derecha -->
+                  <!-- Si está RECHAZADO -->
+                  <div v-else-if="props.status === 'RECHAZADO'" class="d-flex align-center gap-x-3">
+                    <span class="text-error font-weight-bold">
+                      ❌ Rechazado por {{ details.NOMBRE_USUARIO }} el {{ formatDateHour(details.FECHAHORA_CAMBIOESTADO) }}
+                    </span>
+                  </div>
+
+                  <!-- Botón Cancelar -->
                   <div>
-                    <VBtn
-                      color="secondary"
-                      variant="flat"
-                      @click="resetForm"
-                    >
-                        <VIcon
-                          start
-                          icon="ri-logout-circle-line"
-                        />
+                    <VBtn color="secondary" variant="flat" @click="resetForm">
+                      <VIcon start icon="ri-logout-circle-line" />
                       Cancelar
                     </VBtn>
                   </div>

@@ -208,16 +208,22 @@ class OrdersApi extends Controller
                     'FECHAHORA_CAMBIOESTADO'  => now(),
                 ]);
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'estado'  => $estado,
+                'message' => "La orden fue {$estado} correctamente",
+                'color'   => 'primary',
+            ]);
         } catch (\Throwable $e) {
             Log::error('Error en handleApproval', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'error' => 'Error al aprobar/rechazar la orden',
-                'details' => $e->getMessage(),
+                'success' => false,
+                'message' => 'No se pudo procesar la orden',
+                'color'   => 'error',
             ], 500);
         }
     }

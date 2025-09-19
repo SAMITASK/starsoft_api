@@ -45,7 +45,7 @@ const today = new Date();
 
 // Hace 6 días
 const sixDaysAgo = new Date();
-sixDaysAgo.setDate(today.getDate() - 30);
+sixDaysAgo.setDate(today.getDate() - 365);
 
 // Formatear en 'YYYY-MM-DD'
 function formatDate(date) {

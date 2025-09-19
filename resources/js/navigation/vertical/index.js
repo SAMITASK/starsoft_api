@@ -6,7 +6,7 @@ export default [
   },
     {
     title: 'Ordenes de Compra',
-    to: { name: 'second-page' },
+    to: { name: 'ocs' },
     icon: { icon: 'ri-file-text-line' },
   },
     {

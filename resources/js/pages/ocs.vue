@@ -77,7 +77,7 @@ const isDialogVisible = ref(false);
 const selectedItem = ref(null);
 const selectedRows = ref([]);
 
-// Headers
+// Headers  
 const headers = [
   {
     title: "Empresa",
@@ -113,6 +113,8 @@ const headers = [
 const searchQuery = ref("");
 const selectedStatus = ref("EMITIDA");
 const selectedType = ref();
+
+
 
 const { data: ocsData, execute: fetchOcs } = await useApi(
   createUrl("purchase-orders", {
@@ -163,6 +165,16 @@ const markAsRead = async (item) => {
       console.error('Error al marcar como leído', error)
     }
   }
+}
+
+const isSnackbarVisible = ref(false)
+const colorSnackbar = ref('primary')
+const messageSnackbar = ref('')
+
+const showSnackbar = ({ message, color = 'success' }) => {
+  messageSnackbar.value = message
+  colorSnackbar.value = color
+  isSnackbarVisible.value = true
 }
 
 
@@ -402,8 +414,19 @@ const markAsRead = async (item) => {
     :code="selectedItem?.code"
     :type="selectedItem?.type"
     :module="selectedItem?.module"
+    :status= "selectedItem?.status"
+    @showSnackbar="showSnackbar"
     @refresh="fetchOcs"
   />
+
+  <VSnackbar
+    v-model="isSnackbarVisible"
+    :timeout="3000"
+    location="top"
+    :color="colorSnackbar"
+  >
+    {{messageSnackbar}}
+  </VSnackbar>
 
 </template>
 
