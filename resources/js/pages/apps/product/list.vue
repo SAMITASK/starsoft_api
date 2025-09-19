@@ -139,6 +139,8 @@ const headers = [
 ];
 
 const searchQuery = ref("");
+const selectedSwitch = ref(false);
+
 
 const { data: productsData, execute: fetchSuppliers } = await useApi(
   createUrl("products", {
@@ -148,6 +150,7 @@ const { data: productsData, execute: fetchSuppliers } = await useApi(
       type: selectedType,
       family: selectedFamily,
       date: dateRange,
+      ignoreDateFilter: selectedSwitch,
       itemsPerPage,
       page,
       sortBy,
@@ -244,6 +247,15 @@ const handleRowClick = (item) => {
             }"
           />
         </VCol>
+          <VCol cols="12" sm="11" class="d-flex justify-end align-center">
+            <VSwitch
+              v-model="selectedSwitch"
+              label="Mostrar Todos"
+              label-position="start"
+              inset
+              style="transform: scale(1.1);"
+            />
+          </VCol>
       </VRow>
     </VCardText>
 

@@ -94,6 +94,8 @@ const headers = [
 ];
 
 const searchQuery = ref("");
+const selectedSwitch = ref(false);
+
 
 const { data: suppliersData, execute: fetchSuppliers } = await useApi(
   createUrl("suppliers", {
@@ -101,6 +103,7 @@ const { data: suppliersData, execute: fetchSuppliers } = await useApi(
       q: searchQuery,
       company: selectedCompany,
       date: dateRange,
+      ignoreDateFilter: selectedSwitch,
       itemsPerPage,
       page,
       sortBy,
@@ -163,6 +166,14 @@ const handleRowClick = (item) => {
               locale: Spanish,
               maxDate: new Date(),
             }"
+          />
+        </VCol>
+        <VCol cols="12" sm="2" class="d-flex  justify-center align-center">
+          <VSwitch
+            v-model="selectedSwitch"
+            label="Mostrar Todos"
+            inset
+            style="transform: scale(1.1);"
           />
         </VCol>
       </VRow>

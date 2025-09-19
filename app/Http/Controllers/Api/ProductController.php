@@ -60,7 +60,7 @@ class ProductController extends Controller
             });
         }
 
-        if ($request->filled('date')) {
+        if (!$request->boolean('ignoreDateFilter') && $request->filled('date')) {
             $dateRange = $request->input('date');
 
             if (strpos($dateRange, ' a ') !== false) {

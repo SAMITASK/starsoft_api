@@ -57,14 +57,14 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
 
 // End Date Range Picker
 
-const status = ref([
+const status = [
   { title: "EMITIDA", value: "EMITIDA", color: "secondary" },
   { title: "APROBADA", value: "APROBADA", color: "primary" },
   { title: "RECHAZADO", value: "RECHAZADO", color: "error" },
-]);
+];
 
 function getStatusColor(value) {
-  const s = status.value.find((s) => s.value === value);
+  const s = status.find((s) => s.value === value);
   return s ? s.color : "grey";
 }
 
@@ -113,7 +113,7 @@ const headers = [
 const searchQuery = ref("");
 const selectedStatus = ref("EMITIDA");
 const selectedType = ref();
-
+const selectedSwitch = ref(false);
 
 
 const { data: ocsData, execute: fetchOcs } = await useApi(
@@ -122,7 +122,8 @@ const { data: ocsData, execute: fetchOcs } = await useApi(
       q: searchQuery,
       company: selectedCompany,
       status: selectedStatus,
-      date: dateRange,
+      date:dateRange,
+      ignoreDateFilter: selectedSwitch,
       itemsPerPage,
       page,
       sortBy,
@@ -202,17 +203,17 @@ const showSnackbar = ({ message, color = 'success' }) => {
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
-        <VCol cols="12" sm="4">
+        <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedStatus"
-            label="Select Status"
-            placeholder="Select Status"
+            label="Seleccionar Estado"
+            placeholder="Seleccionar Estado"
             :items="status"
             clearable
             clear-icon="ri-close-line"
           />
         </VCol>
-        <VCol cols="12" sm="4">
+        <VCol cols="12" sm="3">
           <AppDateTimePicker
             v-model="dateRange"
             label="Rango de fechas"
@@ -223,6 +224,14 @@ const showSnackbar = ({ message, color = 'success' }) => {
               locale: Spanish,
               maxDate: new Date(),
             }"
+          />
+        </VCol>
+        <VCol cols="12" sm="2" class="d-flex  justify-center align-center">
+          <VSwitch
+            v-model="selectedSwitch"
+            label="Mostrar Todos"
+            inset
+            style="transform: scale(1.1);"
           />
         </VCol>
       </VRow>
