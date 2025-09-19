@@ -58,8 +58,8 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
 // End Date Range Picker
 
 const status = [
-  { title: "EMITIDA", value: "EMITIDA", color: "secondary" },
-  { title: "APROBADA", value: "APROBADA", color: "primary" },
+  { title: "EMITIDA", value: "EMITIDA", color: "primary" },
+  { title: "APROBADA", value: "APROBADA", color: "success" },
   { title: "RECHAZADO", value: "RECHAZADO", color: "error" },
 ];
 
