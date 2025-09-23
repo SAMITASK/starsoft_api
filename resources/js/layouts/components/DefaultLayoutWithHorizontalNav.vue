@@ -29,7 +29,6 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
       </RouterLink>
       <VSpacer />
 
-      <NavSearchBar />
 
       <NavBarI18n
         v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
@@ -37,7 +36,6 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
       />
 
       <NavbarThemeSwitcher class="me-2" />
-      <NavBarNotifications class="me-2" />
         <UserProfile />
     </template>
 

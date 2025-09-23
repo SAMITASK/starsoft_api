@@ -58,8 +58,6 @@ const onFormSubmit = async (action) => {
 
     emit('refresh')
 
-    console.log("Respuesta backend:", data)
-
   } catch (error) {
     emit('showSnackbar', { message: 'Error inesperado al procesar la orden', color: 'error' })
   }
@@ -481,41 +479,45 @@ const
               </VCol>
               <!-- 👉 Submit and Cancel button -->
               <VCol cols="12">
-                <div class="d-flex justify-space-between align-center">
+                <VRow class="align-center" justify="space-between" align="center" no-gutters>
+                  
                   <!-- Si está EMITIDA -->
-                  <div v-if="props.status === 'EMITIDA'">
-                    <VBtn color="success" class="me-3" @click="onFormSubmit('approve')">
-                      Aceptar
-                      <VIcon end icon="ri-checkbox-circle-line" />
-                    </VBtn>
-                    <VBtn color="error" @click="onFormSubmit('reject')">
-                      Rechazar
-                      <VIcon end icon="ri-close-circle-line" />
-                    </VBtn>
-                  </div>
+                  <VCol cols="12" sm="auto" v-if="props.status === 'EMITIDA'" class="mb-3">
+                    <div class="d-flex flex-wrap gap-2">
+                      <VBtn color="success" @click="onFormSubmit('approve')">
+                        Aceptar
+                        <VIcon end icon="ri-checkbox-circle-line" />
+                      </VBtn>
+                      <VBtn color="error" @click="onFormSubmit('reject')">
+                        Rechazar
+                        <VIcon end icon="ri-close-circle-line" />
+                      </VBtn>
+                    </div>
+                  </VCol>
 
                   <!-- Si está APROBADA -->
-                  <div v-else-if="props.status === 'APROBADA'" class="d-flex align-center gap-x-3">
+                  <VCol cols="12" sm="auto" v-else-if="props.status === 'APROBADA'">
                     <span class="text-primary font-weight-bold">
                       ✅ Aprobada por {{ details.NOMBRE_USUARIO }} el {{ formatDateHour(details.FECHAHORA_CAMBIOESTADO) }}
                     </span>
-                  </div>
+                  </VCol>
 
                   <!-- Si está RECHAZADO -->
-                  <div v-else-if="props.status === 'RECHAZADO'" class="d-flex align-center gap-x-3">
+                  <VCol cols="12" sm="auto" v-else-if="props.status === 'RECHAZADO'">
                     <span class="text-error font-weight-bold">
                       ❌ Rechazado por {{ details.NOMBRE_USUARIO }} el {{ formatDateHour(details.FECHAHORA_CAMBIOESTADO) }}
                     </span>
-                  </div>
+                  </VCol>
 
                   <!-- Botón Cancelar -->
-                  <div>
-                    <VBtn color="secondary" variant="flat" @click="resetForm">
+                  <VCol cols="12" sm="auto">
+                    <VBtn color="secondary" variant="flat" block @click="resetForm">
                       <VIcon start icon="ri-logout-circle-line" />
                       Cancelar
                     </VBtn>
-                  </div>
-                </div>
+                  </VCol>
+
+                </VRow>
               </VCol>
             </VRow>
           </VForm>

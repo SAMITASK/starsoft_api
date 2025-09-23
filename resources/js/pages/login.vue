@@ -50,7 +50,7 @@ const login = async () => {
 
     // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/')
+      router.replace(route.query.to ? String(route.query.to) : '/ocs')
     })
   } catch (err) {
     console.error(err)

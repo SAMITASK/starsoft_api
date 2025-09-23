@@ -445,7 +445,7 @@ const showSnackbar = ({ message, color = 'success' }) => {
 }
 
 .row-unread {
-  color: #1f1f1f;
   font-weight: bold;
 }
+
 </style>
