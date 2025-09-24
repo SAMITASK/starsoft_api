@@ -361,6 +361,8 @@
     "watchWithFilter": true,
     "whenever": true,
     "useSelectLoader": true,
-    "mapToSelectOptions": true
+    "mapToSelectOptions": true,
+    "useIdleTimeout": true,
+    "useAuth": true
   }
 }

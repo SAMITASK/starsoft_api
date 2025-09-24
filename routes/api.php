@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/purchase-orders', [OrdersApi::class, 'getOrders']);
     Route::post('/details-order', [OrdersApi::class, 'getOrder']);
     Route::post('/mark-as-read', [OrdersApi::class, 'markAsRead']);
@@ -49,9 +49,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         });
 });
 
+Route::middleware(['auth:sanctum'])->post('/keep-alive', [AuthController::class, 'keepAlive']);
+
+
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('register', [AuthController::class, 'register']);
 
     Route::group(['middleware' => 'auth:sanctum'], function () {

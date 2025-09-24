@@ -53,6 +53,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScrollToTop: typeof import('./resources/js/@core/components/ScrollToTop.vue')['default']
+    SessionTimeoutDialog: typeof import('./resources/js/components/dialogs/SessionTimeoutDialog.vue')['default']
     ShareProjectDialog: typeof import('./resources/js/components/dialogs/ShareProjectDialog.vue')['default']
     Shortcuts: typeof import('./resources/js/@core/components/Shortcuts.vue')['default']
     SuplierOcDialog: typeof import('./resources/js/components/dialogs/SuplierOcDialog.vue')['default']

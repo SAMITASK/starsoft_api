@@ -92,4 +92,21 @@ class AuthController extends Controller
             ]
         ], $code);
     }
+
+     public function keepAlive(Request $request)
+    {
+        if (Auth::check()) {
+            $request->session()->put('last_activity', now()->timestamp);
+
+            return response()->json([
+                'status' => 'ok',
+                'message' => 'Sesión extendida correctamente'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'No autenticado'
+        ], 401);
+    }
 }

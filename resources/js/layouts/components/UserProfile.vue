@@ -1,23 +1,14 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import avatar1 from '@images/avatars/avatar-1.png'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
 const userData = useCookie('userData')
 
 
-const logout = async () => {
+const { logout } = useAuth()
 
-  // Remove "accessToken" from cookie
-  useCookie('accessToken').value = null
-
-  // Remove "userData" from cookie
-  userData.value = null
-
-  // Redirect to login page
-  await router.push('/login')
-
-}
 
 const userProfileList = [
   { type: 'divider' },
