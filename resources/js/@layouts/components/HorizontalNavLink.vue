@@ -18,11 +18,16 @@ const props = defineProps({
     default: false,
   },
 })
+
+const userData = useCookie('userData')
+
+const userCargo = computed(() => userData?.value?.cargo?.toUpperCase())
+
 </script>
 
 <template>
   <li
-    v-if="can(item.action, item.subject)"
+    v-if="!item.roles || item.roles.includes(userCargo)"
     class="nav-link"
     :class="[{
       'sub-item': props.isSubItem,

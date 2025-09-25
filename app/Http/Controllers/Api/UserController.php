@@ -56,7 +56,7 @@ class UserController extends Controller
             'cargo'       => $request->cargo,
             'email'       => $request->email,
             'status'      => $request->status,
-            'password'    => bcrypt($request->password),
+            'password'    => $request->password,
             'company_ids' => $companyIds,
         ]);
 
@@ -84,10 +84,10 @@ class UserController extends Controller
 
         // Solo actualiza contraseña si se envió
         if (!empty($request->password)) {
-            $data['password'] = bcrypt($request->password);
+            $data['password'] = $request->password;
         }
 
-        $user->update($data);
+        $user->fill($data)->save();
 
         return response()->json([
             'message' => 'Usuario actualizado con éxito',

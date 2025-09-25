@@ -17,14 +17,19 @@ const props = defineProps({
 
 const configStore = useLayoutConfigStore()
 const hideTitleAndBadge = configStore.isVerticalNavMini()
+
+const userData = useCookie('userData')
+
 </script>
 
 <template>
-  <li
-    v-if="can(item.action, item.subject)"
-    class="nav-link"
-    :class="{ disabled: item.disable }"
-  >
+    <li
+      class="nav-link"
+      :class="[
+        { 'sub-item': props.isSubItem },
+        { 'disabled': item.roles && !item.roles.includes(userData?.value?.cargo) }
+      ]"
+    >
     <Component
       :is="item.to ? 'RouterLink' : 'a'"
       v-bind="getComputedNavLinkToProp(item)"

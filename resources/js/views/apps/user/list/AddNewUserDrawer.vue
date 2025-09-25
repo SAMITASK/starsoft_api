@@ -96,7 +96,7 @@ const onSubmit = () => {
         avatar: '',
       }
 
-      if (!isEditing.value) {
+      if (password.value) {
         userData.password = password.value
       }
 
@@ -162,14 +162,22 @@ const handleDrawerModelValueUpdate = val => {
 
               <!-- 👉 Cargo -->
               <VCol cols="12">
-                <VTextField
+                <VSelect
                   v-model="cargo"
+                  :items="[
+                    'GERENTE',
+                    'ALMACEN',
+                    'ASISTENTE LOGISTICA',
+                    'JEFE DE COMPRAS',
+                    'ASISTENTE ADMINISTRACION',
+                    'ADMINISTRADOR',
+                    'SISTEMAS'
+                  ]"
                   :rules="[requiredValidator]"
                   label="Cargo"
-                  placeholder="Gerente"
+                  placeholder="Selecciona un cargo"
                 />
               </VCol>
-              
 
               <!-- 👉 Email -->
               <VCol cols="12">
