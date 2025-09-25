@@ -19,6 +19,8 @@ const errors = ref({
   password: undefined,
 })
 
+const loading = ref(false)
+
 const refVForm = ref()
 
 const credentials = ref({
@@ -29,6 +31,7 @@ const credentials = ref({
 const rememberMe = ref(false)
 
 const login = async () => {
+  loading.value = true
   try {
     const res = await $api('auth/login', {
       method: 'POST',
@@ -54,7 +57,10 @@ const login = async () => {
     })
   } catch (err) {
     console.error(err)
+  } finally {
+    loading.value = false
   }
+
 }
 
 const onSubmit = () => {
@@ -139,10 +145,13 @@ const onSubmit = () => {
               </div>
 
               <VBtn
-                block
-                type="submit"
-              >
-                Login
+                  block
+                  type="submit"
+                  color="primary"
+                  :loading="loading"
+                  :disabled="loading"
+                >
+                  <span>Login</span>
               </VBtn>
             </VCol>
           </VRow>
