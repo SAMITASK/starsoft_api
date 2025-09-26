@@ -46,6 +46,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::put('/update/{id}', 'update');
             Route::get('/view/{id}', 'getUser');
             Route::get('/companies', 'userCompanies');
+            Route::get('companyUser/{userId}/{companyId}', 'getIdCompanyUser');
+            Route::post('addCompanyUser','addCompanyUser');
         });
 });
 

@@ -1,5 +1,6 @@
 <script setup>
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
+import openAssignDialog from '@/views/apps/user/list/AssignDialog.vue'
 
 const searchQuery = ref('')
 
@@ -9,6 +10,8 @@ const page = ref(1)
 const sortBy = ref()
 const orderBy = ref()
 const selectedRows = ref([])
+const isAssignDialogVisible = ref(false)
+const selectedUser = ref(null)
 
 const updateOptions = options => {
   page.value = options.page
@@ -128,8 +131,6 @@ const editUser = (user) => {
 }
 
 const updateUser = async userData => {
-  console.log('Updating user...', userData)
-
   await $api(`users/update/${userData.id}`, {
     method: 'PUT',
     body: userData,
@@ -220,6 +221,46 @@ const handleUserData = (userData) => {
           </div>
         </template>
 
+        <template #item.companies="{ item }">
+          <div class="d-flex flex-wrap gap-2">
+            <!-- Mostramos máximo 2 empresas -->
+            <VChip
+              v-for="(company, index) in item.companies.slice(0, 2)"
+              :key="company.id"
+              color="primary"
+              size="small"
+              label
+              class="my-1"
+            >
+              {{ company.name }}
+            </VChip>
+
+            <!-- Si hay más empresas -->
+            <VTooltip v-if="item.companies.length > 2" location="top">
+              <template #activator="{ props }">
+                <VChip
+                  v-bind="props"
+                  color="secondary"
+                  size="small"
+                  label
+                >
+                  +{{ item.companies.length - 2 }} más
+                </VChip>
+              </template>
+
+              <!-- Contenido del tooltip -->
+              <div class="d-flex flex-column">
+                <span
+                  v-for="company in item.companies.slice(2)"
+                  :key="company.id"
+                >
+                  {{ company.name }}
+                </span>
+              </div>
+            </VTooltip>
+          </div>
+        </template>
+
         <!-- Status -->
         <template #item.status="{ item }">
           <VChip
@@ -240,6 +281,11 @@ const handleUserData = (userData) => {
           >
             <VIcon icon="ri-edit-box-line" />
           </IconBtn>
+
+        <IconBtn size="small" @click="selectedUser = item; isAssignDialogVisible = true"
+>
+          <VIcon icon="ri-building-line" />
+        </IconBtn>
 
         </template>
 
@@ -293,6 +339,13 @@ const handleUserData = (userData) => {
     @user-data="handleUserData"
     @user-updated="handleUserData"
   />
+
+<openAssignDialog
+  v-model:is-dialog-visible="isAssignDialogVisible"
+  :user="selectedUser"
+/>
+
+
   </section>
 </template>
 

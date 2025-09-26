@@ -23,6 +23,7 @@ export default [
     icon: { icon: 'ri-table-view' },
     roles: ['ADMINISTRADOR', 'GERENTE', 'JEFE DE COMPRAS', 'SISTEMAS']
   },
+  
   {
     title: 'Usuarios',
     to: { name: 'apps-user-list' },

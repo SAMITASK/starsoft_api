@@ -35,4 +35,9 @@ class User extends Authenticatable
         ];
     }
 
+    public function companiesPivot()
+    {
+        return $this->hasMany(CompanyUserPivot::class, 'user_id');
+    }
+    
 }
