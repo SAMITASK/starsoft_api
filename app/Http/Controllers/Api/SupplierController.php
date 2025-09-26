@@ -234,4 +234,6 @@ class SupplierController extends Controller
 
         return $query;
     }
+
+    
 }
