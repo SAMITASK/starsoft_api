@@ -7,6 +7,7 @@ use App\Models\OCModel;
 use App\Models\OCSModel;
 use App\Models\Supplier;
 use App\Models\CompanyModel;
+use App\Models\CompanyUserPivot;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

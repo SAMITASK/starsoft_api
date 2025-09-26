@@ -60,4 +60,57 @@ class OCModel extends Model
             ->select('OC_CNUMORD', 'OC_CCODPRO', 'OC_CRAZSOC', 'OC_COBSERV', 'OC_CSOLICT', 'OC_CSITORD', 'OC_DFECENT', 'TipoDocumento', 'NOMBRE_USUARIO')
             ->get();
     }
+
+    public static function getOrdersSummary(
+        string $connectionName,
+        string $dateStart,
+        string $dateEnd,
+        ?string $responsible = null,
+        ?string $type = null // <-- opcional
+    ) {
+        // Si no mandas nada, toma ambas
+        if ($type === 'OC') {
+            $tables = ['COMOVC'];
+        } elseif ($type === 'OS') {
+            $tables = ['COMOVC_S'];
+        } else {
+            $tables = ['COMOVC', 'COMOVC_S']; // por defecto ambos
+        }
+
+        $results = collect();
+
+        foreach ($tables as $table) {
+            $rows = self::on($connectionName)
+                ->from($table)
+                ->join('MAEPROV as P', "$table.OC_CCODPRO", '=', 'P.PRVCCODIGO')
+                ->selectRaw('
+                P.PRVCCODIGO as PROVEEDOR,
+                P.PRVCNOMBRE as NOMBRE_PROVEEDOR,
+                SUM(' . $table . '.OC_NVENTA) as MONTO_TOTAL
+            ')
+                ->whereIn("$table.OC_CSITORD", ['01', '03', '04'])
+                ->whereBetween("$table.OC_DFECDOC", [$dateStart, $dateEnd]);
+
+            if ($responsible) {
+                $rows->where("$table.OC_CSOLICT", $responsible);
+            }
+
+            $rows = $rows->groupBy('P.PRVCCODIGO', 'P.PRVCNOMBRE')->get();
+
+            $results = $results->concat($rows);
+        }
+
+        // Combinar si el mismo proveedor aparece en ambas tablas
+        return $results
+            ->groupBy('PROVEEDOR')
+            ->map(function ($items) {
+                return (object)[
+                    'PROVEEDOR' => $items->first()->PROVEEDOR,
+                    'NOMBRE_PROVEEDOR' => $items->first()->NOMBRE_PROVEEDOR,
+                    'MONTO_TOTAL' => $items->sum('MONTO_TOTAL'),
+                ];
+            })
+            ->sortByDesc('MONTO_TOTAL')
+            ->values();
+    }
 }

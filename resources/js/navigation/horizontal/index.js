@@ -28,7 +28,7 @@ export default [
     icon: { icon: 'ri-file-chart-line' },
     children: [
       { title: 'Responsables', to: 'apps-product-list', icon: { icon: 'ri-contacts-line' }, },
-      { title: 'Proveedor', to: 'apps-product-list', icon: { icon: 'ri-building-4-line' }, },
+      { title: 'Proveedor', to: 'apps-report-supplier', icon: { icon: 'ri-building-4-line' }, },
     ],
     roles: ['ADMINISTRADOR', 'JEFE DE COMPRAS', 'SISTEMAS']
   },
