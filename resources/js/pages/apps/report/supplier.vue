@@ -59,6 +59,7 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
 
 const searchQuery = ref("");
 const suppliers = ref([]);
+const maxMonto = ref(10);
 
 const fetchSuppliers = async () => {
   if (!dateRange.value || !dateRange.value.includes(' a ')) return;
@@ -73,12 +74,15 @@ const fetchSuppliers = async () => {
       },
     });
 
-    suppliers.value = res;
+    suppliers.value = res.data;
+    maxMonto.value = res.maxMonto;
   } catch (error) {
     console.error("Error cargando proveedores:", error);
     suppliers.value = [];
+    maxMonto.value = 1;
   }
 };
+
 
 watch([selectedCompany, dateRange, selectedType], fetchSuppliers);
 
@@ -89,6 +93,16 @@ const filteredSuppliers = computed(() => {
     item.NOMBRE_PROVEEDOR.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
+
+const calculateProgress = (monto) => {
+  const numericMonto = Number(monto);
+  const numericMax = Number(maxMonto.value);
+
+  if (numericMax <= 0) return 0;
+
+  const progress = (numericMonto / numericMax) * 100;
+  return Math.floor(progress); // 🔹 floor trunca siempre hacia abajo
+};
 
 fetchSuppliers();
 </script>
@@ -157,9 +171,10 @@ fetchSuppliers();
           />
         </div>
       </div>
-    </VCardText>+
+    </VCardText>
     <VTable
-      class="invoice-preview-table border text-high-emphasis overflow-hidden mb-6"
+      density="compact"
+      striped="even"
     >
       <thead>
         <tr>
@@ -179,7 +194,16 @@ fetchSuppliers();
           <td>{{ index + 1 }}</td>
           <td>{{ item.NOMBRE_PROVEEDOR }}</td>
           <td class="text-center">
-            {{ Number(item.MONTO_TOTAL).toLocaleString("es-PE", { style: "currency", currency: "PEN" }) }}
+          <VProgressLinear
+             :model-value="calculateProgress(item.MONTO_TOTAL)"
+            height="19"
+            color="primary"
+            rounded
+          >
+            <strong>
+                    {{ Number(item.MONTO_TOTAL).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' }) }}
+            </strong>
+          </VProgressLinear>
           </td>
         </tr>
       </tbody>
@@ -196,4 +220,5 @@ fetchSuppliers();
   color: #1f1f1f;
   font-weight: bold;
 }
+
 </style>
