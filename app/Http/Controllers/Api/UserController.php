@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\CompanyModel;
+use App\Models\CompanyUserPivot;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -111,5 +112,37 @@ class UserController extends Controller
             });
 
         return response()->json($companies);
+    }
+
+    public function getIdCompanyUser($userId, $companyId)
+    {
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        $pivot = $user->companiesPivot()->where('company_id', $companyId)->first();
+
+        if (!$pivot) {
+            return response()->json('');
+        }
+
+        return response()->json($pivot->user_code);
+    }
+
+    public function addCompanyUser(Request $request)
+    {
+
+        $pivot = CompanyUserPivot::create([
+            'user_id' => $request->user_id,
+            'company_id' => $request->company_id,
+            'user_code' => $request->user_code,
+        ]);
+
+        return response()->json([
+            'message' => 'Empresa asignada al usuario correctamente',
+            'data' => $pivot,
+        ]);
     }
 }

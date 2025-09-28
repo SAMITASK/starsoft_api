@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\OrdersApi;
 use App\Http\Controllers\Api\Product\FamilyController;
 use App\Http\Controllers\Api\Product\TypeController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -46,7 +47,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::put('/update/{id}', 'update');
             Route::get('/view/{id}', 'getUser');
             Route::get('/companies', 'userCompanies');
+            Route::get('companyUser/{userId}/{companyId}', 'getIdCompanyUser');
+            Route::post('addCompanyUser','addCompanyUser');
         });
+    Route::controller(ReportController::class)
+        ->prefix('reports')
+        ->group(function () {
+            Route::get('/suppliers', 'reportSuppliers');
+        });
+
 });
 
 Route::middleware(['auth:sanctum'])->post('/keep-alive', [AuthController::class, 'keepAlive']);
@@ -62,3 +71,7 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
+
+
+
+

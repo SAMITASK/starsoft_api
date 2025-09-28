@@ -5,13 +5,13 @@ export default [
     icon: { icon: 'ri-home-smile-2-line' },
     roles: ['ADMINISTRADOR', 'JEFE DE COMPRAS', 'SISTEMAS'],
   },
-    {
+  {
     title: 'Ordenes de Compra',
     to: { name: 'ocs' },
     icon: { icon: 'ri-file-text-line' },
     roles: ['ADMINISTRADOR', 'GERENTE', 'JEFE DE COMPRAS', 'SISTEMAS']
   },
-    {
+  {
     title: 'Proveedores',
     to: { name: 'apps-supplier-list' },
     icon: { icon: 'ri-store-3-line' },
@@ -22,6 +22,15 @@ export default [
     to: { name: 'apps-product-list' },
     icon: { icon: 'ri-table-view' },
     roles: ['ADMINISTRADOR', 'GERENTE', 'JEFE DE COMPRAS', 'SISTEMAS']
+  },
+  {
+    title: 'Reportes',
+    icon: { icon: 'ri-file-chart-line' },
+    children: [
+      { title: 'Responsables', to: 'apps-product-list', icon: { icon: 'ri-contacts-line' }, },
+      { title: 'Proveedor', to: 'apps-report-supplier', icon: { icon: 'ri-building-4-line' }, },
+    ],
+    roles: ['ADMINISTRADOR', 'JEFE DE COMPRAS', 'SISTEMAS']
   },
   {
     title: 'Usuarios',
