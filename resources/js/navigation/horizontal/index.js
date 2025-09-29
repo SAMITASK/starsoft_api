@@ -29,6 +29,7 @@ export default [
     children: [
       { title: 'Responsables', to: 'apps-product-list', icon: { icon: 'ri-contacts-line' }, },
       { title: 'Proveedor', to: 'apps-report-supplier', icon: { icon: 'ri-building-4-line' }, },
+      { title: 'Areas', to: 'apps-report-area', icon: { icon: 'ri-box-3-line' }, },
     ],
     roles: ['ADMINISTRADOR', 'JEFE DE COMPRAS', 'SISTEMAS']
   },

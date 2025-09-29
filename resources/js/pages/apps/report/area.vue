@@ -4,42 +4,59 @@ import { Spanish } from "flatpickr/dist/l10n/es.js";
 //Companies
 const selectedCompany = ref("003");
 const selectedType = ref("OC");
+const selectedArea = ref(null);
 const companies = ref([]);
+const areas = ref([]);
+
 const isLoading = ref(true);
+const isLoadingAreas = ref(false);
 const errorMessage = ref(null);
+const errorMessageAreas = ref(null);
 const totalMonto = computed(() => {
-  return filteredSuppliers.value.reduce((sum, item) => sum + Number(item.MONTO_TOTAL || 0), 0);
+  return filteredAreas.value.reduce((sum, item) => sum + Number(item.MONTO_TOTAL || 0), 0);
 });
 
-onMounted(async () => {
+async function fetchData(url, params, loadingRef, errorRef) {
+  loadingRef.value = true
+  errorRef.value = null
+  
   try {
-    const res = await $api("/users/companies", {
-      method: "GET",
-      onResponseError({ response }) {
-        throw new Error(response._data?.message || "Error al obtener empresas");
-      },
-    });
-
-    if (!Array.isArray(res)) {
-      throw new Error("Formato de datos inválido");
-    }
-
-    companies.value = res.map((company) => ({
-      title: company.name,
-      value: company.id,
-      rawData: company,
-    }));
-  } catch (error) {
-    console.error("Error cargando empresas:", error);
-    errorMessage.value =
-      "No se pudieron cargar las empresas. Intente nuevamente.";
-    companies.value = [];
+    const query = new URLSearchParams(params).toString()
+    const fullUrl = query ? `${url}?${query}` : url
+    return await $api(fullUrl)
+  } catch (err) {
+    errorRef.value = err.message || "Error al cargar datos"
+    throw err
   } finally {
-    isLoading.value = false;
+    loadingRef.value = false
   }
-});
+}
 
-// End Companies
+async function loadCompanies() {
+  companies.value = await fetchData('/users/companies', {}, isLoading, errorMessage)
+}
+
+watch(selectedCompany, async (company) => {
+  if (!company) {
+    areas.value = []
+    selectedArea.value = null
+    return
+  }
+
+  areas.value = []
+  selectedArea.value = null
+  
+  const [areasData] = await Promise.all([
+    fetchData('/areas', { company }, isLoadingAreas, errorMessageAreas),
+  ])
+  
+  areas.value = areasData
+}, { immediate: true })
+
+loadCompanies()
+
+
+
 
 // Date Range Picker
 
@@ -64,16 +81,17 @@ const searchQuery = ref("");
 const suppliers = ref([]);
 const maxMonto = ref(10);
 
-const fetchSuppliers = async () => {
+const fetchAreas = async () => {
   if (!dateRange.value || !dateRange.value.includes(' a ')) return;
 
   try {
-    const res = await $api("/reports/suppliers", {
+    const res = await $api("/reports/areas", {
       method: "GET",
       params: {
         company: selectedCompany.value,
         date: dateRange.value,
         type: selectedType.value,
+        area: selectedArea.value,
       },
     });
 
@@ -87,9 +105,9 @@ const fetchSuppliers = async () => {
 };
 
 
-watch([selectedCompany, dateRange, selectedType], fetchSuppliers);
+watch([selectedCompany, dateRange, selectedArea, selectedType], fetchAreas);
 
-const filteredSuppliers = computed(() => {
+const filteredAreas = computed(() => {
   if (!searchQuery.value) return suppliers.value;
 
   return suppliers.value.filter(item =>
@@ -107,7 +125,7 @@ const calculateProgress = (monto) => {
   return Math.floor(progress); // 🔹 floor trunca siempre hacia abajo
 };
 
-fetchSuppliers();
+fetchAreas();
 </script>
 
 <template>
@@ -117,16 +135,18 @@ fetchSuppliers();
     </VCardItem>
     <VCardText>
       <VRow>
-        <VCol cols="12" sm="4">
+        <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedCompany"
-            label="Selecciona empresa"
-            placeholder="Selecciona empresa"
+            label="Filtrar por empresa"
+            placeholder="Filtrar empresa"
             :items="companies"
-            item-title="title"
-            item-value="value"
+            item-title="name"
+            item-value="id"
             :loading="isLoading"
             :error-messages="errorMessage"
+            clearable
+            clear-icon="ri-close-line"
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
@@ -141,6 +161,21 @@ fetchSuppliers();
               locale: Spanish,
               maxDate: new Date(),
             }"
+          />
+        </VCol>
+        <VCol cols="12" sm="3">
+          <VSelect
+            v-model="selectedArea"
+            label="Filtrar por almacen"
+            placeholder="Filtrar por almacen"
+            :items="areas"
+            item-title="name"
+            item-value="id"
+            :loading="isLoadingAreas"
+            :error-messages="errorMessageAreas"
+            clearable
+            clear-icon="ri-close-line"
+            no-data-text="No hay almacenes disponibles"
           />
         </VCol>
         <VCol cols="12" sm="3">
@@ -173,6 +208,7 @@ fetchSuppliers();
         />
       </div>
 
+      <!-- Derecha: monto total -->
       <div class="text-h6 font-weight-medium">
         Total: {{ new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(totalMonto) }}
       </div>
@@ -190,12 +226,12 @@ fetchSuppliers();
       </thead>
 
       <tbody>
-        <tr v-if="filteredSuppliers.length === 0">
+        <tr v-if="filteredAreas.length === 0">
           <td colspan="3" class="text-center text-muted">
             No se encontraron proveedores
           </td>
         </tr>
-        <tr v-for="(item, index) in filteredSuppliers" :key="index">
+        <tr v-for="(item, index) in filteredAreas" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ item.NOMBRE_PROVEEDOR }}</td>
           <td class="text-center">
