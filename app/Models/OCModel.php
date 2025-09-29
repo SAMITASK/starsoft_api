@@ -121,59 +121,53 @@ class OCModel extends Model
             ->values();
     }
 
-    public static function reportSuppliersByArea(
+    public static function reportAreas(
         string $connectionName,
         string $dateStart,
         string $dateEnd,
         ?string $responsible = null,
-        ?string $type = null,
-        ?string $area = null
+        ?string $type = null
     ) {
-        // Si no mandas nada, toma ambas
         if ($type === 'OC') {
             $tables = ['COMOVC'];
         } elseif ($type === 'OS') {
             $tables = ['COMOVC_S'];
         } else {
-            $tables = ['COMOVC', 'COMOVC_S']; // por defecto ambos
+            $tables = ['COMOVC', 'COMOVC_S'];
         }
 
         $results = collect();
 
         foreach ($tables as $table) {
-            $rows = self::on($connectionName)
+            $query = self::on($connectionName)
                 ->from($table)
-                ->join('MAEPROV as P', "$table.OC_CCODPRO", '=', 'P.PRVCCODIGO')
                 ->join('REQUISC as R', "$table.OC_CNRODOCREF", '=', 'R.NROREQUI')
-                ->selectRaw('
-                    P.PRVCCODIGO as PROVEEDOR,
-                    P.PRVCNOMBRE as NOMBRE_PROVEEDOR,
-                    R.AREA as AREA,
-                    SUM(' . $table . '.OC_NVENTA) as MONTO_TOTAL
-                ')
-                ->whereIn("$table.OC_CSITORD", ['01', '03', '04'])
-                ->whereBetween("$table.OC_DFECDOC", [$dateStart, $dateEnd]);
+                ->join('AREA as A', 'R.AREA', '=', 'A.AREA_CODIGO')
+                ->selectRaw("
+                A.AREA_CODIGO as id,
+                A.AREA_DESCRIPCION as name,
+                SUM({$table}.OC_NVENTA) as MONTO_TOTAL
+            ")
+                ->whereIn("{$table}.OC_CSITORD", ['01', '03', '04'])
+                ->whereBetween("{$table}.OC_DFECDOC", [$dateStart, $dateEnd]);
 
             if ($responsible) {
-                $rows->where("$table.OC_CSOLICT", $responsible);
+                $query->where("{$table}.OC_CSOLICT", $responsible);
             }
 
-            if ($area) {
-                $rows->where('R.AREA', $area); // 🔑 filtro por área
-            }
-
-            $rows = $rows->groupBy('P.PRVCCODIGO', 'P.PRVCNOMBRE', 'R.AREA')->get();
+            // Agrupar por código y descripción del área en la query
+            $rows = $query->groupBy('A.AREA_CODIGO', 'A.AREA_DESCRIPCION')->get();
 
             $results = $results->concat($rows);
         }
 
-        // Combinar si el mismo proveedor aparece en ambas tablas
+        // Unificar resultados (OC + OS) agrupando por id (AREA_CODIGO)
         return $results
-            ->groupBy('PROVEEDOR')
+            ->groupBy('id')
             ->map(function ($items) {
                 return (object)[
-                    'PROVEEDOR' => $items->first()->PROVEEDOR,
-                    'NOMBRE_PROVEEDOR' => $items->first()->NOMBRE_PROVEEDOR,
+                    'id' => $items->first()->id,
+                    'name' => $items->first()->name,
                     'MONTO_TOTAL' => $items->sum('MONTO_TOTAL'),
                 ];
             })

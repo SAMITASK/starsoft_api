@@ -74,13 +74,13 @@ class ReportController extends Controller
         }
     }
 
-    public function reportSuppliersByArea(Request $request)
+    public function reportAreas(Request $request)
     {
         try {
             $conexion = 'sqlsrv_' . $request->input('company', '003');
             $dateRange = $request->input('date');
             $type = $request->input('type', 'OC');
-            $area = $request->input('area');
+            $staff = $request->input('staff');
 
             // Validar rango de fechas
             if (strpos($dateRange, ' a ') !== false) {
@@ -93,24 +93,27 @@ class ReportController extends Controller
                 }
             }
 
-            // Determinar usuario responsable
             $responsible = null;
             if (auth()->check()) {
-                $userCode = CompanyUserPivot::where('user_id', auth()->id())
-                    ->where('company_id', $request->input('company', '003'))
-                    ->value('user_code');
+                $user = auth()->user();
 
-                $responsible = $userCode;
+                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
+                    $responsible = $staff;
+                } else {
+                    $userCode = CompanyUserPivot::where('user_id', $user->id)
+                        ->where('company_id', $request->input('company', '003'))
+                        ->value('user_code');
+
+                    $responsible = $userCode;
+                }
             }
 
-            // Obtener resultados filtrados también por área
-            $result = OCModel::reportSuppliersByArea(
+            $result = OCModel::reportAreas(
                 $conexion,
                 $start,
                 $end,
                 $responsible,
-                $type,
-                $area
+                $type
             );
 
             $maxMonto = $result->max(fn($item) => (float) $item->MONTO_TOTAL);
@@ -120,13 +123,13 @@ class ReportController extends Controller
                 'maxMonto' => $maxMonto,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Error en reportSuppliersByArea', [
+            Log::error('Error en reportAreas', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
-                'error' => 'Error inesperado al obtener proveedores por área',
+                'error' => 'Error inesperado al obtener reporte por áreas',
                 'details' => $e->getMessage(),
             ], 500);
         }
