@@ -1,43 +1,72 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 
+const userData = useCookie('userData')
+const isManagerOrAdmin = computed(() => 
+  ['GERENTE', 'ADMINISTRADOR'].includes(userData.value?.cargo)
+)
+
 //Companies
 const selectedCompany = ref("003");
 const selectedType = ref("OC");
-const companies = ref([]);
+const selectedStaff = ref(null);
+const companies = ref([]);const selectedArea = ref(null);
+const staff = ref([]);
+const areas = ref([]);
+
 const isLoading = ref(true);
+const isLoadingAreas = ref(false);
+const isLoadingStaff = ref(false);
 const errorMessage = ref(null);
+const errorMessageAreas = ref(null);
+const errorMessageStaff = ref(null);
+
 const totalMonto = computed(() => {
   return filteredSuppliers.value.reduce((sum, item) => sum + Number(item.MONTO_TOTAL || 0), 0);
 });
 
-onMounted(async () => {
+async function fetchData(url, params, loadingRef, errorRef) {
+  loadingRef.value = true
+  errorRef.value = null
+  
   try {
-    const res = await $api("/users/companies", {
-      method: "GET",
-      onResponseError({ response }) {
-        throw new Error(response._data?.message || "Error al obtener empresas");
-      },
-    });
-
-    if (!Array.isArray(res)) {
-      throw new Error("Formato de datos inválido");
-    }
-
-    companies.value = res.map((company) => ({
-      title: company.name,
-      value: company.id,
-      rawData: company,
-    }));
-  } catch (error) {
-    console.error("Error cargando empresas:", error);
-    errorMessage.value =
-      "No se pudieron cargar las empresas. Intente nuevamente.";
-    companies.value = [];
+    const query = new URLSearchParams(params).toString()
+    const fullUrl = query ? `${url}?${query}` : url
+    return await $api(fullUrl)
+  } catch (err) {
+    errorRef.value = err.message || "Error al cargar datos"
+    throw err
   } finally {
-    isLoading.value = false;
+    loadingRef.value = false
   }
-});
+}
+
+async function loadCompanies() {
+  companies.value = await fetchData('/users/companies', {}, isLoading, errorMessage)
+}
+
+watch(selectedCompany, async (company) => {
+  if (!company) {
+    areas.value = []
+    selectedArea.value = null
+    staff.value = []
+    selectedStaff.value = null
+    return
+  }
+
+  areas.value = []
+  selectedArea.value = null
+  staff.value = []
+  selectedStaff.value = null
+  
+  const [staffData] = await Promise.all([
+    fetchData('/staff', { company }, isLoadingStaff, errorMessageStaff),
+  ])
+  
+  staff.value = staffData
+}, { immediate: true })
+
+loadCompanies()
 
 // End Companies
 
@@ -74,11 +103,14 @@ const fetchSuppliers = async () => {
         company: selectedCompany.value,
         date: dateRange.value,
         type: selectedType.value,
+        area: selectedArea.value,
+        staff: selectedStaff.value,
       },
     });
 
     suppliers.value = res.data;
     maxMonto.value = res.maxMonto;
+    areas.value = res.areas;
   } catch (error) {
     console.error("Error cargando proveedores:", error);
     suppliers.value = [];
@@ -87,7 +119,7 @@ const fetchSuppliers = async () => {
 };
 
 
-watch([selectedCompany, dateRange, selectedType], fetchSuppliers);
+watch([selectedCompany, dateRange, selectedArea, selectedStaff,selectedType], fetchSuppliers);
 
 const filteredSuppliers = computed(() => {
   if (!searchQuery.value) return suppliers.value;
@@ -104,7 +136,7 @@ const calculateProgress = (monto) => {
   if (numericMax <= 0) return 0;
 
   const progress = (numericMonto / numericMax) * 100;
-  return Math.floor(progress); // 🔹 floor trunca siempre hacia abajo
+  return Math.floor(progress);
 };
 
 fetchSuppliers();
@@ -117,16 +149,18 @@ fetchSuppliers();
     </VCardItem>
     <VCardText>
       <VRow>
-        <VCol cols="12" sm="4">
+        <VCol cols="12" sm="3">
           <VSelect
             v-model="selectedCompany"
-            label="Selecciona empresa"
-            placeholder="Selecciona empresa"
+            label="Filtrar por empresa"
+            placeholder="Filtrar empresa"
             :items="companies"
-            item-title="title"
-            item-value="value"
+            item-title="name"
+            item-value="id"
             :loading="isLoading"
             :error-messages="errorMessage"
+            clearable
+            clear-icon="ri-close-line"
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
@@ -143,7 +177,37 @@ fetchSuppliers();
             }"
           />
         </VCol>
-        <VCol cols="12" sm="3">
+        <VCol cols="12" sm="2" v-if="isManagerOrAdmin">
+          <VSelect
+            v-model="selectedStaff"
+            label="Filtrar por encargado"
+            placeholder="Filtrar encargado"
+            :items="staff"
+            item-title="name"
+            item-value="id"
+            :loading="isLoadingStaff"
+            :error-messages="errorMessageStaff"
+            clearable
+            clear-icon="ri-close-line"
+            no-data-text="No hay encargados disponibles"
+        />
+        </VCol>
+        <VCol cols="12" sm="2">
+          <VSelect
+            v-model="selectedArea"
+            label="Filtrar por area"
+            placeholder="Filtrar por area"
+            :items="areas"
+            item-title="name"
+            item-value="id"
+            :loading="isLoadingAreas"
+            :error-messages="errorMessageAreas"
+            clearable
+            clear-icon="ri-close-line"
+            no-data-text="No hay areas disponibles"
+          />
+        </VCol>
+        <VCol cols="12" sm="2">
           <VSelect
             v-model="selectedType"
             label="Selecciona Tipo Orden"

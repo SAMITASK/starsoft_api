@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Area;
 use App\Models\CompanyUserPivot;
 use App\Models\OCModel;
 use Carbon\Carbon;
@@ -17,6 +18,8 @@ class ReportController extends Controller
             $conexion = 'sqlsrv_' . $request->input('company', '003');
             $dateRange = $request->input('date');
             $type = $request->input('type', 'OC');
+            $area = $request->input('area');
+            $staff = $request->input('staff');
 
             if (strpos($dateRange, ' a ') !== false) {
                 [$start, $end] = explode(' a ', $dateRange);
@@ -29,15 +32,26 @@ class ReportController extends Controller
             }
 
             $responsible = null;
-            if (auth()->check()) {
-                $userCode = CompanyUserPivot::where('user_id', auth()->id())
-                    ->where('company_id', $request->input('company', '003'))
-                    ->value('user_code');
 
-                $responsible = $userCode;
+            if (auth()->check()) {
+                $user = auth()->user();
+
+                Log::info('Usuario autenticado', ['user' => $user->id, 'cargo' => $user->cargo]);
+
+                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
+                    $responsible = $staff;
+                } else {
+                    $userCode = CompanyUserPivot::where('user_id', $user->id)
+                        ->where('company_id', $request->input('company', '003'))
+                        ->value('user_code');
+
+                    $responsible = $userCode;
+                    Log::info('UserCode obtenido', ['userCode' => $userCode]);
+                }
             }
 
-            $result = OCModel::getOrdersSummary($conexion, $start, $end, $responsible, $type);
+            $result = OCModel::getOrdersSummary($conexion, $start, $end, $responsible, $type, $area);
+            $areas = Area::getAvailableAreas($conexion, $start, $end, $responsible, $type);
 
             // Calcular monto máximo
             $maxMonto = $result->max(fn($item) => (float) $item->MONTO_TOTAL);
@@ -45,6 +59,7 @@ class ReportController extends Controller
             return response()->json([
                 'data' => $result,
                 'maxMonto' => $maxMonto,
+                'areas' => $areas,
             ]);
         } catch (\Throwable $e) {
             Log::error('Error en reportSuppliers', [

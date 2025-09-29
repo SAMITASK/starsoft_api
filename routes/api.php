@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Product\FamilyController;
 use App\Http\Controllers\Api\Product\TypeController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/families', [FamilyController::class, 'show']);
     Route::get('/types', [TypeController::class, 'show']);
     Route::get('/areas', [AreaController::class, 'filterCompany']);
+    Route::get('/staff', [StaffController::class, 'filterStaff']);
 
     Route::controller(SupplierController::class)
         ->prefix('suppliers')

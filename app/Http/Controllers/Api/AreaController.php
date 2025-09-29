@@ -19,7 +19,4 @@ class AreaController extends Controller
 
         return response()->json($areas);
     }
-
-    
-
 }
