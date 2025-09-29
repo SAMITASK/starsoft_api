@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\OCApi;
@@ -23,6 +24,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/companies', [CompanyController::class, 'show']);
     Route::get('/families', [FamilyController::class, 'show']);
     Route::get('/types', [TypeController::class, 'show']);
+    Route::get('/areas', [AreaController::class, 'filterCompany']);
 
     Route::controller(SupplierController::class)
         ->prefix('suppliers')
@@ -54,6 +56,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         ->prefix('reports')
         ->group(function () {
             Route::get('/suppliers', 'reportSuppliers');
+            Route::get('/areas', 'reportSuppliersByArea');
         });
 
 });
