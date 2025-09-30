@@ -36,27 +36,7 @@ async function loadCompanies() {
   companies.value = await fetchData('/users/companies', {}, isLoading, errorMessage)
 }
 
-watch(selectedCompany, async (company) => {
-  if (!company) {
-    areas.value = []
-    selectedArea.value = null
-    return
-  }
-
-  areas.value = []
-  selectedArea.value = null
-  
-  const [areasData] = await Promise.all([
-    fetchData('/areas', { company }, isLoadingAreas, errorMessageAreas),
-  ])
-  
-  areas.value = areasData
-}, { immediate: true })
-
 loadCompanies()
-
-
-
 
 // Date Range Picker
 
@@ -91,7 +71,6 @@ const fetchAreas = async () => {
         company: selectedCompany.value,
         date: dateRange.value,
         type: selectedType.value,
-        area: selectedArea.value,
       },
     });
 
@@ -105,7 +84,7 @@ const fetchAreas = async () => {
 };
 
 
-watch([selectedCompany, dateRange, selectedArea, selectedType], fetchAreas);
+watch([selectedCompany, dateRange, selectedType], fetchAreas);
 
 const filteredAreas = computed(() => {
   if (!searchQuery.value) return suppliers.value;
@@ -165,21 +144,6 @@ fetchAreas();
         </VCol>
         <VCol cols="12" sm="3">
           <VSelect
-            v-model="selectedArea"
-            label="Filtrar por almacen"
-            placeholder="Filtrar por almacen"
-            :items="areas"
-            item-title="name"
-            item-value="id"
-            :loading="isLoadingAreas"
-            :error-messages="errorMessageAreas"
-            clearable
-            clear-icon="ri-close-line"
-            no-data-text="No hay almacenes disponibles"
-          />
-        </VCol>
-        <VCol cols="12" sm="3">
-          <VSelect
             v-model="selectedType"
             label="Selecciona Tipo Orden"
             placeholder="Selecciona Tipo Orden"
@@ -232,8 +196,8 @@ fetchAreas();
           </td>
         </tr>
         <tr v-for="(item, index) in filteredAreas" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>{{ item.NOMBRE_PROVEEDOR }}</td>
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
           <td class="text-center">
           <VProgressLinear
              :model-value="calculateProgress(item.MONTO_TOTAL)"
