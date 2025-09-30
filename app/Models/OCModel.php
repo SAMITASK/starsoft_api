@@ -68,9 +68,7 @@ class OCModel extends Model
         ?string $responsible = null,
         ?string $type = null,
         ?string $area = null
-
     ) {
-
         if ($type === 'OC') {
             $tables = ['COMOVC'];
         } elseif ($type === 'OS') {
@@ -84,14 +82,23 @@ class OCModel extends Model
         foreach ($tables as $table) {
             $rows = self::on($connectionName)
                 ->from($table)
-                ->join('MAEPROV as P', "$table.OC_CCODPRO", '=', 'P.PRVCCODIGO')
-                ->join('REQUISC as R', "$table.OC_CNRODOCREF", '=', 'R.NROREQUI')
-                ->selectRaw('
-                    P.PRVCCODIGO as PROVEEDOR,
-                    P.PRVCNOMBRE as NOMBRE_PROVEEDOR,
-                    R.AREA as AREA,
-                    SUM(' . $table . '.OC_NVENTA) as MONTO_TOTAL
-                ')
+                ->join('MAEPROV as P', "$table.OC_CCODPRO", '=', 'P.PRVCCODIGO');
+
+            // Relación con REQUISC depende del tipo
+            if ($table === 'COMOVC') {
+                $rows->join('REQUISC as R', "$table.OC_CNRODOCREF", '=', 'R.NROREQUI')
+                    ->where('R.TIPOREQUI', 'RQ');
+            } else {
+                $rows->join('REQUISC as R', "$table.OC_CNRODOCREF", '=', 'R.NROREQUI')
+                    ->where('R.TIPOREQUI', 'RS');
+            }
+
+            $rows->selectRaw('
+                P.PRVCCODIGO as PROVEEDOR,
+                P.PRVCNOMBRE as NOMBRE_PROVEEDOR,
+                R.AREA as AREA,
+                SUM(' . $table . '.OC_NVENTA) as MONTO_TOTAL
+            ')
                 ->whereIn("$table.OC_CSITORD", ['01', '03', '04'])
                 ->whereBetween("$table.OC_DFECDOC", [$dateStart, $dateEnd]);
 
@@ -121,6 +128,7 @@ class OCModel extends Model
             ->values();
     }
 
+
     public static function reportAreas(
         string $connectionName,
         string $dateStart,
@@ -141,13 +149,21 @@ class OCModel extends Model
         foreach ($tables as $table) {
             $query = self::on($connectionName)
                 ->from($table)
-                ->join('REQUISC as R', "$table.OC_CNRODOCREF", '=', 'R.NROREQUI')
+                ->join('REQUISC as R', function ($join) use ($table) {
+                    $join->on("$table.OC_CNRODOCREF", '=', 'R.NROREQUI');
+
+                    if ($table === 'COMOVC') {
+                        $join->where('R.TIPOREQUI', '=', 'RQ');
+                    } else {
+                        $join->where('R.TIPOREQUI', '=', 'RS');
+                    }
+                })
                 ->join('AREA as A', 'R.AREA', '=', 'A.AREA_CODIGO')
                 ->selectRaw("
-                A.AREA_CODIGO as id,
-                A.AREA_DESCRIPCION as name,
-                SUM({$table}.OC_NVENTA) as MONTO_TOTAL
-            ")
+            A.AREA_CODIGO as id,
+            A.AREA_DESCRIPCION as name,
+            SUM({$table}.OC_NVENTA) as MONTO_TOTAL
+        ")
                 ->whereIn("{$table}.OC_CSITORD", ['01', '03', '04'])
                 ->whereBetween("{$table}.OC_DFECDOC", [$dateStart, $dateEnd]);
 
@@ -155,13 +171,11 @@ class OCModel extends Model
                 $query->where("{$table}.OC_CSOLICT", $responsible);
             }
 
-            // Agrupar por código y descripción del área en la query
             $rows = $query->groupBy('A.AREA_CODIGO', 'A.AREA_DESCRIPCION')->get();
 
             $results = $results->concat($rows);
         }
 
-        // Unificar resultados (OC + OS) agrupando por id (AREA_CODIGO)
         return $results
             ->groupBy('id')
             ->map(function ($items) {
