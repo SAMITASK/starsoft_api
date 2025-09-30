@@ -59,6 +59,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         ->group(function () {
             Route::get('/suppliers', 'reportSuppliers');
             Route::get('/areas', 'reportAreas');
+            Route::get('/products', 'reportSupplierProductsAreas');
         });
 
 });

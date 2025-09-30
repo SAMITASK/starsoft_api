@@ -68,6 +68,10 @@ watch(selectedCompany, async (company) => {
 
 loadCompanies()
 
+watch(selectedStaff, () => {
+  selectedArea.value = null
+})
+
 // End Companies
 
 // Date Range Picker
@@ -159,8 +163,6 @@ fetchSuppliers();
             item-value="id"
             :loading="isLoading"
             :error-messages="errorMessage"
-            clearable
-            clear-icon="ri-close-line"
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
