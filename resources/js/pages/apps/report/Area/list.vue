@@ -4,14 +4,10 @@ import { Spanish } from "flatpickr/dist/l10n/es.js";
 //Companies
 const selectedCompany = ref("003");
 const selectedType = ref("OC");
-const selectedArea = ref(null);
 const companies = ref([]);
-const areas = ref([]);
 
 const isLoading = ref(true);
-const isLoadingAreas = ref(false);
 const errorMessage = ref(null);
-const errorMessageAreas = ref(null);
 const totalMonto = computed(() => {
   return filteredAreas.value.reduce((sum, item) => sum + Number(item.MONTO_TOTAL || 0), 0);
 });
@@ -76,6 +72,8 @@ const fetchAreas = async () => {
 
     suppliers.value = res.data;
     maxMonto.value = res.maxMonto;
+
+    console.log(res)
   } catch (error) {
     console.error("Error cargando proveedores:", error);
     suppliers.value = [];
@@ -101,8 +99,22 @@ const calculateProgress = (monto) => {
   if (numericMax <= 0) return 0;
 
   const progress = (numericMonto / numericMax) * 100;
-  return Math.floor(progress); // 🔹 floor trunca siempre hacia abajo
+  return Math.floor(progress);
 };
+
+const router = useRouter()
+
+function goToArea(areaId, areaName) {
+  router.push({
+    name: 'apps-report-area-company-area',
+    params: { company: selectedCompany.value, area: areaName },
+    state: {
+      id: areaId,
+      dateRange: dateRange.value,
+      type : selectedType.value,
+    }
+  })
+}
 
 fetchAreas();
 </script>
@@ -124,8 +136,6 @@ fetchAreas();
             item-value="id"
             :loading="isLoading"
             :error-messages="errorMessage"
-            clearable
-            clear-icon="ri-close-line"
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
@@ -177,38 +187,35 @@ fetchAreas();
         Total: {{ new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(totalMonto) }}
       </div>
     </VCardText>
-    <VTable
-      density="compact"
-      striped="even"
-    >
+    <VTable class="custom-table">
       <thead>
         <tr>
-          <th>#</th>
-          <th scope="col">PROVEEDOR</th>
-          <th scope="col" class="text-center">MONTO</th>
+          <th>Código</th>
+          <th>Área</th>
+          <th>Monto</th>
         </tr>
       </thead>
 
       <tbody>
-        <tr v-if="filteredAreas.length === 0">
-          <td colspan="3" class="text-center text-muted">
-            No se encontraron proveedores
-          </td>
-        </tr>
-        <tr v-for="(item, index) in filteredAreas" :key="index">
+        <tr
+          v-for="(item, index) in filteredAreas"
+          :key="index"
+          class="area-row"
+          @click="goToArea(item.id, item.name)"
+        >
           <td>{{ item.id }}</td>
           <td>{{ item.name }}</td>
           <td class="text-center">
-          <VProgressLinear
-             :model-value="calculateProgress(item.MONTO_TOTAL)"
-            height="19"
-            color="primary"
-            rounded
-          >
-            <strong>
-                    {{ Number(item.MONTO_TOTAL).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' }) }}
-            </strong>
-          </VProgressLinear>
+            <VProgressLinear
+              :model-value="calculateProgress(item.MONTO_TOTAL)"
+              height="19"
+              color="primary"
+              rounded
+            >
+              <strong>
+                {{ Number(item.MONTO_TOTAL).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' }) }}
+              </strong>
+            </VProgressLinear>
           </td>
         </tr>
       </tbody>
@@ -224,6 +231,16 @@ fetchAreas();
 .row-unread {
   color: #1f1f1f;
   font-weight: bold;
+}
+
+.custom-table .area-row {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.custom-table .area-row:hover {
+  background-color: #e0e1e1; /* gris claro */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 </style>

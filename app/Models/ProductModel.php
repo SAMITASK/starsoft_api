@@ -51,4 +51,97 @@ class ProductModel extends Model
     {
         return $this->hasMany(OCSDModel::class, 'OC_CODSERVICIO', 'ACODIGO');
     }
+
+    public static function getOrdersByAreaWithProducts(
+        string $connectionName,
+        string $start,
+        string $end,
+        string $area,
+        ?string $responsible = null,
+        ?string $type = null
+    ) {
+        if ($type === 'OC') {
+            $tables = [['header' => 'COMOVC', 'detail' => 'COMOVD', 'tiporequi' => 'RQ']];
+        } elseif ($type === 'OS') {
+            $tables = [['header' => 'COMOVC_S', 'detail' => 'COMOVD_S', 'tiporequi' => 'RS']];
+        } else {
+            $tables = [
+                ['header' => 'COMOVC', 'detail' => 'COMOVD', 'tiporequi' => 'RQ'],
+                ['header' => 'COMOVC_S', 'detail' => 'COMOVD_S', 'tiporequi' => 'RS'],
+            ];
+        }
+
+        $results = collect();
+
+        foreach ($tables as $table) {
+            $header = $table['header'];
+            $detail = $table['detail'];
+            $tiporequi = $table['tiporequi'];
+
+            $query = self::on($connectionName)
+                ->from($header . ' as H')
+                ->join($detail . ' as D', "H.OC_CNUMORD", '=', "D.OC_CNUMORD")
+                ->join('MAEPROV as P', "H.OC_CCODPRO", '=', 'P.PRVCCODIGO')
+                ->join('REQUISC as R', "H.OC_CNRODOCREF", '=', "R.NROREQUI")
+                ->selectRaw(
+                    $header === 'COMOVC'
+                        ? "P.PRVCCODIGO as proveedor_id,
+                       P.PRVCNOMBRE as proveedor_name,
+                       D.OC_CCODIGO as product_id,
+                       D.OC_CDESREF as product_name,
+                       D.OC_CUNIDAD as unidad,
+                       D.OC_NCANTID as cantidad,
+                       D.OC_NPREUNI as precio_unitario,
+                       D.OC_NTOTNET as total"
+                        : "P.PRVCCODIGO as proveedor_id,
+                       P.PRVCNOMBRE as proveedor_name,
+                       D.OC_CODSERVICIO as product_id,
+                       D.OC_CDESREF as product_name,
+                       'UND' as unidad,
+                       D.OC_CANT as cantidad,
+                       D.OC_NPREUNI as precio_unitario,
+                       D.OC_NPRENET as total"
+                )
+                ->whereIn('H.OC_CSITORD', ['01', '03', '04'])
+                ->whereBetween('H.OC_DFECDOC', [$start, $end])
+                ->whereRaw("CAST(R.AREA AS INT) = ?", [(int)$area])
+                ->where('R.TIPOREQUI', $tiporequi);
+
+            if ($responsible) {
+                $query->where('H.OC_CSOLICT', $responsible);
+            }
+
+            $results = $results->concat($query->get());
+        }
+
+        return $results
+            ->groupBy('proveedor_id')
+            ->flatMap(function ($items) {
+                $proveedor_id = $items->first()->proveedor_id;
+                $proveedor_name = $items->first()->proveedor_name;
+
+                return $items
+                    ->groupBy('product_id')
+                    ->map(function ($products) use ($proveedor_id, $proveedor_name) {
+                        $totalCantidad = $products->sum('cantidad');
+                        $totalMonto = $products->sum('total');
+                        $precioPromedio = $products->avg('precio_unitario');
+                        $precioConIGV   = round($precioPromedio * 1.18, 2);
+
+                        return [
+                            'proveedor_id'   => $proveedor_id,
+                            'proveedor_name' => $proveedor_name,
+                            'product_id'     => $products->first()->product_id,
+                            'product_name'   => $products->first()->product_name,
+                            'unidad'         => $products->first()->unidad,
+                            'cantidad'       => round($totalCantidad,2),
+                            'precio_unitario' => round($precioPromedio, 2),
+                            'precio_igv'     => round($precioConIGV,2),
+                            'total'          => round($totalMonto,2),
+                        ];
+                    })
+                    ->values();
+            })
+            ->values();
+    }
 }
