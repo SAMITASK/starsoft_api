@@ -21,6 +21,8 @@ const errorMessage = ref(null);
 const errorMessageAreas = ref(null);
 const errorMessageStaff = ref(null);
 
+const loadingTable = ref(false);
+
 const totalMonto = computed(() => {
   return filteredSuppliers.value.reduce((sum, item) => sum + Number(item.MONTO_TOTAL || 0), 0);
 });
@@ -98,6 +100,7 @@ const suppliers = ref([]);
 const maxMonto = ref(10);
 
 const fetchSuppliers = async () => {
+  loadingTable.value = true;
   if (!dateRange.value || !dateRange.value.includes(' a ')) return;
 
   try {
@@ -119,11 +122,13 @@ const fetchSuppliers = async () => {
     console.error("Error cargando proveedores:", error);
     suppliers.value = [];
     maxMonto.value = 1;
+  } finally {
+    loadingTable.value = false;
   }
 };
 
 
-watch([selectedCompany, dateRange, selectedArea, selectedStaff,selectedType], fetchSuppliers);
+watch([selectedCompany, dateRange, selectedArea, selectedStaff, selectedType], fetchSuppliers);
 
 const filteredSuppliers = computed(() => {
   if (!searchQuery.value) return suppliers.value;
@@ -243,42 +248,56 @@ fetchSuppliers();
         Total: {{ new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(totalMonto) }}
       </div>
     </VCardText>
-    <VTable
-      density="compact"
-      striped="even"
-    >
-      <thead>
-        <tr>
-          <th>#</th>
-          <th scope="col">PROVEEDOR</th>
-          <th scope="col" class="text-center">MONTO</th>
-        </tr>
-      </thead>
+      <VTable
+        density="compact"
+        striped="even"
+      >
+        <thead>
+          <tr>
+            <th>#</th>
+            <th scope="col">PROVEEDOR</th>
+            <th scope="col" class="text-center">MONTO</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        <tr v-if="filteredSuppliers.length === 0">
-          <td colspan="3" class="text-center text-muted">
-            No se encontraron proveedores
-          </td>
-        </tr>
-        <tr v-for="(item, index) in filteredSuppliers" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>{{ item.NOMBRE_PROVEEDOR }}</td>
-          <td class="text-center">
-          <VProgressLinear
-             :model-value="calculateProgress(item.MONTO_TOTAL)"
-            height="19"
-            color="primary"
-            rounded
+        <tbody>
+          <!-- Fila de loading -->
+          <tr v-if="loadingTable">
+            <td colspan="3" class="text-center">
+              <VProgressCircular indeterminate color="primary" size="32" />
+            </td>
+          </tr>
+
+          <!-- Fila de "no hay datos" -->
+          <tr v-else-if="filteredSuppliers.length === 0">
+            <td colspan="3" class="text-center text-muted">
+              No se encontraron proveedores
+            </td>
+          </tr>
+
+          <!-- Filas de datos -->
+          <tr
+            v-else
+            v-for="(item, index) in filteredSuppliers"
+            :key="index"
           >
-            <strong>
-                    {{ Number(item.MONTO_TOTAL).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' }) }}
-            </strong>
-          </VProgressLinear>
-          </td>
-        </tr>
-      </tbody>
-    </VTable>
+            <td>{{ index + 1 }}</td>
+            <td>{{ item.NOMBRE_PROVEEDOR }}</td>
+            <td class="text-center">
+              <VProgressLinear
+                :model-value="calculateProgress(item.MONTO_TOTAL)"
+                height="19"
+                color="primary"
+                rounded
+              >
+                <strong>
+                  {{ Number(item.MONTO_TOTAL).toLocaleString('es-PE', { style: 'currency', currency: 'PEN' }) }}
+                </strong>
+              </VProgressLinear>
+            </td>
+          </tr>
+        </tbody>
+      </VTable>
   </VCard>
 </template>
 
