@@ -92,7 +92,7 @@ class ProductModel extends Model
                        D.OC_CUNIDAD as unidad,
                        D.OC_NCANTID as cantidad,
                        D.OC_NPREUNI as precio_unitario,
-                       D.OC_NPRENET as total"
+                       D.OC_NTOTNET as total"
                         : "P.PRVCCODIGO as proveedor_id,
                        P.PRVCNOMBRE as proveedor_name,
                        D.OC_CODSERVICIO as product_id,
@@ -116,30 +116,31 @@ class ProductModel extends Model
 
         return $results
             ->groupBy('proveedor_id')
-            ->map(function ($items) {
-                return [
-                    'proveedor_id' => $items->first()->proveedor_id,
-                    'proveedor_name' => $items->first()->proveedor_name,
-                    'products' => $items
-                        ->groupBy('product_id')
-                        ->map(function ($products) {
-                            $totalCantidad = $products->sum('cantidad');
-                            $totalMonto = $products->sum('total');
-                            $precioPromedio = $products->avg('precio_unitario');
-                            $precioConIGV   = round($precioPromedio * 1.18, 2);
+            ->flatMap(function ($items) {
+                $proveedor_id = $items->first()->proveedor_id;
+                $proveedor_name = $items->first()->proveedor_name;
 
-                            return [
-                                'product_id' => $products->first()->product_id,
-                                'product_name' => $products->first()->product_name,
-                                'unidad' => $products->first()->unidad,
-                                'cantidad' => $totalCantidad,
-                                'precio_unitario' => round($precioPromedio, 2),
-                                'precio_igv'      => round($precioConIGV),
-                                'total' => $totalMonto,
-                            ];
-                        })
-                        ->values(),
-                ];
+                return $items
+                    ->groupBy('product_id')
+                    ->map(function ($products) use ($proveedor_id, $proveedor_name) {
+                        $totalCantidad = $products->sum('cantidad');
+                        $totalMonto = $products->sum('total');
+                        $precioPromedio = $products->avg('precio_unitario');
+                        $precioConIGV   = round($precioPromedio * 1.18, 2);
+
+                        return [
+                            'proveedor_id'   => $proveedor_id,
+                            'proveedor_name' => $proveedor_name,
+                            'product_id'     => $products->first()->product_id,
+                            'product_name'   => $products->first()->product_name,
+                            'unidad'         => $products->first()->unidad,
+                            'cantidad'       => round($totalCantidad,2),
+                            'precio_unitario' => round($precioPromedio, 2),
+                            'precio_igv'     => round($precioConIGV,2),
+                            'total'          => round($totalMonto,2),
+                        ];
+                    })
+                    ->values();
             })
             ->values();
     }

@@ -135,6 +135,7 @@ class ReportController extends Controller
 
     public function reportSupplierProductsAreas(Request $request)
     {
+
         try {
             $conexion = 'sqlsrv_' . $request->input('company', '003');
             $area = $request->input('area');
@@ -150,15 +151,17 @@ class ReportController extends Controller
                 if ($start > $end) {
                     [$start, $end] = [$end, $start];
                 }
+            } else {
+                // fallback si solo llega una fecha
+                $start = Carbon::parse(trim($dateRange))->format('Y-m-d');
+                $end = $start;
             }
 
             $responsible = null;
             if (auth()->check()) {
                 $user = auth()->user();
 
-                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
-                    $responsible = null;
-                } else {
+                if (!in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
                     $userCode = CompanyUserPivot::where('user_id', $user->id)
                         ->where('company_id', $request->input('company', '003'))
                         ->value('user_code');
@@ -175,11 +178,14 @@ class ReportController extends Controller
                 $area,
                 $responsible,
                 $type
-
             );
 
+            // Formatear para el front
+            $formatted = $this->formatSupplierProducts($result);
+
             return response()->json([
-                'data' => $result,
+                'suppliers' => $formatted,
+                'total' => count($formatted),
             ]);
         } catch (\Throwable $e) {
             Log::error('Error en reportSupplierProductsAreas', [
@@ -192,5 +198,22 @@ class ReportController extends Controller
                 'details' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function formatSupplierProducts($items): array
+    {
+        return collect($items)->map(function ($item) {
+            return [
+                'proveedor_id'   => $item['proveedor_id'],
+                'proveedor_name' => $item['proveedor_name'],
+                'product_id'     => $item['product_id'],
+                'product_name'   => $item['product_name'],
+                'unidad'         => $item['unidad'],
+                'cantidad'       => $item['cantidad'],
+                'precio_unitario' => $item['precio_unitario'],
+                'precio_igv'     => $item['precio_igv'],
+                'total'          => $item['total'],
+            ];
+        })->toArray();
     }
 }
