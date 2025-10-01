@@ -1,4 +1,5 @@
 import { hexToRgb } from '@core/utils/colorConverter'
+import { numberFormatter } from '@core/utils/numberFormatter'
 
 
 // 👉 Colors variables
@@ -7,7 +8,7 @@ const colorVariables = themeColors => {
   const themeDisabledTextColor = `rgba(${hexToRgb(themeColors.colors['on-surface'])},${themeColors.variables['disabled-opacity']})`
   const themeBorderColor = `rgba(${hexToRgb(String(themeColors.variables['border-color']))},${themeColors.variables['border-opacity']})`
   const themePrimaryTextColor = `rgba(${hexToRgb(themeColors.colors['on-surface'])},${themeColors.variables['high-emphasis-opacity']})`
-  
+
   return { themeSecondaryTextColor, themeDisabledTextColor, themeBorderColor, themePrimaryTextColor }
 }
 
@@ -19,7 +20,7 @@ export const getScatterChartConfig = themeColors => {
   }
 
   const { themeSecondaryTextColor, themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -67,7 +68,7 @@ export const getScatterChartConfig = themeColors => {
 }
 export const getLineChartSimpleConfig = themeColors => {
   const { themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -133,7 +134,7 @@ export const getLineChartSimpleConfig = themeColors => {
 }
 export const getBarChartConfig = themeColors => {
   const { themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -179,7 +180,7 @@ export const getCandlestickChartConfig = themeColors => {
   }
 
   const { themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -233,7 +234,7 @@ export const getRadialBarChartConfig = themeColors => {
   }
 
   const { themeSecondaryTextColor, themePrimaryTextColor } = colorVariables(themeColors)
-  
+
   return {
     stroke: { lineCap: 'round' },
     labels: ['Comments', 'Replies', 'Shares'],
@@ -295,21 +296,50 @@ export const getRadialBarChartConfig = themeColors => {
     },
   }
 }
-export const getDonutChartConfig = themeColors => {
+export const getDonutChartConfig = (themeColors, labels = [], total, type) => {
   const donutColors = {
-    series1: '#fdd835',
-    series2: '#00d4bd',
-    series3: '#826bf8',
-    series4: '#32baff',
-    series5: '#ffa1a1',
+    series1: '#fdb528',  // Amarillo
+    series2: '#0e7205',  // Turquesa
+    series3: '#826bf8',  // Púrpura
+    series4: '#32baff',  // Azul claro
+    series5: '#ffa1a1',  // Rosa
+    series6: '#ff6b6b',  // Rojo coral
+    series7: '#51cf66',  // Verde
+    series8: '#ff922b',  // Naranja
+    series9: '#cc5de8',  // Lila
+    series10: '#339af0', // Azul
+    series11: '#ffd43b', // Amarillo dorado
+    series12: '#63e6be', // Verde menta
   }
 
   const { themeSecondaryTextColor, themePrimaryTextColor } = colorVariables(themeColors)
-  
+
   return {
-    stroke: { width: 0 },
-    labels: ['Operational', 'Networking', 'Hiring', 'R&D'],
-    colors: [donutColors.series1, donutColors.series5, donutColors.series3, donutColors.series2],
+    chart: {
+      parentHeightOffset: 0,
+      toolbar: {
+        show: true,
+        export: {
+          csv: {
+            filename: `chart-${new Date().toISOString().split('T')[0]}`,
+          },
+          svg: {
+            filename: `chart-${new Date().toISOString().split('T')[0]}`,
+          },
+          png: {
+            filename: `chart-${new Date().toISOString().split('T')[0]}`,
+          }
+        }
+      }
+    },
+    stroke: { width: 1 },
+    labels: labels,
+    colors: [
+      donutColors.series1, donutColors.series2, donutColors.series3,
+      donutColors.series4, donutColors.series5, donutColors.series6,
+      donutColors.series7, donutColors.series8, donutColors.series9,
+      donutColors.series10, donutColors.series11, donutColors.series12
+    ],
     dataLabels: {
       enabled: true,
       formatter: val => `${Number.parseInt(val, 10)}%`,
@@ -317,7 +347,7 @@ export const getDonutChartConfig = themeColors => {
     legend: {
       position: 'bottom',
       markers: { offsetX: -3 },
-      labels: { colors: themeSecondaryTextColor },
+      labels: { colors: themePrimaryTextColor },
       itemMargin: {
         vertical: 3,
         horizontal: 10,
@@ -334,13 +364,13 @@ export const getDonutChartConfig = themeColors => {
             value: {
               fontSize: '1.5rem',
               color: themeSecondaryTextColor,
-              formatter: val => `${Number.parseInt(val, 10)}`,
+              formatter: val => numberFormatter(val, type),
             },
             total: {
               show: true,
               fontSize: '1.5rem',
-              label: 'Operational',
-              formatter: () => '31%',
+              label: 'Monto Total',
+              formatter: () => numberFormatter(total, type),
               color: themePrimaryTextColor,
             },
           },
@@ -352,7 +382,7 @@ export const getDonutChartConfig = themeColors => {
         breakpoint: 992,
         options: {
           chart: {
-            height: 380,
+            height: 500,
           },
           legend: {
             position: 'bottom',
@@ -363,7 +393,7 @@ export const getDonutChartConfig = themeColors => {
         breakpoint: 576,
         options: {
           chart: {
-            height: 320,
+            height: 500,
           },
           plotOptions: {
             pie: {
@@ -396,7 +426,7 @@ export const getAreaChartSplineConfig = themeColors => {
   }
 
   const { themeSecondaryTextColor, themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -473,7 +503,7 @@ export const getColumnChartConfig = themeColors => {
   }
 
   const { themeSecondaryTextColor, themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       offsetX: -10,
@@ -548,7 +578,7 @@ export const getColumnChartConfig = themeColors => {
 }
 export const getHeatMapChartConfig = themeColors => {
   const { themeSecondaryTextColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,
@@ -611,7 +641,7 @@ export const getRadarChartConfig = themeColors => {
   }
 
   const { themeSecondaryTextColor, themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
-  
+
   return {
     chart: {
       parentHeightOffset: 0,

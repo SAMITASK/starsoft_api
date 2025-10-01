@@ -48,8 +48,10 @@ declare global {
   const effectScope: typeof import('vue')['effectScope']
   const emailValidator: typeof import('./resources/js/@core/utils/validators.js')['emailValidator']
   const extendRef: typeof import('@vueuse/core')['extendRef']
+  const formatCurrency: typeof import('./resources/js/@core/utils/formatters.js')['formatCurrency']
   const formatDate: typeof import('./resources/js/@core/utils/formatters.js')['formatDate']
   const formatDateToMonthShort: typeof import('./resources/js/@core/utils/formatters.js')['formatDateToMonthShort']
+  const formatNumber: typeof import('./resources/js/@core/utils/formatters.js')['formatNumber']
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
@@ -83,6 +85,7 @@ declare global {
   const mapWritableState: typeof import('pinia')['mapWritableState']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
+  const numberFormatter: typeof import('./resources/js/@core/utils/numberFormatter.js')['numberFormatter']
   const onActivated: typeof import('vue')['onActivated']
   const onBeforeMount: typeof import('vue')['onBeforeMount']
   const onBeforeRouteLeave: typeof import('vue-router/auto')['onBeforeRouteLeave']
@@ -445,6 +448,7 @@ declare module 'vue' {
     readonly mapWritableState: UnwrapRef<typeof import('pinia')['mapWritableState']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
+    readonly numberFormatter: UnwrapRef<typeof import('./resources/js/@core/utils/numberFormatter.js')['numberFormatter']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
     readonly onBeforeRouteLeave: UnwrapRef<typeof import('vue-router/auto')['onBeforeRouteLeave']>

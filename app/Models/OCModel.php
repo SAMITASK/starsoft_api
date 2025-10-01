@@ -188,4 +188,64 @@ class OCModel extends Model
             ->sortByDesc('MONTO_TOTAL')
             ->values();
     }
+
+    public static function reportAreasByOrders(
+        string $connectionName,
+        string $dateStart,
+        string $dateEnd,
+        ?string $responsible = null,
+        ?string $type = null
+    ) {
+        if ($type === 'OC') {
+            $tables = ['COMOVC'];
+        } elseif ($type === 'OS') {
+            $tables = ['COMOVC_S'];
+        } else {
+            $tables = ['COMOVC', 'COMOVC_S'];
+        }
+
+        $results = collect();
+
+        foreach ($tables as $table) {
+            $query = self::on($connectionName)
+                ->from($table)
+                ->join('REQUISC as R', function ($join) use ($table) {
+                    $join->on("$table.OC_CNRODOCREF", '=', 'R.NROREQUI');
+
+                    if ($table === 'COMOVC') {
+                        $join->where('R.TIPOREQUI', '=', 'RQ');
+                    } else {
+                        $join->where('R.TIPOREQUI', '=', 'RS');
+                    }
+                })
+                ->join('AREA as A', 'R.AREA', '=', 'A.AREA_CODIGO')
+                ->selectRaw("
+                A.AREA_CODIGO as id,
+                A.AREA_DESCRIPCION as name,
+                COUNT(*) as TOTAL_ORDERS
+            ")
+                ->whereIn("{$table}.OC_CSITORD", ['01', '03', '04'])
+                ->whereBetween("{$table}.OC_DFECDOC", [$dateStart, $dateEnd]);
+
+            if ($responsible) {
+                $query->where("{$table}.OC_CSOLICT", $responsible);
+            }
+
+            $rows = $query->groupBy('A.AREA_CODIGO', 'A.AREA_DESCRIPCION')->get();
+
+            $results = $results->concat($rows);
+        }
+
+        return $results
+            ->groupBy('id')
+            ->map(function ($items) {
+                return (object)[
+                    'id' => $items->first()->id,
+                    'name' => $items->first()->name,
+                    'MONTO_TOTAL' => $items->sum('TOTAL_ORDERS'),
+                ];
+            })
+            ->sortByDesc('TOTAL_ORDERS')
+            ->values();
+    }
 }
