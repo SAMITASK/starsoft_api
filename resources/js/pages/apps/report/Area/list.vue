@@ -12,6 +12,8 @@ const totalMonto = computed(() => {
   return filteredAreas.value.reduce((sum, item) => sum + Number(item.MONTO_TOTAL || 0), 0);
 });
 
+const loadingTable = ref(false);
+
 async function fetchData(url, params, loadingRef, errorRef) {
   loadingRef.value = true
   errorRef.value = null
@@ -58,6 +60,7 @@ const suppliers = ref([]);
 const maxMonto = ref(10);
 
 const fetchAreas = async () => {
+  loadingTable.value = true;
   if (!dateRange.value || !dateRange.value.includes(' a ')) return;
 
   try {
@@ -67,6 +70,7 @@ const fetchAreas = async () => {
         company: selectedCompany.value,
         date: dateRange.value,
         type: selectedType.value,
+        search: searchQuery.value,
       },
     });
 
@@ -78,6 +82,8 @@ const fetchAreas = async () => {
     console.error("Error cargando proveedores:", error);
     suppliers.value = [];
     maxMonto.value = 1;
+  } finally {
+    loadingTable.value = false;
   }
 };
 
@@ -88,7 +94,7 @@ const filteredAreas = computed(() => {
   if (!searchQuery.value) return suppliers.value;
 
   return suppliers.value.filter(item =>
-    item.NOMBRE_PROVEEDOR.toLowerCase().includes(searchQuery.value.toLowerCase())
+    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -197,6 +203,11 @@ fetchAreas();
       </thead>
 
       <tbody>
+        <tr v-if="loadingTable">
+          <td colspan="3" class="text-center">
+            <VProgressCircular indeterminate color="primary" size="32" />
+          </td>
+        </tr>
         <tr
           v-for="(item, index) in filteredAreas"
           :key="index"
@@ -240,7 +251,7 @@ fetchAreas();
 
 .custom-table .area-row:hover {
   background-color: #e0e1e1; /* gris claro */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 25%);
 }
 
 </style>

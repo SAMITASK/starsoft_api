@@ -80,7 +80,6 @@ class ReportController extends Controller
             $type = $request->input('type', 'OC');
             $staff = $request->input('staff');
 
-            // Validar rango de fechas
             if (strpos($dateRange, ' a ') !== false) {
                 [$start, $end] = explode(' a ', $dateRange);
                 $start = Carbon::parse(trim($start))->format('Y-m-d');
@@ -89,6 +88,10 @@ class ReportController extends Controller
                 if ($start > $end) {
                     [$start, $end] = [$end, $start];
                 }
+            } else {
+                // fallback si solo llega una fecha
+                $start = Carbon::parse(trim($dateRange))->format('Y-m-d');
+                $end = $start;
             }
 
             $responsible = null;
@@ -215,5 +218,70 @@ class ReportController extends Controller
                 'total'          => $item['total'],
             ];
         })->toArray();
+    }
+
+    public function reportAreasByOrders(Request $request)
+    {
+        try {
+            $conexion = 'sqlsrv_' . $request->input('company', '003');
+            $dateRange = $request->input('date');
+            $type = $request->input('type', 'OC');
+            $staff = $request->input('staff');
+
+            // Manejo de fechas
+            if (strpos($dateRange, ' a ') !== false) {
+                [$start, $end] = explode(' a ', $dateRange);
+                $start = Carbon::parse(trim($start))->format('Y-m-d');
+                $end = Carbon::parse(trim($end))->format('Y-m-d');
+
+                if ($start > $end) {
+                    [$start, $end] = [$end, $start];
+                }
+            } else {
+                $start = Carbon::parse(trim($dateRange))->format('Y-m-d');
+                $end = $start;
+            }
+
+            // Responsable
+            $responsible = null;
+            if (auth()->check()) {
+                $user = auth()->user();
+
+                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
+                    $responsible = $staff;
+                } else {
+                    $userCode = CompanyUserPivot::where('user_id', $user->id)
+                        ->where('company_id', $request->input('company', '003'))
+                        ->value('user_code');
+
+                    $responsible = $userCode;
+                }
+            }
+
+            $result = OCModel::reportAreasByOrders(
+                $conexion,
+                $start,
+                $end,
+                $responsible,
+                $type
+            );
+
+            $maxCantidad = $result->max(fn($item) => (int) $item->MONTO_TOTAL);
+
+            return response()->json([
+                'data' => $result,
+                'maxCantidad' => $maxCantidad,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error en reportAreasCount', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'Error inesperado al obtener reporte por áreas (conteo)',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -363,6 +363,10 @@
     "useSelectLoader": true,
     "mapToSelectOptions": true,
     "useIdleTimeout": true,
-    "useAuth": true
+    "useAuth": true,
+    "formatters": true,
+    "formatCurrency": true,
+    "formatNumber": true,
+    "numberFormatter": true
   }
 }

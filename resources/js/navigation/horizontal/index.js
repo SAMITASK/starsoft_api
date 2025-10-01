@@ -1,8 +1,8 @@
 export default [
   {
-    title: 'Home',
+    title: 'Dashboard',
     to: { name: 'root' },
-    icon: { icon: 'ri-home-smile-2-line' },
+    icon: { icon: 'ri-dashboard-2-line' },
     roles: ['ADMINISTRADOR', 'JEFE DE COMPRAS', 'SISTEMAS'],
   },
   {
