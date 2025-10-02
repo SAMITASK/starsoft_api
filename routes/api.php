@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -62,7 +61,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::get('/products', 'reportSupplierProductsAreas');
             Route::get('/areas-by-orders', 'reportAreasByOrders');
         });
-
 });
 
 Route::middleware(['auth:sanctum'])->post('/keep-alive', [AuthController::class, 'keepAlive']);
