@@ -120,10 +120,6 @@ const fetchSuppliers = async () => {
     suppliers.value = res.data;
     maxMonto.value = res.maxMonto;
     areas.value = res.areas;
-    
-    console.log(res);
-    
-
   } catch (error) {
     suppliers.value = [];
     maxMonto.value = 1;
@@ -162,7 +158,11 @@ const goToSupplier = (id, name) => {
   router.push({
     name: 'apps-supplier-id',
     params: { id: id },
-    state: { company: selectedCompany.value }, // <-- aquí pasas el objeto completo
+    state: { 
+      company: selectedCompany.value,
+      dateRange: dateRange.value,
+      type : selectedType.value,
+    },
   })
 }
 

@@ -1,7 +1,6 @@
 <script setup>
 import SupplierBioPanel from '@/views/apps/supplier/view/SupplierBioPanel.vue'
 import SupplierTabOverview from '@/views/apps/supplier/view/SupplierTabOverview.vue'
-import UserTabSecurity from '@/views/apps/user/view/UserTabSecurity.vue'
 
 const route = useRoute('apps-supplier-id')
 const userTab = ref(null)
@@ -11,10 +10,13 @@ const userTab = ref(null)
 const company = history.state.company;
 const supplier = route.params.id;
 
+const dateRange = history.state.dateRange || "";
+const selectedType = history.state.type || "";
+
 const { data: supplierData } = await useApi(`suppliers/view/${supplier}?company=${company}`)
 
 </script>
-
+  
 <template>
   <VRow v-if="supplierData">
     <VCol
@@ -36,7 +38,7 @@ const { data: supplierData } = await useApi(`suppliers/view/${supplier}?company=
         :touch="false"
       >
         <VWindowItem>
-          <SupplierTabOverview :company="company" :supplier="supplier" />
+          <SupplierTabOverview :company="company" :supplier="supplier" :dateRange = "dateRange" :type = "selectedType" />
         </VWindowItem>
       </VWindow>
     </VCol>
@@ -46,7 +48,7 @@ const { data: supplierData } = await useApi(`suppliers/view/${supplier}?company=
       type="error"
       variant="tonal"
     >
-      Invoice with ID  {{ route.params.id }} not found!
+      Proveedor con RUC {{ route.params.id }} no encontrado!
     </VAlert>
   </div>
 </template>
