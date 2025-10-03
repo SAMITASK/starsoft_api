@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\DateHelper;
 
 class ProductController extends Controller
 {
@@ -219,15 +220,31 @@ class ProductController extends Controller
             $conexion = 'sqlsrv_' . $request->query('company');
             $product = $request->query('product');
             $search = $request->query('q');
+            $dateRange = $request->query('date');
+            $type = $request->query('type'); // 'OC', 'OS' o 'ALL'
 
-            // Query para órdenes de compra (detalle)
-            $ocQuery = $this->buildOrderQuery(OCDModel::on($conexion), 'OC', $product, $search);
+            // Parsear rango de fechas
+            [$start, $end] = DateHelper::parseDateRange($dateRange);
 
-            // Query para órdenes de servicio (detalle)
-            $osQuery = $this->buildOrderQuery(OCSDModel::on($conexion), 'OS', $product, $search);
+            // Construir queries según el tipo
+            $queries = match ($type) {
+                'OC' => [
+                    $this->buildProductOrderQuery(OCDModel::on($conexion), 'OC', $product, $search, $start, $end)
+                ],
+                'OS' => [
+                    $this->buildProductOrderQuery(OCSDModel::on($conexion), 'OS', $product, $search, $start, $end)
+                ],
+                default => [
+                    $this->buildProductOrderQuery(OCDModel::on($conexion), 'OC', $product, $search, $start, $end),
+                    $this->buildProductOrderQuery(OCSDModel::on($conexion), 'OS', $product, $search, $start, $end)
+                ]
+            };
 
-            // Unión de ambos
-            $union = $ocQuery->unionAll($osQuery);
+            // Unión de queries
+            $union = array_shift($queries);
+            foreach ($queries as $q) {
+                $union->unionAll($q);
+            }
 
             // Ejecutar unión
             $orders = DB::connection($conexion)
@@ -254,7 +271,7 @@ class ProductController extends Controller
         }
     }
 
-    private function buildOrderQuery($query, string $type, string $product, ?string $search)
+    private function buildProductOrderQuery($query, string $type, string $product, ?string $search, ?string $start, ?string $end)
     {
         if ($type === 'OC') {
             $detalleTable = 'COMOVD';   // tabla detalle OC
@@ -296,8 +313,11 @@ class ProductController extends Controller
             });
         }
 
+        // Filtro por rango de fechas
+        if ($start && $end) {
+            $query->whereBetween('o.OC_DFECDOC', [$start, $end]);
+        }
+
         return $query;
     }
-
-
 }

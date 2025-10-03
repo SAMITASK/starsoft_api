@@ -96,6 +96,7 @@ class ReportController extends Controller
 
             $responsible = null;
             if (auth()->check()) {
+                
                 $user = auth()->user();
 
                 if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {

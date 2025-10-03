@@ -4,8 +4,15 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-})
+  filteredStats: {
+    type: Object,
+    default: null,
+  },
+});
 
+const displayStats = computed(() => {
+  return props.filteredStats || props.productData.stats;
+});
 </script>
 
 <template>
@@ -24,11 +31,8 @@ const props = defineProps({
               v-if="props.productData.avatar"
               :src="props.productData.avatar"
             />
-            <span
-              v-else
-              class="text-2xl font-weight-medium"
-            >
-              {{ avatarText(props.productData.product.description ) }}
+            <span v-else class="text-2xl font-weight-medium">
+              {{ avatarText(props.productData.product.description) }}
             </span>
           </VAvatar>
           <!-- 👉 User fullName -->
@@ -47,15 +51,12 @@ const props = defineProps({
               variant="tonal"
               class="me-4"
             >
-              <VIcon
-                size="24"
-                icon="ri-check-line"
-              />
+              <VIcon size="24" icon="ri-shopping-cart-line" />
             </VAvatar>
 
             <div>
               <h5 class="text-h5">
-                {{ kFormatter(props.productData.stats.oc) }}
+                {{ kFormatter(displayStats.oc) }}
               </h5>
               <span>OC</span>
             </div>
@@ -70,22 +71,17 @@ const props = defineProps({
               variant="tonal"
               class="me-4"
             >
-              <VIcon
-                size="24"
-                icon="ri-briefcase-line"
-              />
+              <VIcon size="24" icon="ri-briefcase-line" />
             </VAvatar>
 
             <div>
               <h5 class="text-h5">
-                {{ kFormatter(props.productData.stats.ocs) }}
+                {{ kFormatter(displayStats.ocs) }}
               </h5>
               <span>OS</span>
             </div>
           </div>
         </VCardText>
-
-
       </VCard>
     </VCol>
 
@@ -93,9 +89,7 @@ const props = defineProps({
       <VCard v-if="props.productData">
         <!-- 👉 Details -->
         <VCardText class="pb-6">
-          <h5 class="text-h5">
-            Detalles
-          </h5>
+          <h5 class="text-h5">Detalles</h5>
 
           <VDivider class="my-4" />
 
@@ -103,9 +97,7 @@ const props = defineProps({
           <VList class="card-list">
             <VListItem>
               <VListItemTitle class="text-sm">
-                <span class="font-weight-medium">
-                  Codigo:
-                </span>
+                <span class="font-weight-medium"> Codigo: </span>
                 <span class="text-body-1">
                   {{ props.productData.product.code }}
                 </span>
@@ -114,9 +106,7 @@ const props = defineProps({
 
             <VListItem>
               <VListItemTitle class="text-sm">
-                <span class="font-weight-medium">
-                  Tipo:
-                </span>
+                <span class="font-weight-medium"> Tipo: </span>
                 <span class="text-body-1">
                   {{ props.productData.product.type_name }}
                 </span>
@@ -125,9 +115,7 @@ const props = defineProps({
 
             <VListItem>
               <VListItemTitle class="text-sm">
-                <span class="font-weight-medium">
-                  Familia:
-                </span>
+                <span class="font-weight-medium"> Familia: </span>
                 <span class="text-body-1">
                   {{ props.productData.product.family_name }}
                 </span>
@@ -136,38 +124,36 @@ const props = defineProps({
 
             <VListItem>
               <VListItemTitle class="text-sm">
-                <span class="font-weight-medium">
-                  Usuario:
-                </span>
-                <span class="text-body-1">{{ props.productData.product.user?.trim() || 'No especificado' }}</span>
+                <span class="font-weight-medium"> Usuario: </span>
+                <span class="text-body-1">{{
+                  props.productData.product.user?.trim() || "No especificado"
+                }}</span>
               </VListItemTitle>
             </VListItem>
 
             <VListItem>
               <VListItemTitle class="text-sm">
-                <span class="font-weight-medium">
-                  Empresa:
-                </span>
-                <span class="text-body-1">{{ props.productData.company_name }}</span>
+                <span class="font-weight-medium"> Empresa: </span>
+                <span class="text-body-1">{{
+                  props.productData.company_name
+                }}</span>
               </VListItemTitle>
             </VListItem>
 
             <VListItem>
               <VListItemTitle class="text-sm">
-                <span class="font-weight-medium">
-                  Fecha Creación:
-                </span>
-                <span class="text-body-1">{{ props.productData.product.date }}</span>
+                <span class="font-weight-medium"> Fecha Creación: </span>
+                <span class="text-body-1">{{
+                  props.productData.product.date
+                }}</span>
               </VListItemTitle>
             </VListItem>
-
           </VList>
         </VCardText>
       </VCard>
     </VCol>
     <!-- !SECTION -->
   </VRow>
-
 </template>
 
 <style lang="scss" scoped>

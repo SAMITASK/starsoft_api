@@ -7,11 +7,13 @@ use App\Models\OCModel;
 use App\Models\OCSModel;
 use App\Models\Supplier;
 use App\Models\CompanyModel;
-use App\Models\CompanyUserPivot;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+
+use App\Helpers\DateHelper;
 
 class SupplierController extends Controller
 {
@@ -174,13 +176,32 @@ class SupplierController extends Controller
         try {
             $conexion = 'sqlsrv_' . $request->query('company');
             $supplier = $request->query('supplier');
-            $search = $request->query('q');
+            $search   = $request->query('q');
+            $dateRange = $request->query('date');
+            $type     = $request->query('type'); // 'OC', 'OS' o 'ALL'
 
-            $ocQuery = $this->buildOrderQuery(OCModel::on($conexion), 'OC', $supplier, $search);
-            $ocsQuery = $this->buildOrderQuery(OCSModel::on($conexion), 'OS', $supplier, $search);
+            // Parsear rango de fechas
+            [$start, $end] = DateHelper::parseDateRange($dateRange);
 
-            // Unión
-            $union = $ocQuery->unionAll($ocsQuery);
+            // Construir queries según el tipo
+            $queries = match ($type) {
+                'OC' => [
+                    $this->buildOrderQuery(OCModel::on($conexion), 'OC', $supplier, $search, $start, $end)
+                ],
+                'OS' => [
+                    $this->buildOrderQuery(OCSModel::on($conexion), 'OS', $supplier, $search, $start, $end)
+                ],
+                default => [
+                    $this->buildOrderQuery(OCModel::on($conexion), 'OC', $supplier, $search, $start, $end),
+                    $this->buildOrderQuery(OCSModel::on($conexion), 'OS', $supplier, $search, $start, $end)
+                ]
+            };
+
+            // Unión de queries
+            $union = array_shift($queries);
+            foreach ($queries as $q) {
+                $union->unionAll($q);
+            }
 
             $orders = DB::connection($conexion)
                 ->table(DB::raw("({$union->toSql()}) as combined"))
@@ -205,7 +226,10 @@ class SupplierController extends Controller
         }
     }
 
-    private function buildOrderQuery($query, string $type, string $supplier, ?string $search)
+    /**
+     * Construcción de la query base para OC/OS
+     */
+    private function buildOrderQuery($query, string $type, string $supplier, ?string $search, ?string $start, ?string $end)
     {
         $query->selectRaw("
         '{$type}' as type,
@@ -233,8 +257,10 @@ class SupplierController extends Controller
             });
         }
 
+        if ($start && $end) {
+            $query->whereBetween('OC_DFECDOC', [$start, $end]);
+        }
+
         return $query;
     }
-
-    
 }

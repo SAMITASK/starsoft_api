@@ -1,6 +1,8 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 
+const router = useRouter()
+
 const userData = useCookie('userData')
 const isManagerOrAdmin = computed(() => 
   ['GERENTE', 'ADMINISTRADOR'].includes(userData.value?.cargo)
@@ -119,7 +121,6 @@ const fetchSuppliers = async () => {
     maxMonto.value = res.maxMonto;
     areas.value = res.areas;
   } catch (error) {
-    console.error("Error cargando proveedores:", error);
     suppliers.value = [];
     maxMonto.value = 1;
   } finally {
@@ -133,9 +134,14 @@ watch([selectedCompany, dateRange, selectedArea, selectedStaff, selectedType], f
 const filteredSuppliers = computed(() => {
   if (!searchQuery.value) return suppliers.value;
 
-  return suppliers.value.filter(item =>
-    item.NOMBRE_PROVEEDOR.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
+  return suppliers.value.filter(item => {
+    const query = searchQuery.value.toLowerCase()
+    return (
+      item.NOMBRE_PROVEEDOR.toLowerCase().includes(query) ||
+      item.PROVEEDOR.toLowerCase().includes(query)
+    )
+})
+
 });
 
 const calculateProgress = (monto) => {
@@ -147,6 +153,18 @@ const calculateProgress = (monto) => {
   const progress = (numericMonto / numericMax) * 100;
   return Math.floor(progress);
 };
+
+const goToSupplier = (id, name) => {
+  router.push({
+    name: 'apps-supplier-id',
+    params: { id: id },
+    state: { 
+      company: selectedCompany.value,
+      dateRange: dateRange.value,
+      type : selectedType.value,
+    },
+  })
+}
 
 fetchSuppliers();
 </script>
@@ -251,37 +269,37 @@ fetchSuppliers();
       <VTable
         density="compact"
         striped="even"
+        class="custom-table"
       >
         <thead>
           <tr>
             <th>#</th>
+            <th scope="col">RUC</th>
             <th scope="col">PROVEEDOR</th>
             <th scope="col" class="text-center">MONTO</th>
           </tr>
         </thead>
 
         <tbody>
-          <!-- Fila de loading -->
           <tr v-if="loadingTable">
-            <td colspan="3" class="text-center">
+            <td colspan="4" class="text-center">
               <VProgressCircular indeterminate color="primary" size="32" />
             </td>
           </tr>
-
-          <!-- Fila de "no hay datos" -->
           <tr v-else-if="filteredSuppliers.length === 0">
-            <td colspan="3" class="text-center text-muted">
+            <td colspan="4" class="text-center text-muted">
               No se encontraron proveedores
             </td>
           </tr>
-
-          <!-- Filas de datos -->
           <tr
             v-else
             v-for="(item, index) in filteredSuppliers"
             :key="index"
+            class="area-row"
+            @click="goToSupplier(item.PROVEEDOR, item.NOMBRE_PROVEEDOR)"
           >
-            <td>{{ index + 1 }}</td>
+            <td>{{index +1 }}</td>
+            <td>{{item.PROVEEDOR }}</td>
             <td>{{ item.NOMBRE_PROVEEDOR }}</td>
             <td class="text-center">
               <VProgressLinear
@@ -309,6 +327,16 @@ fetchSuppliers();
 .row-unread {
   color: #1f1f1f;
   font-weight: bold;
+}
+
+.custom-table .area-row {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.custom-table .area-row:hover {
+  background-color: #e0e1e1; /* gris claro */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 25%);
 }
 
 </style>
