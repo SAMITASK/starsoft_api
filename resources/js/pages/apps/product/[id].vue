@@ -5,13 +5,19 @@ import ProductTabOverview from '@/views/apps/product/view/ProductTabOverview.vue
 const route = useRoute('apps-supplier-id')
 const userTab = ref(null)
 
-
-
 const company = history.state.company;
 const product = route.params.id;
+const dateRange = history.state.dateRange;
+const type = history.state.type;
 
 const { data: productData } = await useApi(`products/view/${product}?company=${company}`)
 
+// Reactive stats que se actualizarán con los filtros
+const filteredStats = ref(null)
+
+const handleStatsUpdate = (stats) => {
+  filteredStats.value = stats
+}
 </script>
 
 <template>
@@ -21,7 +27,10 @@ const { data: productData } = await useApi(`products/view/${product}?company=${c
       md="12"
       lg="12"
     >
-      <ProductBioPanel :product-data="productData" />
+      <ProductBioPanel 
+        :product-data="productData" 
+        :filtered-stats="filteredStats"
+      />
     </VCol>
 
     <VCol
@@ -35,7 +44,13 @@ const { data: productData } = await useApi(`products/view/${product}?company=${c
         :touch="false"
       >
         <VWindowItem>
-        <ProductTabOverview :company="company" :product="product" />
+          <ProductTabOverview 
+            :company="company" 
+            :product="product" 
+            :date-range="dateRange" 
+            :type="type"
+            @update:stats="handleStatsUpdate"
+          />
         </VWindowItem>
       </VWindow>
     </VCol>

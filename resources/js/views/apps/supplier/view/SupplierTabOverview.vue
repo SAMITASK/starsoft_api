@@ -125,40 +125,40 @@ function formatDate(raw) {
   <VRow>
     <VCol cols="12">
       <VCard>
-      <VCardText v-if="dateRange && dateRange.length">
-        <VRow>
-          <VCol cols="12" sm="3">
-            <AppDateTimePicker
-              v-model="dateRange"
-              label="Rango de fechas"
-              placeholder="Selecciona el rango"
-              :config="{
-                mode: 'range',
-                dateFormat: 'Y-m-d',
-                locale: Spanish,
-                maxDate: new Date(),
-              }"
-            />
-          </VCol>
-          <VCol cols="12" sm="3">
-            <VSelect
-              v-model="selectedType"
-              label="Selecciona Tipo Orden"
-              placeholder="Selecciona Tipo Orden"
-              :items="[
-                { title: 'Orden de Compra', value: 'OC' },
-                { title: 'Orden de Servicio', value: 'OS' },
-                { title: 'Todos', value: 'ALL' },
-              ]"
-              item-title="title"
-              item-value="value"
-              no-data-text="No hay empresas disponibles"
-            />
-          </VCol>
-        </VRow>
-      </VCardText>
+        <VCardText v-if="dateRange && dateRange.length">
+          <VRow>
+            <VCol cols="12" sm="3">
+              <AppDateTimePicker
+                v-model="dateRange"
+                label="Rango de fechas"
+                placeholder="Selecciona el rango"
+                :config="{
+                  mode: 'range',
+                  dateFormat: 'Y-m-d',
+                  locale: Spanish,
+                  maxDate: new Date(),
+                }"
+              />
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VSelect
+                v-model="selectedType" 
+                label="Selecciona Tipo Orden"
+                placeholder="Selecciona Tipo Orden"
+                :items="[
+                  { title: 'Orden de Compra', value: 'OC' },
+                  { title: 'Orden de Servicio', value: 'OS' },
+                  { title: 'Todos', value: 'ALL' },
+                ]"
+                item-title="title"
+                item-value="value"
+                no-data-text="No hay empresas disponibles"
+              />
+            </VCol>
+          </VRow>
+        </VCardText>
 
-      <VDivider v-if="dateRange && dateRange.length" />
+        <VDivider v-if="dateRange && dateRange.length" />
         <VCardItem>
           <div class="d-flex justify-space-between align-center flex-wrap gap-4">
             <VCardTitle>Ordenes de compra y servicio</VCardTitle>

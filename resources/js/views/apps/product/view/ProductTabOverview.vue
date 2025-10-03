@@ -1,5 +1,5 @@
 <script setup>
-
+import { Spanish } from "flatpickr/dist/l10n/es.js";
 import OCSupplierDialog from "@/components/dialogs/OCSupplierDialog.vue";
 
 const props = defineProps({
@@ -11,7 +11,19 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  dateRange: {
+    type: String,
+    required: false,
+    default: "",
+  },
+  type : {
+    type: String,
+
+  }
 })
+
+const dateRange = ref(props.dateRange);
+const selectedType = ref(props.type );
 
 const headers = [
   {
@@ -74,6 +86,8 @@ const { data: ocData, execute: fetchOc } = await useApi(
       q: searchQuery,
       company: props.company,
       product: props.product,
+      date: dateRange,
+      type: selectedType,
       itemsPerPage,
       page,
       sortBy,
@@ -104,12 +118,62 @@ function formatDate(raw) {
   const mins = String(date.getMinutes()).padStart(2, '0')
   return `${day}/${month}/${year} ${hours}:${mins}`
 }
+
+const emit = defineEmits(['update:stats'])
+
+// Agregar después de que tengas el computed de ocs
+const stats = computed(() => {
+  if (!ocs.value) return { oc: 0, ocs: 0 }
+  
+  return {
+    oc: ocs.value.filter(o => o.type === 'OC').length,
+    ocs: ocs.value.filter(o => o.type === 'OS').length
+  }
+})
+
+// Watch para emitir cuando cambien los stats
+watch(stats, (newStats) => {
+  emit('update:stats', newStats)
+}, { immediate: true })
 </script>
 
 <template>
   <VRow>
     <VCol cols="12">
       <VCard>
+        <VCardText v-if="dateRange && dateRange.length">
+          <VRow>
+            <VCol cols="12" sm="3">
+              <AppDateTimePicker
+                v-model="dateRange"
+                label="Rango de fechas"
+                placeholder="Selecciona el rango"
+                :config="{
+                  mode: 'range',
+                  dateFormat: 'Y-m-d',
+                  locale: Spanish,
+                  maxDate: new Date(),
+                }"
+              />
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VSelect
+                v-model="selectedType" 
+                label="Selecciona Tipo Orden"
+                placeholder="Selecciona Tipo Orden"
+                :items="[
+                  { title: 'Orden de Compra', value: 'OC' },
+                  { title: 'Orden de Servicio', value: 'OS' },
+                  { title: 'Todos', value: 'ALL' },
+                ]"
+                item-title="title"
+                item-value="value"
+                no-data-text="No hay empresas disponibles"
+              />
+            </VCol>
+          </VRow>
+        </VCardText>
+        <VDivider v-if="dateRange && dateRange.length" />
         <VCardItem>
           <div class="d-flex justify-space-between align-center flex-wrap gap-4">
             <VCardTitle>Ordenes de compra y servicio</VCardTitle>
