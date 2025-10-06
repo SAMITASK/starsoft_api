@@ -28,6 +28,7 @@ declare module 'vue' {
     CardStatisticsWithIcon: typeof import('./resources/js/@core/components/cards/CardStatisticsWithIcon.vue')['default']
     CardStatisticsWithImages: typeof import('./resources/js/@core/components/cards/CardStatisticsWithImages.vue')['default']
     ConfirmDialog: typeof import('./resources/js/components/dialogs/ConfirmDialog.vue')['default']
+    copy: typeof import('./resources/js/components/dialogs/OCSupplierDialog copy.vue')['default']
     CreateAppDialog: typeof import('./resources/js/components/dialogs/CreateAppDialog.vue')['default']
     CustomCheckboxes: typeof import('./resources/js/@core/components/app-form-elements/CustomCheckboxes.vue')['default']
     CustomCheckboxesWithIcon: typeof import('./resources/js/@core/components/app-form-elements/CustomCheckboxesWithIcon.vue')['default']

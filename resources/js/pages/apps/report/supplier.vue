@@ -269,7 +269,7 @@ fetchSuppliers();
       <VTable
         density="compact"
         striped="even"
-        class="custom-table"
+        hover
       >
         <thead>
           <tr>
@@ -328,15 +328,4 @@ fetchSuppliers();
   color: #1f1f1f;
   font-weight: bold;
 }
-
-.custom-table .area-row {
-  cursor: pointer;
-  transition: box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-.custom-table .area-row:hover {
-  background-color: #e0e1e1; /* gris claro */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 25%);
-}
-
 </style>
