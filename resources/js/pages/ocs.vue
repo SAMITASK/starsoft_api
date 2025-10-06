@@ -353,7 +353,6 @@ const showSnackbar = ({ message, color = 'success' }) => {
           <div class="d-flex flex-column">
             <VChip
               :color="getStatusColor(item.status)"
-              class="text-white"
               outlined
             >
               {{

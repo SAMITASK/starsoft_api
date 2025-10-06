@@ -67,7 +67,7 @@ const status = ref([
 ]);
 
 function getStatusColor(value) {
-  const s = status.value.find((s) => s.value === value);
+  const s = status.value.find((s) => s.value == value);
   return s ? s.color : "grey";
 }
 
@@ -280,7 +280,6 @@ watch(stats, (newStats) => {
               <div class="d-flex flex-column">
                 <VChip
                   :color="getStatusColor(item.status)"
-                  class="text-white"
                   outlined
                 >
                   {{
