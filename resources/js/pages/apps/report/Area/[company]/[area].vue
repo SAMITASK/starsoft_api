@@ -54,7 +54,6 @@ const { data: suppliersData, execute: fetchSuppliers } = await useApi(
   })
 );
 
-
 // 🧠 Datos derivados
 const suppliers = computed(() => suppliersData.value?.suppliers ?? []);
 const total = computed(() => suppliersData.value?.total ?? 0);
@@ -102,6 +101,14 @@ const goToProduct = (item) => {
       dateRange: dateRange.value,
       type: typeSel.value,
     },
+  });
+};
+
+const getSupplierTotal = (items) => {
+  const sum = items.reduce((acc, i) => acc + (i.raw.total || 0), 0);
+  return sum.toLocaleString("es-PE", {
+    style: "currency",
+    currency: "PEN",
   });
 };
 </script>
@@ -224,8 +231,15 @@ const goToProduct = (item) => {
       <template #data-table-group="{ props, item, count }">
         <td class="cursor-pointer">
           <VBtn v-bind="props" variant="text" density="comfortable" />
+
+          <!-- Nombre del proveedor -->
           <span @click="goToSupplier(item)">
             {{ item.value }} ({{ count }})
+          </span>
+
+          <!-- 💰 Total por proveedor -->
+          <span class="ms-3 text-primary fw-bold">
+            {{ getSupplierTotal(item.items) }}
           </span>
         </td>
       </template>

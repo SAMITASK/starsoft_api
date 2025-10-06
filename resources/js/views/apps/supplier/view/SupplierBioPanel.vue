@@ -48,7 +48,7 @@ const displayStats = computed(() => {
               color="primary"
               variant="tonal"
               class="me-4"
-              icon="ri-check-line"
+              icon="ri-shopping-cart-fill"
             />
 
             <div>
