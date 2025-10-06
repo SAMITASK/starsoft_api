@@ -27,12 +27,7 @@ const displayStats = computed(() => {
             :color="!props.supplierData.avatar ? 'primary' : undefined"
             :variant="!props.supplierData.avatar ? 'tonal' : undefined"
           >
-            <VImg
-              v-if="props.supplierData.avatar"
-              :src="props.supplierData.avatar"
-            />
             <span
-              v-else
               class="text-2xl font-weight-medium"
             >
               {{ avatarText(props.supplierData.supplier.reason) }}
@@ -53,12 +48,8 @@ const displayStats = computed(() => {
               color="primary"
               variant="tonal"
               class="me-4"
-            >
-              <VIcon
-                size="24"
-                icon="ri-check-line"
-              />
-            </VAvatar>
+              icon="ri-check-line"
+            />
 
             <div>
               <h5 class="text-h5">
@@ -76,12 +67,8 @@ const displayStats = computed(() => {
               color="primary"
               variant="tonal"
               class="me-4"
-            >
-              <VIcon
-                size="24"
-                icon="ri-briefcase-line"
-              />
-            </VAvatar>
+              icon="ri-briefcase-line"
+            />
 
             <div>
               <h5 class="text-h5">

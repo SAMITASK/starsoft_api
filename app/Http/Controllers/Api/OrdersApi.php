@@ -31,6 +31,8 @@ class OrdersApi extends Controller
             // Formatear resultados
             $formatted = $this->formatOrders($results->items());
 
+            Log::info($formatted);
+
             return response()->json([
                 'ocs'   => $formatted,
                 'total' => $results->total(),
