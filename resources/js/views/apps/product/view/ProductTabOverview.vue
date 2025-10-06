@@ -281,7 +281,6 @@ watch(stats, (newStats) => {
                 <VChip
                   :color="getStatusColor(item.status)"
                   class="text-white"
-                  dense
                   outlined
                 >
                   {{

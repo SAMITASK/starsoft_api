@@ -4,8 +4,15 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  filteredStats: {
+    type: Object,
+    default: null,
+  },
 })
 
+const displayStats = computed(() => {
+  return props.filteredStats || props.supplierData.stats;
+});
 </script>
 
 <template>
@@ -20,20 +27,15 @@ const props = defineProps({
             :color="!props.supplierData.avatar ? 'primary' : undefined"
             :variant="!props.supplierData.avatar ? 'tonal' : undefined"
           >
-            <VImg
-              v-if="props.supplierData.avatar"
-              :src="props.supplierData.avatar"
-            />
             <span
-              v-else
               class="text-2xl font-weight-medium"
             >
-              {{ avatarText(props.supplierData.reason ) }}
+              {{ avatarText(props.supplierData.supplier.reason) }}
             </span>
           </VAvatar>
           <!-- 👉 User fullName -->
           <h5 class="text-h5 mt-4">
-            {{ props.supplierData.reason }}
+            {{ props.supplierData.supplier.reason }}
           </h5>
         </VCardText>
 
@@ -46,16 +48,12 @@ const props = defineProps({
               color="primary"
               variant="tonal"
               class="me-4"
-            >
-              <VIcon
-                size="24"
-                icon="ri-check-line"
-              />
-            </VAvatar>
+              icon="ri-check-line"
+            />
 
             <div>
               <h5 class="text-h5">
-                {{ kFormatter(props.supplierData.purchase_orders_count) }}
+                {{ kFormatter(displayStats.oc) }}
               </h5>
               <span>OC</span>
             </div>
@@ -69,16 +67,12 @@ const props = defineProps({
               color="primary"
               variant="tonal"
               class="me-4"
-            >
-              <VIcon
-                size="24"
-                icon="ri-briefcase-line"
-              />
-            </VAvatar>
+              icon="ri-briefcase-line"
+            />
 
             <div>
               <h5 class="text-h5">
-                {{ kFormatter(props.supplierData.service_orders_count) }}
+                {{ kFormatter(displayStats.ocs) }}
               </h5>
               <span>OS</span>
             </div>
@@ -108,7 +102,7 @@ const props = defineProps({
                 </span>
               </VListItemTitle>
                   <span class="text-body-1">
-                  {{ props.supplierData.address }}
+                  {{ props.supplierData.supplier.address }}
                 </span>
             </VListItem>
 
@@ -117,7 +111,7 @@ const props = defineProps({
                 <span class="font-weight-medium">
                   Usuario:
                 </span>
-                <span class="text-body-1">{{ props.supplierData.user?.trim() || 'No especificado' }}</span>
+                <span class="text-body-1">{{ props.supplierData.supplier.user?.trim() || 'No especificado' }}</span>
               </VListItemTitle>
             </VListItem>
 
@@ -135,7 +129,7 @@ const props = defineProps({
                 <span class="font-weight-medium">
                   Fecha Creación:
                 </span>
-                <span class="text-body-1">{{ props.supplierData.issue_date }}</span>
+                <span class="text-body-1">{{ props.supplierData.supplier.issue_date }}</span>
               </VListItemTitle>
             </VListItem>
 

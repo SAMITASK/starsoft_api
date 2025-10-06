@@ -128,30 +128,32 @@ class SupplierController extends Controller
             $company = CompanyModel::where('EMP_CODIGO', $companyCode)->first();
             $companyName = $company ? $company->EMP_RAZON_NOMBRE : 'Empresa desconocida';
 
-            // Cantidades
-            $orderCount = $this->countPurchaseOrders($conexion, $id);
-            $serviceOrderCount = $this->countServiceOrders($conexion, $id);
-
             return response()->json([
-                'ruc'        => $supplier->PRVCRUC,
-                'reason'     => $supplier->PRVCNOMBRE,
-                'address'    => $supplier->PRVCDIRECC,
-                'issue_date' => $supplier->PRVDFECCRE
-                    ? Carbon::parse($supplier->PRVDFECCRE)->format('Y-m-d')
-                    : null,
-                'user'       => $supplier->PRVCUSER,
-                'purchase_orders_count' => $orderCount,
-                'service_orders_count' => $serviceOrderCount,
+                'supplier' => [
+                    'ruc'        => $supplier->PRVCRUC,
+                    'reason'     => $supplier->PRVCNOMBRE,
+                    'address'    => $supplier->PRVCDIRECC,
+                    'issue_date' => $supplier->PRVDFECCRE 
+                        ? Carbon::parse($supplier->PRVDFECCRE)->format('d/m/Y') 
+                        : null,
+                    'user'       => $supplier->PRVCUSER,
+                ],
                 'company_name' => $companyName,
+                'stats' => [
+                'oc'  => 0,  // Valores iniciales, se actualizarán desde el frontend
+                'ocs' => 0,
+            ]
             ]);
         } catch (\Throwable $e) {
             Log::error('Error en getSupplier', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'supplier_id' => $id,
+                'company' => $companyCode ?? 'null'
             ]);
 
             return response()->json([
-                'error' => 'Error inesperado al obtener proveedor',
+                'error' => 'Error al obtener el proveedor',
                 'details' => $e->getMessage(),
             ], 500);
         }

@@ -180,9 +180,8 @@ class ProductController extends Controller
                 ],
                 'company_name' => $companyName,
                 'stats' => [
-                    'oc' => $this->countPurcharseOrders($conexion, $product->ACODIGO),
-                    'ocs' => $this->countServiceOrders($conexion, $product->ACODIGO),
-                    // Puedes agregar más estadísticas si es necesario
+                    'oc'  => 0,  // Valores iniciales, se actualizarán desde el frontend
+                    'ocs' => 0,
                 ]
             ]);
         } catch (\Throwable $e) {

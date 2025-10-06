@@ -17,6 +17,8 @@ const filteredStats = ref(null)
 
 const handleStatsUpdate = (stats) => {
   filteredStats.value = stats
+  console.log(stats);
+  
 }
 </script>
 

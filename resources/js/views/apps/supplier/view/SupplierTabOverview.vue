@@ -119,6 +119,23 @@ function formatDate(raw) {
   const mins = String(date.getMinutes()).padStart(2, '0')
   return `${day}/${month}/${year} ${hours}:${mins}`
 }
+
+const emit = defineEmits(['update:stats'])
+
+// Agregar después de que tengas el computed de ocs
+const stats = computed(() => {
+  if (!ocs.value) return { oc: 0, ocs: 0 }
+  
+  return {
+    oc: ocs.value.filter(o => o.type === 'OC').length,
+    ocs: ocs.value.filter(o => o.type === 'OS').length
+  }
+})
+
+// Watch para emitir cuando cambien los stats
+watch(stats, (newStats) => {
+  emit('update:stats', newStats)
+}, { immediate: true })
 </script>
 
 <template>
@@ -266,7 +283,6 @@ function formatDate(raw) {
                 <VChip
                   :color="getStatusColor(item.status)"
                   class="text-white"
-                  dense
                   outlined
                 >
                   {{

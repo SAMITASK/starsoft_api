@@ -354,7 +354,6 @@ const showSnackbar = ({ message, color = 'success' }) => {
             <VChip
               :color="getStatusColor(item.status)"
               class="text-white"
-              dense
               outlined
             >
               {{
