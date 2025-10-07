@@ -5,7 +5,7 @@ const router = useRouter()
 
 
 //Companies
-const selectedCompany = ref("003");
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const companies = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);

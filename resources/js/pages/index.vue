@@ -16,7 +16,7 @@ const isManagerOrAdmin = computed(() =>
   ["GERENTE", "ADMINISTRADOR"].includes(userData.value?.cargo)
 );
 
-const selectedCompany = ref();
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const selectedType = ref("OC");
 const selectedStaff = ref(null);
 const companies = ref([]);
@@ -50,10 +50,6 @@ async function fetchData(url, params, loadingRef, errorRef) {
 async function loadCompanies() {
   const data = await fetchData("/users/companies", {}, isLoading, errorMessage);
   companies.value = data;
-
-  if (data.length && !selectedCompany.value) {
-    selectedCompany.value = data[0].id;
-  }
 }
 
 loadCompanies();

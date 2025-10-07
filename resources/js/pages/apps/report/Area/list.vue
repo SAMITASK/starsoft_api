@@ -2,7 +2,7 @@
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 
 //Companies
-const selectedCompany = ref("003");
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const selectedType = ref("OC");
 const companies = ref([]);
 

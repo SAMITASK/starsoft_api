@@ -9,7 +9,7 @@ const isManagerOrAdmin = computed(() =>
 )
 
 //Companies
-const selectedCompany = ref("003");
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const selectedType = ref("OC");
 const selectedStaff = ref(null);
 const companies = ref([]);const selectedArea = ref(null);

@@ -78,14 +78,18 @@ const saveChanges = async () => {
     company: user.value.company_default,
     password: accountDataLocal.value.password || null,
   };
-  console.log(userData);
-  
-
   try {
     await $api(`/users/update-profile/${userData.id}`, {
       method: "PUT",
       body: userData,
     });
+
+    useCookie("userData").value = {
+      ...useCookie("userData").value,
+      name: user.value.name,
+      email: user.value.email,
+      company_default: user.value.company_default,
+    };
 
     showSnackbar({
       message: "✅ Usuario actualizado correctamente",

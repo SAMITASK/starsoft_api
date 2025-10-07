@@ -5,7 +5,7 @@ const router = useRouter()
 
 
 // Valores seleccionados
-const selectedCompany = ref("003")
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const selectedType = ref(null)
 const selectedFamily = ref(null)
 
