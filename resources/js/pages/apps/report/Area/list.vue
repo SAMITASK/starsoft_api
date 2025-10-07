@@ -2,7 +2,7 @@
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 
 //Companies
-const selectedCompany = ref("003");
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const selectedType = ref("OC");
 const companies = ref([]);
 
@@ -193,7 +193,7 @@ fetchAreas();
         Total: {{ new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(totalMonto) }}
       </div>
     </VCardText>
-    <VTable class="custom-table">
+    <VTable hover>
       <thead>
         <tr>
           <th>Código</th>
@@ -243,15 +243,4 @@ fetchAreas();
   color: #1f1f1f;
   font-weight: bold;
 }
-
-.custom-table .area-row {
-  cursor: pointer;
-  transition: box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-.custom-table .area-row:hover {
-  background-color: #e0e1e1; /* gris claro */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 25%);
-}
-
 </style>

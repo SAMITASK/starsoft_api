@@ -1,39 +1,43 @@
 <script setup>
 
 const props = defineProps({
-  nameArea: {
-    type: String,
-    required: true
-  }
+  nameArea: String,
+  products: Number,
+  suppliers: Number,
+  money: Number,
 })
 
-const statistics = [  
-  {
-    title: 'Customers',
-    stats: '8,458',
-    icon: 'ri-user-star-line',
-    color: 'primary',
-  },
-  {
-    title: 'Total Profit',
-    stats: '$28.5k',
-    icon: 'ri-pie-chart-2-line',
-    color: 'warning',
-  },
-  {
-    title: 'Transactions',
-    stats: '2,450k',
-    icon: 'ri-arrow-left-right-line',
-    color: 'info',
-  },
-]
+const statistics = computed(() => {
+  const formatCurrency = value =>
+    value?.toLocaleString("es-PE", { style: "currency", currency: "PEN" }) ?? "S/ 0.00"
 
+  return [
+    {
+      title: "Monto Total",
+      stats: formatCurrency(props.money),
+      icon: "ri-wallet-3-line",
+      color: "primary",
+    },
+    {
+      title: "Cantidad Proveedores",
+      stats: props.suppliers ?? 0,
+      icon: "ri-store-3-line",
+      color: "warning",
+    },
+    {
+      title: "Cantidad Productos",
+      stats: props.products ?? 0,
+      icon: "ri-shopping-cart-2-line",
+      color: "info",
+    },
+  ]
+})
 </script>
 
 <template>
   <VCard>
     <VCardItem>
-      <h3 class="text-h3">{{nameArea}}</h3>
+      <h3 class="text-h3">{{ props.nameArea }}</h3>
     </VCardItem>
 
     <VCardText>
@@ -50,19 +54,12 @@ const statistics = [
             size="80"
             class="me-3"
           >
-            <VIcon
-              size="24"
-              :icon="item.icon"
-            />
+            <VIcon size="30" :icon="item.icon" />
           </VAvatar>
 
-          <div class="d-flex flex-column">
-            <h5 class="text-h5">
-              {{ item.stats }}
-            </h5>
-            <div class="text-body-1">
-              {{ item.title }}
-            </div>
+          <div>
+            <h5 class="text-h5 mb-1">{{ item.stats }}</h5>
+            <span class="text-body-1">{{ item.title }}</span>
           </div>
         </div>
       </div>

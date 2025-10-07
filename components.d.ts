@@ -45,7 +45,6 @@ declare module 'vue' {
     Notifications: typeof import('./resources/js/@core/components/Notifications.vue')['default']
     OCDetailDialog: typeof import('./resources/js/components/dialogs/OCDetailDialog.vue')['default']
     OCSupplierDialog: typeof import('./resources/js/components/dialogs/OCSupplierDialog.vue')['default']
-    'OCSupplierDialog copy': typeof import('./resources/js/components/dialogs/OCSupplierDialog copy.vue')['default']
     PaymentProvidersDialog: typeof import('./resources/js/components/dialogs/PaymentProvidersDialog.vue')['default']
     PricingPlanDialog: typeof import('./resources/js/components/dialogs/PricingPlanDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

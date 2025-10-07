@@ -57,6 +57,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'cargo' => $user->cargo,
                 'status' => $user->status,
+                'company_default' => $user->company_default
             ],
         ]);
     }

@@ -1,31 +1,31 @@
 <script setup>
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import avatar1 from '@images/avatars/avatar-1.png'
-import { useAuth } from '@/composables/useAuth'
+import { PerfectScrollbar } from "vue3-perfect-scrollbar";
+import avatar1 from "@images/avatars/avatar-1.png";
+import { useAuth } from "@/composables/useAuth";
 
-const router = useRouter()
-const userData = useCookie('userData')
+const router = useRouter();
+const userData = useCookie("userData");
 
-
-const { logout } = useAuth()
-
+const { logout } = useAuth();
 
 const userProfileList = [
-  { type: 'divider' },
+  { type: "divider" },
   {
-    type: 'navItem',
-    icon: 'ri-user-line',
-    title: 'Profile',
-    href: '#',
+    type: "navItem",
+    icon: "ri-user-line",
+    title: "Perfil",
+    href: "#",
   },
   {
-    type: 'navItem',
-    icon: 'ri-settings-4-line',
-    title: 'Settings',
-    href: '#',
-  }
-]
-
+    type: "navItem",
+    icon: "ri-settings-4-line",
+    title: "Configuración",
+    to: {
+      name: "apps-account-settings-tab",
+      params: { tab: "account" },   
+    },
+  },
+];
 </script>
 
 <template>
@@ -45,22 +45,11 @@ const userProfileList = [
       :color="!(userData && userData.avatar) ? 'primary' : undefined"
       :variant="!(userData && userData.avatar) ? 'tonal' : undefined"
     >
-      <VImg
-        v-if="userData && userData.avatar"
-        :src="userData.avatar"
-      />
-      <VIcon
-        v-else
-        icon="ri-user-line"
-      />
+      <VImg v-if="userData && userData.avatar" :src="userData.avatar" />
+      <VIcon v-else icon="ri-user-line" />
 
       <!-- SECTION Menu -->
-      <VMenu
-        activator="parent"
-        width="230"
-        location="bottom end"
-        offset="15px"
-      >
+      <VMenu activator="parent" width="230" location="bottom end" offset="15px">
         <VList>
           <VListItem class="px-4">
             <div class="d-flex gap-x-2 align-center">
@@ -72,10 +61,7 @@ const userProfileList = [
                   v-if="userData && userData.avatar"
                   :src="userData.avatar"
                 />
-                <VIcon
-                  v-else
-                  icon="ri-user-line"
-                />
+                <VIcon v-else icon="ri-user-line" />
               </VAvatar>
 
               <div>
@@ -90,39 +76,24 @@ const userProfileList = [
           </VListItem>
 
           <PerfectScrollbar :options="{ wheelPropagation: false }">
-            <template
-              v-for="item in userProfileList"
-              :key="item.title"
-            >
+            <template v-for="item in userProfileList" :key="item.title">
               <VListItem
                 v-if="item.type === 'navItem'"
                 :to="item.to"
                 class="px-4"
               >
                 <template #prepend>
-                  <VIcon
-                    :icon="item.icon"
-                    size="22"
-                  />
+                  <VIcon :icon="item.icon" size="22" />
                 </template>
 
                 <VListItemTitle>{{ item.title }}</VListItemTitle>
 
-                <template
-                  v-if="item.chipsProps"
-                  #append
-                >
-                  <VChip
-                    v-bind="item.chipsProps"
-                    variant="elevated"
-                  />
+                <template v-if="item.chipsProps" #append>
+                  <VChip v-bind="item.chipsProps" variant="elevated" />
                 </template>
               </VListItem>
 
-              <VDivider
-                v-else
-                class="my-1"
-              />
+              <VDivider v-else class="my-1" />
             </template>
 
             <VListItem class="px-4">

@@ -42,7 +42,6 @@ const displayStats = computed(() => {
         </VCardText>
 
         <VCardText class="d-flex justify-center flex-wrap gap-6 pb-6">
-          <!-- 👉 Done task -->
           <div class="d-flex align-center me-8">
             <VAvatar
               :size="40"
@@ -50,9 +49,8 @@ const displayStats = computed(() => {
               color="primary"
               variant="tonal"
               class="me-4"
-            >
-              <VIcon size="24" icon="ri-shopping-cart-line" />
-            </VAvatar>
+              icon="ri-shopping-cart-fill"
+            />
 
             <div>
               <h5 class="text-h5">
@@ -62,7 +60,6 @@ const displayStats = computed(() => {
             </div>
           </div>
 
-          <!-- 👉 Done Project -->
           <div class="d-flex align-center me-4">
             <VAvatar
               :size="44"
@@ -70,9 +67,8 @@ const displayStats = computed(() => {
               color="primary"
               variant="tonal"
               class="me-4"
-            >
-              <VIcon size="24" icon="ri-briefcase-line" />
-            </VAvatar>
+              icon="ri-briefcase-line"
+            />
 
             <div>
               <h5 class="text-h5">

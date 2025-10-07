@@ -2,7 +2,7 @@
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 import OCDetailDialog from "@/components/dialogs/OCDetailDialog.vue";
 //Companies
-const selectedCompany = ref("003");
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
 const companies = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null); 

@@ -96,7 +96,7 @@ class ReportController extends Controller
 
             $responsible = null;
             if (auth()->check()) {
-                
+
                 $user = auth()->user();
 
                 if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
@@ -281,6 +281,96 @@ class ReportController extends Controller
 
             return response()->json([
                 'error' => 'Error inesperado al obtener reporte por áreas (conteo)',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function reportMonthOrders(Request $request)
+    {
+        try {
+
+            $conexion = 'sqlsrv_' . $request->input('company', '003');
+            $dateRange = $request->input('date');
+            $type = $request->input('type', 'OC');
+            $staff = $request->input('staff');
+            $months = 4;
+
+            $responsible = null;
+            if (auth()->check()) {
+                $user = auth()->user();
+
+                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
+                    $responsible = $staff;
+                } else {
+                    $userCode = CompanyUserPivot::where('user_id', $user->id)
+                        ->where('company_id', $request->input('company', '003'))
+                        ->value('user_code');
+
+                    $responsible = $userCode;
+                }
+            }
+
+            $endDate = Carbon::now()->endOfMonth();
+            $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
+        } catch (\Throwable $e) {
+        }
+    }
+
+    public function reportMonthlyExpenses(Request $request)
+    {
+        try {
+            // 1️⃣ Conexión a base de datos
+            $conexion = 'sqlsrv_' . $request->input('company', '003');
+
+            // 2️⃣ Parámetros de entrada
+            $type = $request->input('type'); // OC, OS o null (ambos)
+            $staff = $request->input('staff');
+            $area = $request->input('area'); // opcional
+            $monthsBack = $request->input('months', 5); // cantidad de meses atrás
+
+            // 3️⃣ Determinar responsable
+            $responsible = null;
+            if (auth()->check()) {
+                $user = auth()->user();
+
+                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
+                    // Gerente o admin puede filtrar por otro responsable
+                    $responsible = $staff;
+                } else {
+                    // Usuarios normales usan su propio código
+                    $userCode = CompanyUserPivot::where('user_id', $user->id)
+                        ->where('company_id', $request->input('company', '003'))
+                        ->value('user_code');
+
+                    $responsible = $userCode;
+                }
+            }
+
+            // 4️⃣ Llamada al modelo
+            $result = OCModel::reportMonthlyExpenses(
+                $conexion,
+                $type,
+                $responsible,
+                $area,
+                $monthsBack
+            );
+
+            // 5️⃣ Calcular total general
+            $totalGeneral = collect($result)->sum('total');
+
+            return response()->json([
+                'data' => $result,
+                'totalGeneral' => $totalGeneral,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error en reportMonthlyExpenses', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'Error inesperado al obtener reporte mensual',
                 'details' => $e->getMessage(),
             ], 500);
         }

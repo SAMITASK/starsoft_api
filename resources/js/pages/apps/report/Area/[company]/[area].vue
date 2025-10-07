@@ -2,63 +2,51 @@
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 import TotalOverview from "@/views/apps/report/Area/totalOverview.vue";
 
+// Router + route
 const route = useRoute();
 const router = useRouter();
-const dateRange = ref("");
-const typeSel = ref();
+
+// 📦 Parámetros iniciales
 const nameArea = ref(route.params.area);
 const company = route.params.company;
-
 const id = ref();
 
+// 📅 Filtros
+const dateRange = ref("");
+const typeSel = ref();
+const searchQuery = ref("");
+
+// 🔁 Recuperar estado si viene desde navegación anterior
 const state = router.options.history.state;
-if (state && state.dateRange) {
-  dateRange.value = state.dateRange;
-  typeSel.value = state.type;
-  id.value = state.id;
+if (state) {
+  dateRange.value = state.dateRange ?? "";
+  typeSel.value = state.type ?? "ALL";
+  id.value = state.id ?? null;
 }
 
+// ⚙️ Control de tabla
 const page = ref(1);
 const sortBy = ref();
 const orderBy = ref();
 
 const headers = [
-  { title: "Provedor", key: "data-table-group" },
-  {
-    title: "Producto",
-    key: "product_name",
-  },
-  {
-    title: "Unidad",
-    key: "unidad",
-  },
-  {
-    title: "Cantidad",
-    key: "cantidad",
-  },
-  {
-    title: "Precio Unitario (S/)",
-    key: "precio_unitario",
-  },
-  {
-    title: "Precio con IGV (S/)",
-    key: "precio_igv",
-  },
-  {
-    title: "Total (S/)",
-    key: "total",
-  },
+  { title: "Proveedor", key: "data-table-group", sortable: false },
+  { title: "Producto", key: "product_name", sortable: false },
+  { title: "Unidad", key: "unidad", sortable: false },
+  { title: "Cantidad", key: "cantidad", sortable: false },
+  { title: "Precio Unitario (S/)", key: "precio_unitario", sortable: false },
+  { title: "Precio con IGV (S/)", key: "precio_igv", sortable: false },
+  { title: "Total (S/)", key: "total", sortable: false },
 ];
 
 const groupBy = [{ key: "proveedor_name" }];
 
-const searchQuery = ref("");
-
+// 📡 Datos principales
 const { data: suppliersData, execute: fetchSuppliers } = await useApi(
   createUrl("/reports/products", {
     query: {
       q: searchQuery,
-      company: company,
+      company,
       date: dateRange,
       type: typeSel,
       area: id,
@@ -66,44 +54,68 @@ const { data: suppliersData, execute: fetchSuppliers } = await useApi(
   })
 );
 
+// 🧠 Datos derivados
+const suppliers = computed(() => suppliersData.value?.suppliers ?? []);
+const total = computed(() => suppliersData.value?.total ?? 0);
+
+const tSuppliers = computed(() => {
+  const data = suppliers.value;
+  return new Set(data.map((i) => i.proveedor_id)).size;
+});
+
+const tMoney = computed(() =>
+  suppliers.value.reduce((sum, i) => sum + (i.total || 0), 0)
+);
+
+// 📑 Control tabla
 const updateOptions = (options) => {
   page.value = options.page;
-  sortBy.value = options.sortBy[0]?.key;
-  orderBy.value = options.sortBy[0]?.order;
+  sortBy.value = options.sortBy?.[0]?.key;
+  orderBy.value = options.sortBy?.[0]?.order;
 };
 
-const suppliers = computed(() => suppliersData.value.suppliers);
-const total = computed(() => suppliersData.value.total);
-
+// 🔗 Navegación a proveedor
 const goToSupplier = (item) => {
+  const idSupplier = item.items?.[0]?.raw?.proveedor_id;
+  if (!idSupplier) return;
+
   router.push({
-    name: 'apps-supplier-id',
-    params: { id: item.items[0].raw.proveedor_id },
-    state: { 
+    name: "apps-supplier-id",
+    params: { id: idSupplier },
+    state: {
       company,
       dateRange: dateRange.value,
-      type : typeSel.value,
-     }
-  })
-}
+      type: typeSel.value,
+    },
+  });
+};
 
+// 🔗 Navegación a producto
 const goToProduct = (item) => {
-  console.log(item.product_id)
+  if (!item.product_id) return;
   router.push({
-    name: 'apps-product-id',
+    name: "apps-product-id",
     params: { id: item.product_id },
-    state: { 
+    state: {
       company,
       dateRange: dateRange.value,
-      type : typeSel.value,
-    }
-  })
-}
+      type: typeSel.value,
+    },
+  });
+};
 
+const getSupplierTotal = (items) => {
+  const sum = items.reduce((acc, i) => acc + (i.raw.total || 0), 0);
+  return sum.toLocaleString("es-PE", {
+    style: "currency",
+    currency: "PEN",
+  });
+};
 </script>
 
 <template>
   <VRow class="match-height">
+    <!-- 📊 Filtros -->
     <VCol cols="12" md="4">
       <VCard class="mb-6">
         <VCardItem class="pb-4">
@@ -111,7 +123,7 @@ const goToProduct = (item) => {
         </VCardItem>
         <VCardText>
           <VRow>
-            <VCol cols="12" sm="12">
+            <VCol cols="12">
               <AppDateTimePicker
                 v-model="dateRange"
                 label="Rango de fechas"
@@ -124,7 +136,8 @@ const goToProduct = (item) => {
                 }"
               />
             </VCol>
-            <VCol cols="12" sm="12">
+
+            <VCol cols="12">
               <VSelect
                 v-model="typeSel"
                 label="Selecciona Tipo Orden"
@@ -136,32 +149,40 @@ const goToProduct = (item) => {
                 ]"
                 item-title="title"
                 item-value="value"
-                no-data-text="No hay empresas disponibles"
+                no-data-text="No hay tipos disponibles"
               />
             </VCol>
           </VRow>
         </VCardText>
       </VCard>
     </VCol>
+
+    <!-- 🧾 Resumen -->
     <VCol cols="12" md="8">
-      <TotalOverview :name-area="nameArea" />
+      <TotalOverview
+        :name-area="nameArea"
+        :money="tMoney"
+        :suppliers="tSuppliers"
+        :products="total"
+      />
     </VCol>
   </VRow>
+
+  <!-- 📋 Tabla -->
   <VCard class="mt-6">
     <VCardItem>
       <div class="d-flex justify-space-between align-center flex-wrap gap-4">
-        <VCardTitle>Ordenes de compra y servicio</VCardTitle>
-        <div style="inline-size: 15.625rem;">
-          <VTextField
-            v-model="searchQuery"
-            placeholder="Buscar Proveedor o Producto"
-            density="compact"
-            style="inline-size: 15.625rem;"
-            hover
-          />
-        </div>
+        <VCardTitle>Órdenes de compra y servicio</VCardTitle>
+        <VTextField
+          v-model="searchQuery"
+          placeholder="Buscar Proveedor o Producto"
+          density="compact"
+          class="w-100"
+          style="max-inline-size: 250px;"
+        />
       </div>
     </VCardItem>
+
     <VDataTableServer
       :headers="headers"
       :group-by="groupBy"
@@ -171,57 +192,55 @@ const goToProduct = (item) => {
       @update:options="updateOptions"
       hide-default-footer
     >
+      <!-- 🏷 Producto clickeable -->
       <template #item.product_name="{ item }">
-        <span 
-          class="cursor-pointer text-primary"
-          @click="goToProduct(item)"
-        >
+        <span class="cursor-pointer text-primary" @click="goToProduct(item)">
           {{ item.product_name }}
         </span>
       </template>
+
+      <!-- 💰 Formato monetario -->
       <template #item.precio_unitario="{ item }">
-        <div class="d-flex align-center gap-x-3">
-          <div class="d-flex flex-column">
-            <span class="text-base">{{
-              Number(item.precio_unitario).toLocaleString("es-PE", {
-                style: "currency",
-                currency: "PEN",
-              })
-            }}</span>
-          </div>
-        </div>
-      </template>
-      <template #item.precio_igv="{ item }">
-        <div class="d-flex align-center gap-x-3">
-          <div class="d-flex flex-column">
-            <span class="text-base">{{
-              Number(item.precio_igv).toLocaleString("es-PE", {
-                style: "currency",
-                currency: "PEN",
-              })
-            }}</span>
-          </div>
-        </div>
-      </template>
-      <template #item.total="{ item }">
-        <div class="d-flex align-center gap-x-3">
-          <div class="d-flex flex-column">
-            <span class="text-base">{{
-              Number(item.total).toLocaleString("es-PE", {
-                style: "currency",
-                currency: "PEN",
-              })
-            }}</span>
-          </div>
-        </div>
+        {{
+          Number(item.precio_unitario).toLocaleString("es-PE", {
+            style: "currency",
+            currency: "PEN",
+          })
+        }}
       </template>
 
+      <template #item.precio_igv="{ item }">
+        {{
+          Number(item.precio_igv).toLocaleString("es-PE", {
+            style: "currency",
+            currency: "PEN",
+          })
+        }}
+      </template>
+
+      <template #item.total="{ item }">
+        {{
+          Number(item.total).toLocaleString("es-PE", {
+            style: "currency",
+            currency: "PEN",
+          })
+        }}
+      </template>
+
+      <!-- 👥 Grupo de proveedores -->
       <template #data-table-group="{ props, item, count }">
         <td class="cursor-pointer">
-          <VBtn v-bind="props" variant="text" density="comfortable"> </VBtn>
+          <VBtn v-bind="props" variant="text" density="comfortable" />
 
-          <span @click="goToSupplier(item)">{{ item.value }}</span>
-          <span @click="goToSupplier(item)">({{ count }})</span>
+          <!-- Nombre del proveedor -->
+          <span @click="goToSupplier(item)">
+            {{ item.value }} ({{ count }})
+          </span>
+
+          <!-- 💰 Total por proveedor -->
+          <span class="ms-3 text-primary fw-bold">
+            {{ getSupplierTotal(item.items) }}
+          </span>
         </td>
       </template>
     </VDataTableServer>

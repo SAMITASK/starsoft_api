@@ -48,6 +48,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::get('/list', 'getUsers');
             Route::post('/add', 'store');
             Route::put('/update/{id}', 'update');
+            Route::put('/update-profile/{id}', 'updateProfile');
             Route::get('/view/{id}', 'getUser');
             Route::get('/companies', 'userCompanies');
             Route::get('companyUser/{userId}/{companyId}', 'getIdCompanyUser');
@@ -60,6 +61,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::get('/areas', 'reportAreas');
             Route::get('/products', 'reportSupplierProductsAreas');
             Route::get('/areas-by-orders', 'reportAreasByOrders');
+            Route::get('/monthly', 'reportMonthlyExpenses');
         });
 });
 

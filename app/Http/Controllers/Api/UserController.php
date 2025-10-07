@@ -81,6 +81,7 @@ class UserController extends Controller
             'email'       => $request->email,
             'status'      => $request->status,
             'company_ids' => $companyIds,
+            'company_default'  => $request->company_default,
         ];
 
         // Solo actualiza contraseña si se envió
@@ -95,6 +96,30 @@ class UserController extends Controller
             'data'    => $user,
         ], 200);
     }
+
+    public function updateProfile(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $data = [
+            'name'             => $request->fullName,
+            'cargo'            => $request->cargo,
+            'email'            => $request->email,
+            'company_default'  => $request->company,
+        ];
+
+        if (!empty($request->password)) {
+            $data['password'] = $request->password;
+        }
+
+        $user->fill($data)->save();
+
+        return response()->json([
+            'message' => 'Perfil actualizado con éxito',
+            'data'    => $user,
+        ]);
+    }
+
 
     public function userCompanies()
     {
