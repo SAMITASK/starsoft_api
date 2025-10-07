@@ -20,7 +20,8 @@ class User extends Authenticatable
         'password',
         'cargo',
         'status',
-        'company_ids'
+        'company_ids',
+        'company_default'
     ];
 
     protected $hidden = [
