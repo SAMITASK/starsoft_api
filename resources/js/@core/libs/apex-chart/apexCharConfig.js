@@ -133,44 +133,73 @@ export const getLineChartSimpleConfig = themeColors => {
   }
 }
 export const getBarChartConfig = themeColors => {
-  const { themeBorderColor, themeDisabledTextColor } = colorVariables(themeColors)
+  const { themeBorderColor, themeDisabledTextColor, themePrimaryTextColor } = colorVariables(themeColors)
 
   return {
     chart: {
-      parentHeightOffset: 0,
-      toolbar: { show: false },
+      type: 'bar',
+      stacked: true,
+      toolbar: {
+        show: true,
+        export: {
+          csv: { filename: `BarChart-${new Date().toISOString().split('T')[0]}` },
+          svg: { filename: `BarChart-${new Date().toISOString().split('T')[0]}` },
+          png: { filename: `BarChart-${new Date().toISOString().split('T')[0]}` },
+        },
+      },
     },
-    colors: ['#00cfe8'],
-    dataLabels: { enabled: false },
     plotOptions: {
       bar: {
-        borderRadius: 8,
-        barHeight: '30%',
         horizontal: true,
+        borderRadius: 6,
+        dataLabels: {
+          total: {
+            enabled: true,
+            style: {
+              color: themePrimaryTextColor,
+              fontSize: '14px',
+              fontWeight: 700,
+            },
+            formatter: val => 'S/ ' + val.toLocaleString(),
+          },
+        },
       },
     },
+    colors: ['#666CFF', '#32BBAF'],
     grid: {
       borderColor: themeBorderColor,
-      xaxis: {
-        lines: { show: false },
-      },
-      padding: {
-        top: -10,
+      xaxis: { lines: { show: true } },
+    },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories: [],
+      labels: {
+        style: { colors: themeDisabledTextColor },
+        formatter: val => 'S/ ' + Number(val).toLocaleString(),
       },
     },
     yaxis: {
-      labels: {
-        style: { colors: themeDisabledTextColor },
+      labels: { style: { colors: themeDisabledTextColor } },
+    },
+    tooltip: {
+      y: {
+        formatter: val => 'S/ ' + Number(val).toLocaleString(),
       },
     },
-    xaxis: {
-      axisBorder: { show: false },
-      axisTicks: { color: themeBorderColor },
-      categories: ['MON, 11', 'THU, 14', 'FRI, 15', 'MON, 18', 'WED, 20', 'FRI, 21', 'MON, 23'],
-      labels: {
-        style: { colors: themeDisabledTextColor },
+    legend: {
+      labels: { colors: themePrimaryTextColor },
+      position: 'top',
+      horizontalAlign: 'center',
+      markers: { offsetX: -3 },
+      itemMargin: {
+        vertical: 3,
+        horizontal: 10,
       },
     },
+    fill: { opacity: 1 },
+    responsive: [
+
+    ]
   }
 }
 export const getCandlestickChartConfig = themeColors => {

@@ -248,4 +248,67 @@ class OCModel extends Model
             ->sortByDesc('TOTAL_ORDERS')
             ->values();
     }
+
+    public static function reportMonthlyExpenses(
+        string $connectionName,
+        ?string $type = null,
+        ?string $responsible = null,
+        ?string $area = null,
+        int $monthsBack = 5
+    ) {
+        // Rango de fechas
+        $dateEnd = now()->endOfMonth()->toDateString();
+        $dateStart = now()->subMonths($monthsBack - 1)->startOfMonth()->toDateString();
+
+        // --- Consulta OC ---
+        $ocQuery = self::on($connectionName)
+            ->from('COMOVC')
+            ->join('REQUISC as R', 'COMOVC.OC_CNRODOCREF', '=', 'R.NROREQUI')
+            ->where('R.TIPOREQUI', 'RQ')
+            ->selectRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM') as month, SUM(COMOVC.OC_NVENTA) as oc_total")
+            ->whereIn('COMOVC.OC_CSITORD', ['01', '03', '04'])
+            ->whereBetween('COMOVC.OC_DFECDOC', [$dateStart, $dateEnd]);
+
+        if ($responsible) $ocQuery->where('COMOVC.OC_CSOLICT', $responsible);
+        if ($area) $ocQuery->where('R.AREA', $area);
+
+        $ocData = $ocQuery->groupByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
+            ->orderByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
+            ->get();
+
+        // --- Consulta OS ---
+        $osQuery = self::on($connectionName)
+            ->from('COMOVC_S')
+            ->join('REQUISC as R', 'COMOVC_S.OC_CNRODOCREF', '=', 'R.NROREQUI')
+            ->where('R.TIPOREQUI', 'RS')
+            ->selectRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM') as month, SUM(COMOVC_S.OC_NVENTA) as os_total")
+            ->whereIn('COMOVC_S.OC_CSITORD', ['01', '03', '04'])
+            ->whereBetween('COMOVC_S.OC_DFECDOC', [$dateStart, $dateEnd]);
+
+        if ($responsible) $osQuery->where('COMOVC_S.OC_CSOLICT', $responsible);
+        if ($area) $osQuery->where('R.AREA', $area);
+
+        $osData = $osQuery->groupByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
+            ->orderByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
+            ->get();
+
+        // --- Combinar ambos ---
+        $months = collect([...$ocData, ...$osData])
+            ->pluck('month')
+            ->unique()
+            ->sort()
+            ->values();
+
+        $result = $months->map(function ($month) use ($ocData, $osData) {
+            $oc = $ocData->firstWhere('month', $month)->oc_total ?? 0;
+            $os = $osData->firstWhere('month', $month)->os_total ?? 0;
+            return [
+                'month' => $month,
+                'oc_total' => (float) $oc,
+                'os_total' => (float) $os,
+            ];
+        });
+
+        return $result;
+    }
 }

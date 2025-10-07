@@ -1,6 +1,8 @@
 <script setup>
-import ApexChartExpenseRatio from "@/views/charts/apex-chart/ApexChartExpenseRatio.vue";
 import { Spanish } from "flatpickr/dist/l10n/es.js";
+
+import ApexChartExpenseRatio from "@/views/charts/apex-chart/ApexChartExpenseRatio.vue";
+import ApexChartHorizontalBar from '@/views/charts/apex-chart/ApexChartHorizontalBar.vue'
 
 definePage({
   meta: {
@@ -8,11 +10,11 @@ definePage({
   },
 });
 
-const userData = useCookie('userData')
+const userData = useCookie("userData");
 
-const isManagerOrAdmin = computed(() => 
-  ['GERENTE', 'ADMINISTRADOR'].includes(userData.value?.cargo)
-)
+const isManagerOrAdmin = computed(() =>
+  ["GERENTE", "ADMINISTRADOR"].includes(userData.value?.cargo)
+);
 
 const selectedCompany = ref();
 const selectedType = ref("OC");
@@ -30,59 +32,56 @@ const errorMessageAreas = ref(null);
 const errorMessageStaff = ref(null);
 
 async function fetchData(url, params, loadingRef, errorRef) {
-  loadingRef.value = true
-  errorRef.value = null
-  
+  loadingRef.value = true;
+  errorRef.value = null;
+
   try {
-    const query = new URLSearchParams(params).toString()
-    const fullUrl = query ? `${url}?${query}` : url
-    return await $api(fullUrl)
+    const query = new URLSearchParams(params).toString();
+    const fullUrl = query ? `${url}?${query}` : url;
+    return await $api(fullUrl);
   } catch (err) {
-    errorRef.value = err.message || "Error al cargar datos"
-    throw err
+    errorRef.value = err.message || "Error al cargar datos";
+    throw err;
   } finally {
-    loadingRef.value = false
+    loadingRef.value = false;
   }
 }
 
 async function loadCompanies() {
-  const data = await fetchData('/users/companies', {}, isLoading, errorMessage)
-  companies.value = data
+  const data = await fetchData("/users/companies", {}, isLoading, errorMessage);
+  companies.value = data;
 
-  // Seleccionar la primera empresa automáticamente si no hay ninguna seleccionada
   if (data.length && !selectedCompany.value) {
-    selectedCompany.value = data[0].id
+    selectedCompany.value = data[0].id;
   }
 }
 
-// Cargar empresas al inicializar
-loadCompanies()
+loadCompanies();
 
 watch(selectedCompany, async (company) => {
   if (!company) {
-    areas.value = []
-    selectedArea.value = null
-    staff.value = []
-    selectedStaff.value = null
-    return
+    areas.value = [];
+    selectedArea.value = null;
+    staff.value = [];
+    selectedStaff.value = null;
+    return;
   }
 
-  areas.value = []
-  selectedArea.value = null
-  staff.value = []
-  selectedStaff.value = null
-  
+  areas.value = [];
+  selectedArea.value = null;
+  staff.value = [];
+  selectedStaff.value = null;
+
   const [staffData] = await Promise.all([
-    fetchData('/staff', { company }, isLoadingStaff, errorMessageStaff),
-  ])
-  
-  staff.value = staffData
-})
-// ← Quitar el immediate: true aquí
+    fetchData("/staff", { company }, isLoadingStaff, errorMessageStaff),
+  ]);
+
+  staff.value = staffData;
+});
 
 watch(selectedStaff, () => {
-  selectedArea.value = null
-})
+  selectedArea.value = null;
+});
 
 const today = new Date();
 
@@ -97,7 +96,6 @@ function formatDate(date) {
 }
 
 const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
-
 </script>
 <template>
   <VCard class="mb-6">
@@ -180,7 +178,7 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
       </VRow>
     </VCardText>
   </VCard>
- <VRow>
+  <VRow>
     <VCol cols="12" md="6">
       <VCard title="Monto Areas" subtitle="Porcentaje y monto total por Area">
         <VCardText style="position: relative; min-block-size: 500px;">
@@ -196,7 +194,10 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
       </VCard>
     </VCol>
     <VCol cols="12" md="6">
-      <VCard title="OC/OS Areas" subtitle="Porcentaje y Cantidad de OC/OS total por Area">
+      <VCard
+        title="OC/OS Areas"
+        subtitle="Porcentaje y Cantidad de OC/OS total por Area"
+      >
         <VCardText style="position: relative; min-block-size: 500px;">
           <ApexChartExpenseRatio
             :company="selectedCompany"
@@ -206,6 +207,21 @@ const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
             url-params="/reports/areas-by-orders"
             value-type="count"
           />
+        </VCardText>
+      </VCard>
+    </VCol>
+    <VCol
+      cols="12"
+      md="6"
+    >
+      <VCard title="Ultimos 5 Meses">
+        <VCardText>
+          <ApexChartHorizontalBar  
+            :company="selectedCompany"
+            :staff="selectedStaff"
+            :type="selectedType"
+            url-params="/reports/monthly"
+            value-type="money"/>
         </VCardText>
       </VCard>
     </VCol>

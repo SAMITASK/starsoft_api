@@ -21,8 +21,8 @@ const userProfileList = [
   {
     type: 'navItem',
     icon: 'ri-settings-4-line',
-    title: 'Settings',
-    href: '#',
+    title: 'Configuración',
+    to: { name: 'apps-supplier-list' },
   }
 ]
 

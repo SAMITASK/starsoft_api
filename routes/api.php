@@ -60,6 +60,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
             Route::get('/areas', 'reportAreas');
             Route::get('/products', 'reportSupplierProductsAreas');
             Route::get('/areas-by-orders', 'reportAreasByOrders');
+            Route::get('/monthly', 'reportMonthlyExpenses');
         });
 });
 
