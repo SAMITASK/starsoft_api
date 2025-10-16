@@ -7,6 +7,8 @@ use App\Models\Product\TypeModel;
 use App\Traits\HasDynamicConnection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ProductModel extends Model
 {
@@ -14,23 +16,27 @@ class ProductModel extends Model
 
     protected $table = 'MAEART';
     protected $primaryKey = 'ACODIGO';
-    public $incrementing = false; // varchar
+    public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
 
     protected $fillable = [
-        'ACODIGO',   // Código
-        'ADESCRI',   // Descripción
-        'AUNIDAD',   // Unidad
-        'AFSERIE',   // Serie
-        'AFLOTE',    // Lote
-        'AFAMILIA',  // Familia
-        'AMODELO',   // Línea / Modelo
-        'AGRUPO',    // Grupo
-        'ATIPO',     // Tipo
-        'AUSER',     // Usuario
-        'AFECHA',    // Fecha de registro
+        'ACODIGO',
+        'ADESCRI',
+        'AUNIDAD',
+        'AFSERIE',
+        'AFLOTE',
+        'AFAMILIA',
+        'AMODELO',
+        'AGRUPO',
+        'ATIPO',
+        'AUSER',
+        'AFECHA',
     ];
+
+    // ============================================
+    // RELACIONES
+    // ============================================
 
     public function type()
     {
@@ -52,6 +58,40 @@ class ProductModel extends Model
         return $this->hasMany(OCSDModel::class, 'OC_CODSERVICIO', 'ACODIGO');
     }
 
+    // ============================================
+    // CONFIGURACIÓN DE TIPOS DE ORDEN
+    // ============================================
+
+    private const ORDER_TYPES = [
+        'OC' => [
+            'header' => 'COMOVC',
+            'detail' => 'COMOVD',
+            'tiporequi' => 'RQ',
+            'is_service' => false,
+        ],
+        'OS' => [
+            'header' => 'COMOVC_S',
+            'detail' => 'COMOVD_S',
+            'tiporequi' => 'RS',
+            'is_service' => true,
+        ],
+    ];
+
+    // ============================================
+    // MÉTODO PRINCIPAL (PÚBLICO)
+    // ============================================
+
+    /**
+     * Obtiene órdenes con productos agrupados por proveedor
+     * 
+     * @param string $connectionName Nombre de la conexión (ej: 'sqlsrv_003')
+     * @param string $start Fecha inicio (Y-m-d)
+     * @param string $end Fecha fin (Y-m-d)
+     * @param string $area Código de área
+     * @param string|null $responsible Código del responsable (opcional)
+     * @param string|null $type Tipo de orden: 'OC', 'OS', 'ALL' o null
+     * @return Collection
+     */
     public static function getOrdersByAreaWithProducts(
         string $connectionName,
         string $start,
@@ -59,89 +99,164 @@ class ProductModel extends Model
         string $area,
         ?string $responsible = null,
         ?string $type = null
-    ) {
-        if ($type === 'OC') {
-            $tables = [['header' => 'COMOVC', 'detail' => 'COMOVD', 'tiporequi' => 'RQ']];
-        } elseif ($type === 'OS') {
-            $tables = [['header' => 'COMOVC_S', 'detail' => 'COMOVD_S', 'tiporequi' => 'RS']];
-        } else {
-            $tables = [
-                ['header' => 'COMOVC', 'detail' => 'COMOVD', 'tiporequi' => 'RQ'],
-                ['header' => 'COMOVC_S', 'detail' => 'COMOVD_S', 'tiporequi' => 'RS'],
-            ];
-        }
-
+    ): Collection {
+        $tables = self::getTablesByType($type);
         $results = collect();
 
-        foreach ($tables as $table) {
-            $header = $table['header'];
-            $detail = $table['detail'];
-            $tiporequi = $table['tiporequi'];
-
-            $query = self::on($connectionName)
-                ->from($header . ' as H')
-                ->join($detail . ' as D', "H.OC_CNUMORD", '=', "D.OC_CNUMORD")
-                ->join('MAEPROV as P', "H.OC_CCODPRO", '=', 'P.PRVCCODIGO')
-                ->join('REQUISC as R', "H.OC_CNRODOCREF", '=', "R.NROREQUI")
-                ->selectRaw(
-                    $header === 'COMOVC'
-                        ? "P.PRVCCODIGO as proveedor_id,
-                       P.PRVCNOMBRE as proveedor_name,
-                       D.OC_CCODIGO as product_id,
-                       D.OC_CDESREF as product_name,
-                       D.OC_CUNIDAD as unidad,
-                       D.OC_NCANTID as cantidad,
-                       D.OC_NPREUNI as precio_unitario,
-                       D.OC_NTOTNET as total"
-                        : "P.PRVCCODIGO as proveedor_id,
-                       P.PRVCNOMBRE as proveedor_name,
-                       D.OC_CODSERVICIO as product_id,
-                       D.OC_CDESREF as product_name,
-                       'UND' as unidad,
-                       D.OC_CANT as cantidad,
-                       D.OC_NPREUNI as precio_unitario,
-                       D.OC_NPRENET as total"
-                )
-                ->whereIn('H.OC_CSITORD', ['01', '03', '04'])
-                ->whereBetween('H.OC_DFECDOC', [$start, $end])
-                ->whereRaw("CAST(R.AREA AS INT) = ?", [(int)$area])
-                ->where('R.TIPOREQUI', $tiporequi);
-
-            if ($responsible) {
-                $query->where('H.OC_CSOLICT', $responsible);
-            }
+        foreach ($tables as $config) {
+            $query = self::buildOrderQuery(
+                $connectionName,
+                $config,
+                $start,
+                $end,
+                $area,
+                $responsible
+            );
 
             $results = $results->concat($query->get());
         }
 
+        return self::aggregateResults($results);
+    }
+
+    // ============================================
+    // MÉTODOS PRIVADOS (LÓGICA INTERNA)
+    // ============================================
+
+    /**
+     * Determina qué tablas consultar según el tipo
+     */
+    private static function getTablesByType(?string $type): array
+    {
+        // Si es null o 'ALL', traer ambos tipos
+        if (!$type || $type === 'ALL') {
+            return array_values(self::ORDER_TYPES);
+        }
+
+        // Si el tipo existe en la configuración, devolverlo
+        if (isset(self::ORDER_TYPES[$type])) {
+            return [self::ORDER_TYPES[$type]];
+        }
+
+        // Fallback: traer ambos (por si acaso)
+        return array_values(self::ORDER_TYPES);
+    }
+
+    /**
+     * Construye la query para un tipo de orden específico
+     */
+    private static function buildOrderQuery(
+        string $connectionName,
+        array $config,
+        string $start,
+        string $end,
+        string $area,
+        ?string $responsible
+    ) {
+        $header = $config['header'];
+        $detail = $config['detail'];
+
+        $query = DB::connection($connectionName)
+            ->table("{$header} as H")
+            ->join("{$detail} as D", 'H.OC_CNUMORD', '=', 'D.OC_CNUMORD')
+            ->join('MAEPROV as P', 'H.OC_CCODPRO', '=', 'P.PRVCCODIGO')
+            ->join('REQUISC as R', 'H.OC_CNRODOCREF', '=', 'R.NROREQUI')
+            ->select(self::getSelectFields($config['is_service']))
+            ->whereIn('H.OC_CSITORD', ['01', '03', '04'])
+            ->whereBetween('H.OC_DFECDOC', [$start, $end])
+            ->whereRaw('CAST(R.AREA AS INT) = ?', [(int)$area])
+            ->where('R.TIPOREQUI', $config['tiporequi']);
+
+        if ($responsible) {
+            $query->where('H.OC_CSOLICT', $responsible);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Define los campos SELECT según si es servicio o producto
+     */
+    private static function getSelectFields(bool $isService): array
+    {
+        $baseFields = [
+            'P.PRVCCODIGO as proveedor_id',
+            'P.PRVCNOMBRE as proveedor_name',
+        ];
+
+        if ($isService) {
+            return array_merge($baseFields, [
+                'D.OC_CODSERVICIO as product_id',
+                'D.OC_CDESREF as product_name',
+                DB::raw("'UND' as unidad"),
+                'D.OC_CANT as cantidad',
+                'D.OC_NPREUNI as precio_unitario',
+                'D.OC_NPRENET as total',
+                'D.OC_NIGV as igv',
+            ]);
+        }
+
+        return array_merge($baseFields, [
+            'D.OC_CCODIGO as product_id',
+            'D.OC_CDESREF as product_name',
+            'D.OC_CUNIDAD as unidad',
+            'D.OC_NCANTID as cantidad',
+            'D.OC_NPREUNI as precio_unitario',
+            'D.OC_NTOTNET as total',
+            'D.OC_NIGV as igv',
+        ]);
+    }
+
+    /**
+     * Agrupa y suma los resultados por proveedor y producto
+     */
+    private static function aggregateResults(Collection $results): Collection
+    {
         return $results
             ->groupBy('proveedor_id')
-            ->flatMap(function ($items) {
-                $proveedor_id = $items->first()->proveedor_id;
-                $proveedor_name = $items->first()->proveedor_name;
+            ->flatMap(function ($providerItems) {
+                $providerId = $providerItems->first()->proveedor_id;
+                $providerName = $providerItems->first()->proveedor_name;
 
-                return $items
+                return $providerItems
                     ->groupBy('product_id')
-                    ->map(function ($products) use ($proveedor_id, $proveedor_name) {
-                        $totalCantidad = $products->sum('cantidad');
-                        $totalMonto = $products->sum('total');
-                        $precioPromedio = $products->avg('precio_unitario');
-                        $precioConIGV   = round($precioPromedio * 1.18, 2);
-
-                        return [
-                            'proveedor_id'   => $proveedor_id,
-                            'proveedor_name' => $proveedor_name,
-                            'product_id'     => $products->first()->product_id,
-                            'product_name'   => $products->first()->product_name,
-                            'unidad'         => $products->first()->unidad,
-                            'cantidad'       => round($totalCantidad,2),
-                            'precio_unitario' => round($precioPromedio, 2),
-                            'precio_igv'     => round($precioConIGV,2),
-                            'total'          => round($totalMonto,2),
-                        ];
+                    ->map(function ($products) use ($providerId, $providerName) {
+                        return self::buildProductSummary($products, $providerId, $providerName);
                     })
                     ->values();
             })
             ->values();
+    }
+
+    /**
+     * Construye el resumen de un producto agrupado
+     */
+    private static function buildProductSummary(
+        Collection $products,
+        string $providerId,
+        string $providerName
+    ): array {
+        $first = $products->first();
+        $totalCantidad = $products->sum('cantidad');
+        $totalMonto = $products->sum('total');
+        $precioPromedio = $products->avg('precio_unitario');
+
+        // ✅ Calcular IGV solo si el producto lo lleva
+        $igvPromedio = $products->avg('igv');
+        $precioConIgv = ($igvPromedio > 0)
+            ? round($precioPromedio * 1.18, 2)
+            : 0;
+
+        return [
+            'proveedor_id' => $providerId,
+            'proveedor_name' => $providerName,
+            'product_id' => $first->product_id,
+            'product_name' => $first->product_name,
+            'unidad' => $first->unidad,
+            'cantidad' => round($totalCantidad, 2),
+            'precio_unitario' => round($precioPromedio, 2),
+            'precio_igv' => $precioConIgv,
+            'total' => round($totalMonto, 2),
+        ];
     }
 }
