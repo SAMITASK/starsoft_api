@@ -26,7 +26,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/types', [TypeController::class, 'show']);
     Route::get('/areas', [AreaController::class, 'filterCompany']);
     Route::get('/staff', [StaffController::class, 'filterStaff']);
-
+    
     Route::controller(SupplierController::class)
         ->prefix('suppliers')
         ->group(function () {
