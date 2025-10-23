@@ -1,35 +1,31 @@
-# vue
+# Portal de Compras — Starsoft API
 
-This template should help get you started developing with Vue 3 in Vite.
+![Portal de Compras — captura](/docs/screenshot.png)
 
-## Recommended IDE Setup
+Descripción
+Un portal web (Frontend: Vue 3 + Vite — Backend: PHP) integrado con la base de datos SQL Server del ERP Starsoft. Gestión de Órdenes de Compra (OC/OS) con flujo de aprobación, auditoría y reportes complementarios.
 
-[VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) (and disable Vetur).
+Stack
+- Frontend: Vue 3 + Vite
+- Backend: PHP
+- BBDD: SQL Server
 
-## Type Support for `.vue` Imports in TS
+Inicio rápido (desarrollo)
+Frontend:
+- pnpm install
+- pnpm run dev
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates.
+Backend:
+- composer install (si aplica)
+- Configurar .env con la conexión a SQL Server
+- Ejecutar scripts en /sql para entorno de desarrollo
+- Iniciar el servidor según la estructura del backend
 
-However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can run `Volar: Switch TS Plugin on/off` from VS Code command palette.
+Contribuciones
+No se aceptan contribuciones externas. Consulta CONTRIBUTING.md para la política del proyecto.
 
-## Customize configuration
+Contacto
+EmersonValenzuela (GitHub)
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
+Licencia
+Agregar la licencia correspondiente al repositorio (p. ej. MIT).
