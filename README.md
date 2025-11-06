@@ -7,7 +7,8 @@
   <div>
     <img src="https://img.shields.io/badge/-Vue.js-black?style=for-the-badge&logo=vue.js&logoColor=4FC08D" alt="Vue.js" />
     <img src="https://img.shields.io/badge/-Vite-black?style=for-the-badge&logo=vite&logoColor=white&color=646CFF" alt="Vite" />
-    <img src="https://img.shields.io/badge/-Blade-black?style=for-the-badge&logo=laravel&logoColor=white&color=FF2D20" alt="Blade" />
+    <img src="https://img.shields.io/badge/-PHP-black?style=for-the-badge&logo=php&logoColor=white&color=777BB4" alt="PHP" />
+    <img src="https://img.shields.io/badge/-Laravel-black?style=for-the-badge&logo=laravel&logoColor=white&color=FF2D20" alt="Laravel" />
     <img src="https://img.shields.io/badge/-SQL_Server-black?style=for-the-badge&logo=microsoft-sql-server&logoColor=CC2927" alt="SQL Server" />
   </div>
   <h2 align="center">Portal de Compras — Starsoft API 📦</h2>
