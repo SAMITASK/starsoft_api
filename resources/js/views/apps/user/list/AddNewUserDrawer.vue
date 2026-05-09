@@ -158,7 +158,7 @@ const handleDrawerModelValueUpdate = val => {
                   label="Nombres y Apellidos"
                   placeholder="John Doe"
                 />
-              </VCol>
+              </VCol> 
 
               <!-- 👉 Cargo -->
               <VCol cols="12">
@@ -169,6 +169,7 @@ const handleDrawerModelValueUpdate = val => {
                     'ALMACEN',
                     'ASISTENTE LOGISTICA',
                     'JEFE DE COMPRAS',
+                    'JEFE DE AREA',
                     'ASISTENTE ADMINISTRACION',
                     'ADMINISTRADOR',
                     'SISTEMAS'
