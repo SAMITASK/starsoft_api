@@ -21,24 +21,45 @@ class User extends Authenticatable
         'cargo',
         'status',
         'company_ids',
-        'company_default'
+        'company_default',
+        'area_permissions',
     ];
 
     protected $hidden = [
         'password',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'area_permissions' => 'array',
+    ];
 
     public function companiesPivot()
     {
         return $this->hasMany(CompanyUserPivot::class, 'user_id');
     }
-    
+
+    public function getCompanyIds(): array
+    {
+        return $this->company_ids
+            ? array_filter(array_map('trim', explode(',', $this->company_ids)))
+            : [];
+    }
+
+    public function getAreaPermissions(): array
+    {
+        return $this->area_permissions ?? [];
+    }
+
+    public function getAllowedAreasForCompany(string $companyId): array
+    {
+        $permissions = $this->getAreaPermissions();
+
+        if (empty($permissions[$companyId])) {
+            return [];
+        }
+
+        return array_filter(array_map('trim', (array) $permissions[$companyId]));
+    }
 }

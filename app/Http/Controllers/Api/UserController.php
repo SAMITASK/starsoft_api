@@ -11,6 +11,40 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    protected function normalizeAreaPermissions(Request $request, ?string $cargo, ?string $companyIds): ?array
+    {
+        if (strtoupper(trim((string) $cargo)) !== 'JEFE DE AREA') {
+            return null;
+        }
+
+        $rawPermissions = $request->input('area_permissions', []);
+
+        if (!is_array($rawPermissions)) {
+            return [];
+        }
+
+        $selectedCompanies = $companyIds
+            ? array_filter(array_map('trim', explode(',', $companyIds)))
+            : [];
+
+        $permissions = [];
+
+        foreach ($selectedCompanies as $companyId) {
+            $areas = $rawPermissions[$companyId] ?? [];
+
+            $areas = array_values(array_unique(array_filter(
+                array_map('trim', (array) $areas),
+                fn ($areaId) => $areaId !== ''
+            )));
+
+            if (!empty($areas)) {
+                $permissions[$companyId] = $areas;
+            }
+        }
+
+        return $permissions;
+    }
+
     public function getUsers(Request $request)
     {
         $query = User::query();
@@ -52,13 +86,16 @@ class UserController extends Controller
             ? implode(',', array_map('trim', $request->company))
             : null;
 
+        $areaPermissions = $this->normalizeAreaPermissions($request, $request->cargo, $companyIds);
+
         $user = User::create([
-            'name'        => $request->fullName,
-            'cargo'       => $request->cargo,
-            'email'       => $request->email,
-            'status'      => $request->status,
-            'password'    => $request->password,
-            'company_ids' => $companyIds,
+            'name'             => $request->fullName,
+            'cargo'            => $request->cargo,
+            'email'            => $request->email,
+            'status'           => $request->status,
+            'password'         => $request->password,
+            'company_ids'      => $companyIds,
+            'area_permissions' => $areaPermissions,
         ]);
 
         return response()->json([
@@ -75,13 +112,16 @@ class UserController extends Controller
             ? implode(',', array_map('trim', $request->company))
             : null;
 
+        $areaPermissions = $this->normalizeAreaPermissions($request, $request->cargo, $companyIds);
+
         $data = [
-            'name'        => $request->fullName,
-            'cargo'       => $request->cargo,
-            'email'       => $request->email,
-            'status'      => $request->status,
-            'company_ids' => $companyIds,
+            'name'             => $request->fullName,
+            'cargo'            => $request->cargo,
+            'email'            => $request->email,
+            'status'           => $request->status,
+            'company_ids'      => $companyIds,
             'company_default'  => $request->company_default,
+            'area_permissions' => $areaPermissions,
         ];
 
         // Solo actualiza contraseña si se envió
@@ -150,19 +190,26 @@ class UserController extends Controller
         $pivot = $user->companiesPivot()->where('company_id', $companyId)->first();
 
         if (!$pivot) {
-            return response()->json('');
+            return response()->json([
+                'user_code' => '',
+                'approval_email' => '',
+            ]);
         }
 
-        return response()->json($pivot->user_code);
+        return response()->json([
+            'user_code' => $pivot->user_code ?? '',
+            'approval_email' => $pivot->approval_email ?? '',
+        ]);
     }
 
     public function addCompanyUser(Request $request)
     {
-
-        $pivot = CompanyUserPivot::create([
+        $pivot = CompanyUserPivot::updateOrCreate([
             'user_id' => $request->user_id,
             'company_id' => $request->company_id,
+        ], [
             'user_code' => $request->user_code,
+            'approval_email' => $request->approval_email,
         ]);
 
         return response()->json([

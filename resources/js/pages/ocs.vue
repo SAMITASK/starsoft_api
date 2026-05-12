@@ -1,11 +1,17 @@
 <script setup>
-import { Spanish } from "flatpickr/dist/l10n/es.js";
-import OCDetailDialog from "@/components/dialogs/OCDetailDialog.vue";
+import OCDetailDialog from "@/components/dialogs/OCDetailDialog.vue"
+import AreaFilter from "@/components/filters/AreaFilter.vue"
+import { useOrderFilters } from "@/composables/useOrderFilters"
+import { Spanish } from "flatpickr/dist/l10n/es"
+
+// 🎯 Usar composable de filtros
+const { isJefeDeArea, canApprove, canMarkAsRead, availableStatuses, normalizeStatus, getStatusColor } = useOrderFilters()
+
 //Companies
-const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
-const companies = ref([]);
-const isLoading = ref(true);
-const errorMessage = ref(null); 
+const selectedCompany = ref(useCookie('userData').value?.company_default || "003")
+const companies = ref([])
+const isLoading = ref(true)
+const errorMessage = ref(null) 
 
 onMounted(async () => {
   try {
@@ -20,7 +26,7 @@ onMounted(async () => {
       throw new Error('Formato de datos inválido')
     }
 
-    companies.value = res.map((company) => ({
+    companies.value = res.map(company => ({
       title: company.name,
       value: company.id,
       rawData: company,
@@ -38,44 +44,42 @@ onMounted(async () => {
 
 // Date Range Picker
 
-const today = new Date();
+const today = new Date()
 
 // Hace 6 días
-const sixDaysAgo = new Date();
-sixDaysAgo.setDate(today.getDate() - 6);
+const sixDaysAgo = new Date()
+
+sixDaysAgo.setDate(today.getDate() - 6)
 
 // Formatear en 'YYYY-MM-DD'
 function formatDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  
+  return `${year}-${month}-${day}`
 }
 
 // Rango: de hace 6 días a hoy
-const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
+const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`)
 
 // End Date Range Picker
 
-const status = [
-  { title: "EMITIDA", value: "EMITIDA", color: "primary" },
-  { title: "APROBADA", value: "APROBADA", color: "success" },
-  { title: "RECHAZADO", value: "RECHAZADO", color: "error" },
-];
-
-function getStatusColor(value) {
-  const s = status.find((s) => s.value === value);
-  return s ? s.color : "grey";
-}
+// 🏷️ Estados disponibles según rol
+const status = availableStatuses.value
 
 // Data table options
-const itemsPerPage = ref(30);
-const page = ref(1);
-const sortBy = ref();
-const orderBy = ref();
-const isDialogVisible = ref(false);
-const selectedItem = ref(null);
-const selectedRows = ref([]);
+const itemsPerPage = ref(30)
+const page = ref(1)
+const sortBy = ref()
+const orderBy = ref()
+const isDialogVisible = ref(false)
+const selectedItem = ref(null)
+const selectedRows = ref([])
+
+// 🎯 Filtro de área para JEFE DE AREA
+const selectedArea = ref(null)
+const areaPermissions = computed(() => useCookie('userData').value?.area_permissions ?? {})
 
 // Headers  
 const headers = [
@@ -108,12 +112,12 @@ const headers = [
     title: "Estado",
     key: "status",
   },
-];
+]
 
-const searchQuery = ref("");
-const selectedStatus = ref("EMITIDA");
-const selectedType = ref();
-const selectedSwitch = ref(false);
+const searchQuery = ref("")
+const selectedStatus = ref(canApprove.value ? 'PREAPROBADA' : 'EMITIDA')
+const selectedType = ref()
+const selectedSwitch = ref(false)
 
 
 const { data: ocsData, execute: fetchOcs } = await useApi(
@@ -122,49 +126,51 @@ const { data: ocsData, execute: fetchOcs } = await useApi(
       q: searchQuery,
       company: selectedCompany,
       status: selectedStatus,
-      date:dateRange,
+      area: selectedArea,
+      date: dateRange,
       ignoreDateFilter: selectedSwitch,
       itemsPerPage,
       page,
       sortBy,
       orderBy,
     },
-  })
-);
+  }),
+)
 
-const updateOptions = (options) => {
-  page.value = options.page;
-  sortBy.value = options.sortBy[0]?.key;
-  orderBy.value = options.sortBy[0]?.order;
-};
+const updateOptions = options => {
+  page.value = options.page
+  sortBy.value = options.sortBy[0]?.key
+  orderBy.value = options.sortBy[0]?.order
+}
 
-const ocs = computed(() => ocsData.value.ocs);
-const total = computed(() => ocsData.value.total);
+const ocs = computed(() => ocsData.value.ocs)
+const total = computed(() => ocsData.value.total)
 
-const handleRowClick = (item) => {
+const handleRowClick = item => {
   selectedItem.value = item
   isDialogVisible.value = true
   markAsRead(item)
 }
 
-const markAsRead = async (item) => {
-  if (!item.read) {
+const markAsRead = async item => {
+  if (item.read || !canMarkAsRead.value) {
+    return
+  }
+
+  try {
+    await $api('/mark-as-read', {
+      method: 'POST',
+      body: {
+        code: item.code,
+        type: item.type,
+        company: item.company,
+      },
+    })
+
     item.read = true
-
-    try {
-      await $api('/mark-as-read', {
-        method: 'POST',
-        body: {
-          code: item.code,
-          type: item.type,
-          company: item.company,
-        },
-      })
-
-      await fetchOcs()
-    } catch (error) {
-      console.error('Error al marcar como leído', error)
-    }
+    await fetchOcs()
+  } catch (error) {
+    console.error('Error al marcar como leído', error)
   }
 }
 
@@ -177,8 +183,6 @@ const showSnackbar = ({ message, color = 'success' }) => {
   colorSnackbar.value = color
   isSnackbarVisible.value = true
 }
-
-
 </script>
 
 <template>
@@ -188,7 +192,10 @@ const showSnackbar = ({ message, color = 'success' }) => {
     </VCardItem>
     <VCardText>
       <VRow>
-        <VCol cols="12" sm="4">
+        <VCol
+          cols="12"
+          sm="4"
+        >
           <VSelect
             v-model="selectedCompany"
             label="Selecciona empresa"
@@ -203,7 +210,10 @@ const showSnackbar = ({ message, color = 'success' }) => {
             no-data-text="No hay empresas disponibles"
           />
         </VCol>
-        <VCol cols="12" sm="3">
+        <VCol
+          cols="12"
+          sm="3"
+        >
           <VSelect
             v-model="selectedStatus"
             label="Seleccionar Estado"
@@ -213,7 +223,17 @@ const showSnackbar = ({ message, color = 'success' }) => {
             clear-icon="ri-close-line"
           />
         </VCol>
-        <VCol cols="12" sm="3">
+        <!-- 🎯 Filtro de área - solo para JEFE DE AREA -->
+        <AreaFilter
+          v-if="isJefeDeArea"
+          v-model="selectedArea"
+          :selected-company="selectedCompany"
+          :area-permissions="areaPermissions"
+        />
+        <VCol
+          cols="12"
+          sm="3"
+        >
           <AppDateTimePicker
             v-model="dateRange"
             label="Rango de fechas"
@@ -226,7 +246,11 @@ const showSnackbar = ({ message, color = 'success' }) => {
             }"
           />
         </VCol>
-        <VCol cols="12" sm="2" class="d-flex  justify-center align-center">
+        <VCol
+          cols="12"
+          sm="2"
+          class="d-flex  justify-center align-center"
+        >
           <VSwitch
             v-model="selectedSwitch"
             label="Mostrar Todos"
@@ -262,8 +286,8 @@ const showSnackbar = ({ message, color = 'success' }) => {
       :items="ocs"
       :items-length="total"
       class="text-no-wrap rounded-0"
-      @update:options="updateOptions"
       hover
+      @update:options="updateOptions"
     >
       <template #item.company="{ item }">
         <div
@@ -356,8 +380,8 @@ const showSnackbar = ({ message, color = 'success' }) => {
               outlined
             >
               {{
-                status.find((s) => s.value === item.status)?.title ??
-                item.status
+                status.find((s) => s.value === normalizeStatus(item.status))?.title ??
+                  normalizeStatus(item.status)
               }}
             </VChip>
           </div>
@@ -369,9 +393,7 @@ const showSnackbar = ({ message, color = 'success' }) => {
         <VDivider />
 
         <div class="d-flex justify-end flex-wrap gap-x-6 px-2 py-1">
-          <div
-            class="d-flex align-center gap-x-2 text-medium-emphasis text-base"
-          >
+          <div class="d-flex align-center gap-x-2 text-medium-emphasis text-base">
             Registros por página:
             <VSelect
               v-model="itemsPerPage"
@@ -416,13 +438,13 @@ const showSnackbar = ({ message, color = 'success' }) => {
   </VCard>
 
   <OCDetailDialog
-    v-model:isDialogVisible="isDialogVisible"
+    v-model:is-dialog-visible="isDialogVisible"
     :company="selectedItem?.company"
     :code="selectedItem?.code"
     :type="selectedItem?.type"
     :module="selectedItem?.module"
-    :status= "selectedItem?.status"
-    @showSnackbar="showSnackbar"
+    :status="normalizeStatus(selectedItem?.status)"
+    @show-snackbar="showSnackbar"
     @refresh="fetchOcs"
   />
 
@@ -432,9 +454,8 @@ const showSnackbar = ({ message, color = 'success' }) => {
     location="top"
     :color="colorSnackbar"
   >
-    {{messageSnackbar}}
+    {{ messageSnackbar }}
   </VSnackbar>
-
 </template>
 
 <style lang="scss" scoped>
@@ -445,5 +466,4 @@ const showSnackbar = ({ message, color = 'success' }) => {
 .row-unread {
   font-weight: bold;
 }
-
 </style>

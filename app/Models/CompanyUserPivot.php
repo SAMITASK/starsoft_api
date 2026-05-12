@@ -13,5 +13,6 @@ class CompanyUserPivot extends Model
         'user_id',
         'company_id',
         'user_code',
+        'approval_email',
     ];
 }

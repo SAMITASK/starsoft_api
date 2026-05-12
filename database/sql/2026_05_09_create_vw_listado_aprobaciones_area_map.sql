@@ -1,0 +1,289 @@
+USE [BDWENCO];
+GO
+
+CREATE OR ALTER VIEW [dbo].[vw_ListadoAprobacionesAreaMap]
+AS
+    SELECT DISTINCT
+        '001' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [001BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [001BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '001' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [001BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [001BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '002' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [002BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [002BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '002' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [002BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [002BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '003' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [003BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [003BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '003' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [003BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [003BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '004' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [004BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [004BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '004' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [004BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [004BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '005' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [005BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [005BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '005' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [005BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [005BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '006' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [006BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [006BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '006' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [006BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [006BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '007' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [007BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [007BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '007' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [007BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [007BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '008' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [008BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [008BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '008' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [008BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [008BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '009' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [009BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [009BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '009' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [009BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [009BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '010' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [010BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [010BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '010' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [010BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [010BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '011' AS codigoEmpresa,
+        'OC' AS tipo,
+        CAST(OC.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [011BDCOMUN].[dbo].[COMOVC] AS OC
+    INNER JOIN [011BDCOMUN].[dbo].[REQUISC] AS R
+        ON OC.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RQ'
+    WHERE R.AREA IS NOT NULL
+
+    UNION ALL
+
+    SELECT DISTINCT
+        '011' AS codigoEmpresa,
+        'OS' AS tipo,
+        CAST(OS.OC_CNUMORD AS VARCHAR(50)) AS identificador,
+        CAST(R.AREA AS VARCHAR(50)) AS AREA
+    FROM [011BDCOMUN].[dbo].[COMOVC_S] AS OS
+    INNER JOIN [011BDCOMUN].[dbo].[REQUISC] AS R
+        ON OS.OC_CNRODOCREF = R.NROREQUI
+        AND R.TIPOREQUI = 'RS'
+    WHERE R.AREA IS NOT NULL;
+GO

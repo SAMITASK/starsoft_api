@@ -368,6 +368,7 @@
     "formatCurrency": true,
     "formatNumber": true,
     "numberFormatter": true,
-    "useStatus": true
+    "useStatus": true,
+    "useOrderFilters": true
   }
 }

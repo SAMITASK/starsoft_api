@@ -25,6 +25,6 @@ class Orders extends Model
         'usuarioAprobacion',
         'fechaAprobacion',
         'estadoEliminado',
-        'correoRespuesta'
+        'correoRespuesta',
     ];
 }

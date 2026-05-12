@@ -20,9 +20,10 @@ initConfigStore()
 
 const configStore = useConfigStore()
 
-const { userData, logout, keepAlive } = useAuth()
+const { accessToken, logout, keepAlive } = useAuth()
 const idleTimeout = Number(import.meta.env.VITE_SESSION_IDLE_TIMEOUT) || 900
 const warningBefore = Number(import.meta.env.VITE_SESSION_WARNING_BEFORE) || 60
+const isIdleTimeoutEnabled = computed(() => route.name !== 'login' && !!accessToken.value)
 
 const handleSessionContinue = async () => {
   await keepAlive()
@@ -31,11 +32,12 @@ const handleSessionLogout = async () => {
   await logout()
 }
 
-const { isDialogVisible, handleContinue, handleLogout } = useIdleTimeout({
+const { isDialogVisible, remainingSeconds, handleContinue, handleLogout } = useIdleTimeout({
   timeout: idleTimeout,
   warningBefore,
+  isEnabled: isIdleTimeoutEnabled,
   onContinue: handleSessionContinue,
-  onLogout: handleSessionLogout
+  onLogout: handleSessionLogout,
 })
 
 </script>
@@ -52,6 +54,7 @@ const { isDialogVisible, handleContinue, handleLogout } = useIdleTimeout({
         :onContinue="handleContinue"
         :onLogout="handleLogout"
         :warning-seconds="warningBefore"
+        :remaining-seconds="remainingSeconds"
       />
 
       <ScrollToTop />

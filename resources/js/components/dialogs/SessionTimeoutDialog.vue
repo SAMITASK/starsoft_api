@@ -3,40 +3,19 @@ const props = defineProps({
   isDialogVisible: Boolean,
   onContinue: Function,
   onLogout: Function,
-  warningSeconds: { type: Number, default: 60 }
+  warningSeconds: { type: Number, default: 60 },
+  remainingSeconds: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['update:isDialogVisible'])
 
-const totalSeconds = props.warningSeconds
-const remainingSeconds = ref(totalSeconds)
-const progressValue = ref(100)
-let interval = null 
-
-const startTimer = () => {
-  interval = setInterval(() => {
-    if (remainingSeconds.value <= 0) {
-      clearInterval(interval)
-      props.onLogout()
-    } else {
-      remainingSeconds.value--
-      progressValue.value = (remainingSeconds.value / totalSeconds) * 100
-    }
-  }, 1000)
-}
-
-watch(
-  () => props.isDialogVisible,
-  (val) => {
-    if (val) {
-      remainingSeconds.value = totalSeconds
-      progressValue.value = 100
-      startTimer()
-    } else if (interval) {
-      clearInterval(interval)
-    }
+const progressValue = computed(() => {
+  if (props.warningSeconds <= 0) {
+    return 0
   }
-)
+
+  return Math.max((props.remainingSeconds / props.warningSeconds) * 100, 0)
+})
 
 const handleContinue = () => {
   props.onContinue()
@@ -50,6 +29,7 @@ const handleLogout = () => {
   <VDialog
     :model-value="props.isDialogVisible"
     max-width="500"
+    persistent
     @update:model-value="val => emit('update:isDialogVisible', val)"
   >
     <VCard class="pa-6 text-center">
@@ -63,7 +43,7 @@ const handleLogout = () => {
             :model-value="progressValue"
             color="primary"
           >
-            <strong>{{ remainingSeconds }}</strong>s
+            <strong>{{ props.remainingSeconds }}</strong>s
           </VProgressCircular>
         </VCol>
 
