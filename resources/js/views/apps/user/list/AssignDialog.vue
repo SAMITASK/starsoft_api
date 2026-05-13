@@ -13,14 +13,38 @@ const props = defineProps({
 
 const emit = defineEmits(["update:isDialogVisible"]);
 
+const isManagementRole = computed(() => {
+  const role = props.user?.role || props.user?.cargo || ''
+
+  return role.toUpperCase().startsWith('GERENTE')
+})
+
+const assignmentTitle = computed(() => (
+  isManagementRole.value
+    ? 'Asignar Correo Aprobador por Empresa'
+    : 'Asignar ID STARSOFT a Usuario'
+))
+
+const assignmentDescription = computed(() => (
+  isManagementRole.value
+    ? `Asignarás el ID STARSOFT y el correo aprobador de ${props.user?.name || 'este usuario'} por cada empresa.`
+    : `Asignarás el ID STARSOFT a ${props.user?.name || 'este usuario'} por cada empresa.`
+))
+
 const dialogVisibleUpdate = (val) => {
   emit("update:isDialogVisible", val);
 };
 
 const companyStarsoftId = ref("");
+const approvalEmail = ref("");
 const selectedCompany = ref(null);
 const isFormValid = ref(false)
 
+const resetAssignmentForm = () => {
+  selectedCompany.value = null
+  companyStarsoftId.value = ''
+  approvalEmail.value = ''
+}
 
 const checkCompanyUser = async (companyId) => {
   if (!props.user) {
@@ -32,12 +56,22 @@ const checkCompanyUser = async (companyId) => {
     const res = await $api(`/users/companyUser/${props.user.id}/${companyId}`, {
       method: "GET",
     });
-    console.log("Respuesta:", res);
-    companyStarsoftId.value = res || '';
+    companyStarsoftId.value = res?.user_code || '';
+    approvalEmail.value = res?.approval_email || '';
   } catch (error) {
     console.error("Error:", error);
   }
 };
+
+watch(() => props.user?.id, () => {
+  resetAssignmentForm()
+})
+
+watch(() => props.isDialogVisible, visible => {
+  if (!visible) {
+    resetAssignmentForm()
+  }
+})
 
 
 const onSubmit = async () => {
@@ -50,15 +84,13 @@ const onSubmit = async () => {
         user_id: props.user.id,
         company_id: selectedCompany.value,
         user_code: companyStarsoftId.value || null,
+        approval_email: approvalEmail.value || null,
       },
     });
 
-    console.log('Respuesta del backend:', res);
-
     // Cerrar diálogo y limpiar formulario si quieres
     emit('update:isDialogVisible', false);
-    selectedCompany.value = null;
-    companyStarsoftId.value = '';
+    resetAssignmentForm()
 
   } catch (error) {
     console.error('Error al agregar empresa:', error);
@@ -82,10 +114,9 @@ const onSubmit = async () => {
       <VCardText class="pt-5">
         <VForm ref="refForm" v-model="isFormValid" @submit.prevent="onSubmit">
           <div class="text-center mb-6">
-            <h4 class="text-h4 mb-2">Asignar ID STARSOFT a Usuario</h4>
+            <h4 class="text-h4 mb-2">{{ assignmentTitle }}</h4>
             <p class="text-body-1">
-              Asignaras el ID STARSOFT a <b>{{ user.name }}</b> por cada
-              empresa.
+              {{ assignmentDescription }}
             </p>
           </div>
 
@@ -107,6 +138,15 @@ const onSubmit = async () => {
                 :rules="[requiredValidator]"
                 label="ID de usuario"
                 placeholder=""
+              />
+
+              <VTextField
+                v-if="isManagementRole"
+                v-model="approvalEmail"
+                :rules="[requiredValidator, emailValidator]"
+                label="Correo aprobador"
+                placeholder="correo@empresa.com"
+                class="mt-4"
               />
             </VCol>
           </div>

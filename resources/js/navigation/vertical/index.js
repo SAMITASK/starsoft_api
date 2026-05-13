@@ -9,7 +9,7 @@ export default [
     title: 'Ordenes de Compra',
     to: { name: 'ocs' },
     icon: { icon: 'ri-file-text-line' },
-    roles: ['ADMINISTRADOR', 'GERENTE', 'JEFE DE COMPRAS', 'SISTEMAS']
+    roles: ['ADMINISTRADOR', 'GERENTE', 'JEFE DE COMPRAS', 'JEFE DE AREA', 'SISTEMAS']
   },
   {
     title: 'Proveedores',

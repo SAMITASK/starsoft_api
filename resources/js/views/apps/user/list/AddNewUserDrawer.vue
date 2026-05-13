@@ -1,5 +1,6 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import UserAreaPermissions from '@/components/filters/UserAreaPermissions.vue'
 
 const props = defineProps({
   isDrawerOpen: {
@@ -23,27 +24,86 @@ const refForm = ref()
 const fullName = ref('')
 const email = ref('')
 const cargo = ref('')
-const status = ref()
+const status = ref('')
 const password = ref('')
 const companies = ref([])
-const company = ref()
+const company = ref([])
+const areaPermissions = ref({})
 const isEditing = ref(false)
+const isAreaManager = computed(() => cargo.value?.toUpperCase() === 'JEFE DE AREA')
 
-watch(() => props.editingUser, (newUser) => {
-  if (newUser) {
-    isEditing.value = true
-    fullName.value = newUser.name || newUser.fullName || ''
-    email.value = newUser.email || ''
-    cargo.value = newUser.role || newUser.cargo || ''
-    status.value = newUser.status || ''
-    company.value = newUser.company_ids || []
-    password.value = ''
-  } else {
-    refForm.value?.reset()
-    refForm.value?.resetValidation()
+const normalizeAreaPermissions = (permissions = {}, selectedCompanies = []) => {
+  if (!Array.isArray(selectedCompanies) || !selectedCompanies.length)
+    return {}
+
+  return Object.fromEntries(
+    selectedCompanies.map(companyId => {
+      const companyAreas = permissions?.[companyId]
+
+      return [
+        companyId,
+        Array.isArray(companyAreas)
+          ? companyAreas.filter(areaId => `${areaId}`.trim() !== '')
+          : [],
+      ]
+    }),
+  )
+}
+
+const resetFormState = () => {
+  fullName.value = ''
+  email.value = ''
+  cargo.value = ''
+  status.value = ''
+  password.value = ''
+  company.value = []
+  areaPermissions.value = {}
+}
+
+const hydrateForm = user => {
+  if (!user) {
+    resetFormState()
     isEditing.value = false
+    return
+  }
+
+  isEditing.value = true
+  fullName.value = user.name || user.fullName || ''
+  email.value = user.email || ''
+  cargo.value = user.role || user.cargo || ''
+  status.value = user.status || ''
+  company.value = Array.isArray(user.company_ids) ? [...user.company_ids] : []
+  areaPermissions.value = normalizeAreaPermissions(user.area_permissions, company.value)
+  password.value = ''
+}
+
+watch(() => props.editingUser, newUser => {
+  if (props.isDrawerOpen) {
+    hydrateForm(newUser)
   }
 }, { immediate: true })
+
+watch(() => props.isDrawerOpen, isOpen => {
+  if (isOpen) {
+    hydrateForm(props.editingUser)
+    return
+  }
+
+  resetFormState()
+  refForm.value?.reset()
+  refForm.value?.resetValidation()
+  isEditing.value = false
+})
+
+watch([company, isAreaManager], ([selectedCompanies, areaManager]) => {
+  if (!areaManager) {
+    areaPermissions.value = {}
+    
+    return
+  }
+
+  areaPermissions.value = normalizeAreaPermissions(areaPermissions.value, selectedCompanies)
+}, { deep: true })
 
 onMounted(async () => {
   await loadCompanies()
@@ -62,7 +122,7 @@ const loadCompanies = async () => {
       throw new Error('Formato de datos inválido')
     }
 
-    companies.value = res.map((company) => ({
+    companies.value = res.map(company => ({
       title: company.name,
       value: company.id,
       rawData: company,
@@ -77,6 +137,7 @@ const loadCompanies = async () => {
 const closeNavigationDrawer = () => {
   emit('update:isDrawerOpen', false)
   nextTick(() => {
+    resetFormState()
     refForm.value?.reset()
     refForm.value?.resetValidation()
     isEditing.value = false
@@ -93,6 +154,7 @@ const onSubmit = () => {
         company: company.value,
         email: email.value,
         status: status.value,
+        'area_permissions': isAreaManager.value ? normalizeAreaPermissions(areaPermissions.value, company.value) : null,
         avatar: '',
       }
 
@@ -109,6 +171,7 @@ const onSubmit = () => {
       
       emit('update:isDrawerOpen', false)
       nextTick(() => {
+        resetFormState()
         refForm.value?.reset()
         refForm.value?.resetValidation()
         isEditing.value = false
@@ -118,6 +181,12 @@ const onSubmit = () => {
 }
 
 const handleDrawerModelValueUpdate = val => {
+  if (!val) {
+    closeNavigationDrawer()
+    
+    return
+  }
+
   emit('update:isDrawerOpen', val)
 }
 </script>
@@ -126,7 +195,7 @@ const handleDrawerModelValueUpdate = val => {
   <VNavigationDrawer
     data-allow-mismatch
     temporary
-    :width="400"
+    :width="500"
     location="end"
     class="scrollable-content"
     :model-value="props.isDrawerOpen"
@@ -158,7 +227,7 @@ const handleDrawerModelValueUpdate = val => {
                   label="Nombres y Apellidos"
                   placeholder="John Doe"
                 />
-              </VCol>
+              </VCol> 
 
               <!-- 👉 Cargo -->
               <VCol cols="12">
@@ -169,6 +238,7 @@ const handleDrawerModelValueUpdate = val => {
                     'ALMACEN',
                     'ASISTENTE LOGISTICA',
                     'JEFE DE COMPRAS',
+                    'JEFE DE AREA',
                     'ASISTENTE ADMINISTRACION',
                     'ADMINISTRADOR',
                     'SISTEMAS'
@@ -210,6 +280,17 @@ const handleDrawerModelValueUpdate = val => {
                   multiple
                   :rules="[requiredValidator]"
                   :items="companies"
+                />
+              </VCol>
+
+              <VCol
+                v-if="isAreaManager"
+                cols="12"
+              >
+                <UserAreaPermissions
+                  v-model="areaPermissions"
+                  :company-ids="company"
+                  :companies="companies"
                 />
               </VCol>
 

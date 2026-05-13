@@ -52,12 +52,15 @@ class AuthController extends Controller
             'accessToken' => $token,
             'token_type' => 'Bearer',
             'userData' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'cargo' => $user->cargo,
-                'status' => $user->status,
-                'company_default' => $user->company_default
+                'id'               => $user->id,
+                'name'             => $user->name,
+                'email'            => $user->email,
+                'cargo'            => $user->cargo,
+                'role'             => $user->cargo,
+                'status'           => $user->status,
+                'company_ids'      => $user->getCompanyIds(),
+                'company_default'  => $user->company_default,
+                'area_permissions' => $user->getAreaPermissions(),
             ],
         ]);
     }
@@ -95,10 +98,10 @@ class AuthController extends Controller
         ], $code);
     }
 
-     public function keepAlive(Request $request)
+    public function keepAlive(Request $request)
     {
         if (Auth::check()) {
-            $request->session()->put('last_activity', now()->timestamp);
+            $request->session()->put('lastActivityTime', now()->timestamp);
 
             return response()->json([
                 'status' => 'ok',

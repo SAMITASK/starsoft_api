@@ -1,7 +1,8 @@
 // composables/useAuth.js
 export function useAuth() {
   const router = useRouter()
-  const userData = ref(null)
+  const userDataCookie = useCookie('userData')
+  const userData = computed(() => userDataCookie.value)
   const accessToken = useCookie('accessToken')
 
   // Verificar si el usuario está autenticado
@@ -15,9 +16,8 @@ export function useAuth() {
     } catch (error) {
       console.error(error)
     } finally {
-
-    useCookie('userData').value = null 
-    useCookie('accessToken').value = null
+      userDataCookie.value = null
+      accessToken.value = null
 
       await router.push('/login')
     }
@@ -26,9 +26,16 @@ export function useAuth() {
   const keepAlive = async () => {
     try {
       await $api('/keep-alive', { method: 'POST' })
-      console.log('Sesión renovada ✅')
+
+      return true
     } catch (error) {
       console.error(error)
+
+      if (error?.response?.status === 401) {
+        await logout()
+      }
+
+      return false
     }
   }
 
