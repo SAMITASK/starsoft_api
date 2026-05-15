@@ -52,6 +52,34 @@ async function loadCompanies() {
   companies.value = data;
 }
 
+async function loadAreas() {
+  if (!selectedCompany.value || !dateRange.value) {
+    areas.value = []
+    selectedArea.value = null
+    return
+  }
+
+  const response = await fetchData("/reports/areas", {
+    company: selectedCompany.value,
+    date: dateRange.value,
+    staff: selectedStaff.value,
+    type: selectedType.value,
+  }, isLoadingAreas, errorMessageAreas)
+
+  const areaList = Array.isArray(response?.data)
+    ? response.data.map(area => ({
+      id: area.id,
+      name: area.name,
+    }))
+    : []
+
+  areas.value = areaList
+
+  if (!areaList.find(area => `${area.id}` === `${selectedArea.value}`)) {
+    selectedArea.value = null
+  }
+}
+
 loadCompanies();
 
 watch(selectedCompany, async (company) => {
@@ -73,6 +101,7 @@ watch(selectedCompany, async (company) => {
   ]);
 
   staff.value = staffData;
+  await loadAreas()
 });
 
 watch(selectedStaff, () => {
@@ -92,6 +121,10 @@ function formatDate(date) {
 }
 
 const dateRange = ref(`${formatDate(sixDaysAgo)} a ${formatDate(today)}`);
+
+watch([dateRange, selectedStaff, selectedType], () => {
+  loadAreas()
+})
 </script>
 <template>
   <VCard class="mb-6">
