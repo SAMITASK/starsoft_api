@@ -79,6 +79,24 @@ const formatCurrency = (value) => {
   }).format(number);
 };
 
+const parseNumericValue = (value) => {
+  const parsedValue = parseFloat(value);
+
+  return Number.isNaN(parsedValue) ? 0 : parsedValue;
+};
+
+const getItemQuantity = (item) => {
+  return parseNumericValue(item?.OC_NCANTID ?? item?.OC_CANT);
+};
+
+const getItemTotal = (item) => {
+  const unitPrice = parseNumericValue(item?.OC_NPREUNI);
+  const quantity = getItemQuantity(item);
+  const discountPercent = parseNumericValue(item?.OC_NDSCPOR);
+
+  return unitPrice * quantity * (1 - discountPercent / 100);
+};
+
 function formatDate(fecha) {
   if (!fecha) return "";
 
@@ -267,7 +285,7 @@ function formatDate(fecha) {
                   <td>{{ item.OC_CDESREF }}</td>
                   <td class="text-center">{{ item.OC_CUNIDAD }}</td>
                   <td class="text-center">
-                    {{ formatCurrency(item.OC_NCANTID) }}
+                    {{ formatCurrency(getItemQuantity(item)) }}
                   </td>
                   <td class="text-center">
                     {{ formatCurrency(item.OC_NPREUNI) }}
@@ -280,11 +298,7 @@ function formatDate(fecha) {
                   </td>
                   <td class="text-center">
                     {{
-                      formatCurrency(
-                        parseFloat(item.OC_NPREUNI) *
-                          parseFloat(item.OC_NCANTID) *
-                          (1 - parseFloat(item.OC_NDSCPOR) / 100)
-                      )
+                      formatCurrency(getItemTotal(item))
                     }}
                   </td>
                 </tr>

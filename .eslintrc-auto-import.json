@@ -369,6 +369,8 @@
     "formatNumber": true,
     "numberFormatter": true,
     "useStatus": true,
-    "useOrderFilters": true
+    "useOrderFilters": true,
+    "resolveCompanySelection": true,
+    "syncSelectedCompany": true
   }
 }

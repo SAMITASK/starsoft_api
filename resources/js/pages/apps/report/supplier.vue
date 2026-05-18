@@ -1,5 +1,6 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
+import { resolveCompanySelection, syncSelectedCompany } from "@/composables/useCompanySelection";
 
 const router = useRouter()
 
@@ -9,7 +10,7 @@ const isManagerOrAdmin = computed(() =>
 )
 
 //Companies
-const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
+const selectedCompany = ref(resolveCompanySelection({ userData: userData.value }));
 const selectedType = ref("OC");
 const selectedStaff = ref(null);
 const companies = ref([]);const selectedArea = ref(null);
@@ -47,6 +48,7 @@ async function fetchData(url, params, loadingRef, errorRef) {
 
 async function loadCompanies() {
   companies.value = await fetchData('/users/companies', {}, isLoading, errorMessage)
+  syncSelectedCompany(selectedCompany, userData.value, companies.value, company => company.id)
 }
 
 watch(selectedCompany, async (company) => {

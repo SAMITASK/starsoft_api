@@ -217,6 +217,23 @@ class OrdersApi extends Controller
             return response()->json(['message' => 'Orden no encontrada'], 404);
         }
 
+        $portalOrder = Orders::where('tipo', $type)
+            ->where('identificador', $code)
+            ->where('codigoEmpresa', $company)
+            ->first();
+
+        $preApproval = $this->findPreApproval(
+            $this->normalizeCompanyCode($company),
+            $this->normalizeOrderType($type),
+            $this->normalizeOrderCode($code),
+        );
+
+        $order->setAttribute('portal_status', $this->resolveEffectiveStatus($portalOrder?->estado ?? null, $preApproval));
+        $order->setAttribute('usuarioAprobacion', $portalOrder?->usuarioAprobacion);
+        $order->setAttribute('fechaAprobacion', $portalOrder?->fechaAprobacion);
+        $order->setAttribute('pre_approved_by', $preApproval?->area_manager_name);
+        $order->setAttribute('pre_approved_at', $preApproval?->area_manager_approved_at?->toDateTimeString());
+
         return response()->json($order);
     }
 

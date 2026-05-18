@@ -1,14 +1,16 @@
 <script setup>
 import OCDetailDialog from "@/components/dialogs/OCDetailDialog.vue"
 import AreaFilter from "@/components/filters/AreaFilter.vue"
+import { resolveCompanySelection, syncSelectedCompany } from "@/composables/useCompanySelection"
 import { useOrderFilters } from "@/composables/useOrderFilters"
 import { Spanish } from "flatpickr/dist/l10n/es"
 
 // 🎯 Usar composable de filtros
 const { isJefeDeArea, canApprove, canMarkAsRead, availableStatuses, normalizeStatus, getStatusColor } = useOrderFilters()
+const userData = useCookie('userData')
 
 //Companies
-const selectedCompany = ref(useCookie('userData').value?.company_default || "003")
+const selectedCompany = ref(resolveCompanySelection({ userData: userData.value }))
 const companies = ref([])
 const isLoading = ref(true)
 const errorMessage = ref(null) 
@@ -31,6 +33,8 @@ onMounted(async () => {
       value: company.id,
       rawData: company,
     }))
+
+    syncSelectedCompany(selectedCompany, userData.value, companies.value, company => company.value)
   } catch (error) {
     console.error('Error cargando empresas:', error)
     errorMessage.value = 'No se pudieron cargar las empresas. Intente nuevamente.'

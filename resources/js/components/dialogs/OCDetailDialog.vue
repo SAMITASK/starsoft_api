@@ -130,6 +130,24 @@ const formatCurrency = value => {
   }).format(number)
 }
 
+const parseNumericValue = value => {
+  const parsedValue = parseFloat(value)
+
+  return Number.isNaN(parsedValue) ? 0 : parsedValue
+}
+
+const getItemQuantity = item => {
+  return parseNumericValue(item?.OC_NCANTID ?? item?.OC_CANT)
+}
+
+const getItemTotal = item => {
+  const unitPrice = parseNumericValue(item?.OC_NPREUNI)
+  const quantity = getItemQuantity(item)
+  const discountPercent = parseNumericValue(item?.OC_NDSCPOR)
+
+  return unitPrice * quantity * (1 - discountPercent / 100)
+}
+
 
 const
   formatDateHour = fechaStr => {
@@ -145,6 +163,13 @@ const
 
     return `${dia}/${mes}/${anio} ${hora}:${minutos}`
   }
+
+const approvalSummary = computed(() => ({
+  preApprovedBy: details.value?.pre_approved_by ?? '',
+  preApprovedAt: details.value?.pre_approved_at ? formatDateHour(details.value.pre_approved_at) : '',
+  approvedBy: details.value?.usuarioAprobacion ?? '',
+  approvedAt: details.value?.fechaAprobacion ? formatDateHour(details.value.fechaAprobacion) : '',
+}))
 </script>
 
 <template>
@@ -310,6 +335,50 @@ const
                   density="compact"
                 />
               </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <VTextField
+                  :model-value="approvalSummary.preApprovedBy"
+                  label="Preaprobado por"
+                  readonly
+                  density="compact"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <VTextField
+                  :model-value="approvalSummary.preApprovedAt"
+                  label="Fecha Preaprobación"
+                  readonly
+                  density="compact"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <VTextField
+                  :model-value="approvalSummary.approvedBy"
+                  label="Aprobado por"
+                  readonly
+                  density="compact"
+                />
+              </VCol>
+              <VCol
+                cols="12"
+                md="4"
+              >
+                <VTextField
+                  :model-value="approvalSummary.approvedAt"
+                  label="Fecha Aprobación"
+                  readonly
+                  density="compact"
+                />
+              </VCol>
 
               <VCol sm="12">
                 <VTextarea
@@ -404,7 +473,7 @@ const
                     {{ item.OC_CUNIDAD }}
                   </td>
                   <td class="text-center">
-                    {{ formatCurrency(item.OC_NCANTID) }}
+                    {{ formatCurrency(getItemQuantity(item)) }}
                   </td>
                   <td class="text-center">
                     {{ formatCurrency(item.OC_NPREUNI) }}
@@ -417,11 +486,7 @@ const
                   </td>
                   <td class="text-center">
                     {{
-                      formatCurrency(
-                        parseFloat(item.OC_NPREUNI) *
-                          parseFloat(item.OC_NCANTID) *
-                          (1 - parseFloat(item.OC_NDSCPOR) / 100)
-                      )
+                      formatCurrency(getItemTotal(item))
                     }}
                   </td>
                 </tr>
