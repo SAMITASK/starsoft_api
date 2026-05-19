@@ -167,8 +167,6 @@ const
 const approvalSummary = computed(() => ({
   preApprovedBy: details.value?.pre_approved_by ?? '',
   preApprovedAt: details.value?.pre_approved_at ? formatDateHour(details.value.pre_approved_at) : '',
-  approvedBy: details.value?.usuarioAprobacion ?? '',
-  approvedAt: details.value?.fechaAprobacion ? formatDateHour(details.value.fechaAprobacion) : '',
 }))
 </script>
 
@@ -353,28 +351,6 @@ const approvalSummary = computed(() => ({
                 <VTextField
                   :model-value="approvalSummary.preApprovedAt"
                   label="Fecha Preaprobación"
-                  readonly
-                  density="compact"
-                />
-              </VCol>
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <VTextField
-                  :model-value="approvalSummary.approvedBy"
-                  label="Aprobado por"
-                  readonly
-                  density="compact"
-                />
-              </VCol>
-              <VCol
-                cols="12"
-                md="4"
-              >
-                <VTextField
-                  :model-value="approvalSummary.approvedAt"
-                  label="Fecha Aprobación"
                   readonly
                   density="compact"
                 />
