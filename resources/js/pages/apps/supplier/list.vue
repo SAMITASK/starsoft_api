@@ -1,11 +1,13 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
+import { resolveCompanySelection, syncSelectedCompany } from "@/composables/useCompanySelection";
 
 const router = useRouter()
+const userData = useCookie('userData')
 
 
 //Companies
-const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
+const selectedCompany = ref(resolveCompanySelection({ userData: userData.value }));
 const companies = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref(null);
@@ -28,6 +30,8 @@ onMounted(async () => {
       value: company.id,
       rawData: company,
     }))
+
+    syncSelectedCompany(selectedCompany, userData.value, companies.value, company => company.value)
   } catch (error) {
     console.error('Error cargando empresas:', error)
     errorMessage.value = 'No se pudieron cargar las empresas. Intente nuevamente.'

@@ -1,5 +1,6 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
+import { resolveCompanySelection, syncSelectedCompany } from "@/composables/useCompanySelection";
 
 import ApexChartExpenseRatio from "@/views/charts/apex-chart/ApexChartExpenseRatio.vue";
 import ApexChartHorizontalBar from '@/views/charts/apex-chart/ApexChartHorizontalBar.vue'
@@ -16,7 +17,7 @@ const isManagerOrAdmin = computed(() =>
   ["GERENTE", "ADMINISTRADOR"].includes(userData.value?.cargo)
 );
 
-const selectedCompany = ref(useCookie('userData').value?.company_default || "003");
+const selectedCompany = ref(resolveCompanySelection({ userData: userData.value }));
 const selectedType = ref("OC");
 const selectedStaff = ref(null);
 const companies = ref([]);
@@ -50,6 +51,7 @@ async function fetchData(url, params, loadingRef, errorRef) {
 async function loadCompanies() {
   const data = await fetchData("/users/companies", {}, isLoading, errorMessage);
   companies.value = data;
+  syncSelectedCompany(selectedCompany, userData.value, companies.value, company => company.id);
 }
 
 async function loadAreas() {

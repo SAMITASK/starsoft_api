@@ -128,6 +128,7 @@ declare global {
   const regexValidator: typeof import('./resources/js/@core/utils/validators.js')['regexValidator']
   const registerPlugins: typeof import('./resources/js/@core/utils/plugins.js')['registerPlugins']
   const requiredValidator: typeof import('./resources/js/@core/utils/validators.js')['requiredValidator']
+  const resolveCompanySelection: typeof import('./resources/js/composables/useCompanySelection.js')['resolveCompanySelection']
   const resolveComponent: typeof import('vue')['resolveComponent']
   const resolveRef: typeof import('@vueuse/core')['resolveRef']
   const resolveUnref: typeof import('@vueuse/core')['resolveUnref']
@@ -141,6 +142,7 @@ declare global {
   const storeToRefs: typeof import('pinia')['storeToRefs']
   const syncRef: typeof import('@vueuse/core')['syncRef']
   const syncRefs: typeof import('@vueuse/core')['syncRefs']
+  const syncSelectedCompany: typeof import('./resources/js/composables/useCompanySelection.js')['syncSelectedCompany']
   const templateRef: typeof import('@vueuse/core')['templateRef']
   const throttledRef: typeof import('@vueuse/core')['throttledRef']
   const throttledWatch: typeof import('@vueuse/core')['throttledWatch']
@@ -493,6 +495,7 @@ declare module 'vue' {
     readonly regexValidator: UnwrapRef<typeof import('./resources/js/@core/utils/validators.js')['regexValidator']>
     readonly registerPlugins: UnwrapRef<typeof import('./resources/js/@core/utils/plugins.js')['registerPlugins']>
     readonly requiredValidator: UnwrapRef<typeof import('./resources/js/@core/utils/validators.js')['requiredValidator']>
+    readonly resolveCompanySelection: UnwrapRef<typeof import('./resources/js/composables/useCompanySelection.js')['resolveCompanySelection']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly resolveRef: UnwrapRef<typeof import('@vueuse/core')['resolveRef']>
     readonly resolveUnref: UnwrapRef<typeof import('@vueuse/core')['resolveUnref']>
@@ -506,6 +509,7 @@ declare module 'vue' {
     readonly storeToRefs: UnwrapRef<typeof import('pinia')['storeToRefs']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
+    readonly syncSelectedCompany: UnwrapRef<typeof import('./resources/js/composables/useCompanySelection.js')['syncSelectedCompany']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
     readonly throttledWatch: UnwrapRef<typeof import('@vueuse/core')['throttledWatch']>
