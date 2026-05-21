@@ -67,7 +67,7 @@ class OCModel extends Model
         string $dateEnd,
         ?string $responsible = null,
         ?string $type = null,
-        ?string $area = null
+        ?array $areaFilter = null
     ) {
         if ($type === 'OC') {
             $tables = ['COMOVC'];
@@ -80,6 +80,10 @@ class OCModel extends Model
         $results = collect();
 
         foreach ($tables as $table) {
+            if (is_array($areaFilter) && empty($areaFilter)) {
+                continue;
+            }
+
             $rows = self::on($connectionName)
                 ->from($table)
                 ->join('MAEPROV as P', "$table.OC_CCODPRO", '=', 'P.PRVCCODIGO');
@@ -106,8 +110,8 @@ class OCModel extends Model
                 $rows->where("$table.OC_CSOLICT", $responsible);
             }
 
-            if ($area) {
-                $rows->where('R.AREA', $area);
+            if (is_array($areaFilter)) {
+                $rows->whereIn('R.AREA', $areaFilter);
             }
 
             $rows = $rows->groupBy('P.PRVCCODIGO', 'P.PRVCNOMBRE', 'R.AREA')->get();
@@ -134,7 +138,8 @@ class OCModel extends Model
         string $dateStart,
         string $dateEnd,
         ?string $responsible = null,
-        ?string $type = null
+        ?string $type = null,
+        ?array $areaFilter = null
     ) {
         if ($type === 'OC') {
             $tables = ['COMOVC'];
@@ -147,6 +152,10 @@ class OCModel extends Model
         $results = collect();
 
         foreach ($tables as $table) {
+            if (is_array($areaFilter) && empty($areaFilter)) {
+                continue;
+            }
+
             $query = self::on($connectionName)
                 ->from($table)
                 ->join('REQUISC as R', function ($join) use ($table) {
@@ -169,6 +178,10 @@ class OCModel extends Model
 
             if ($responsible) {
                 $query->where("{$table}.OC_CSOLICT", $responsible);
+            }
+
+            if (is_array($areaFilter)) {
+                $query->whereIn('R.AREA', $areaFilter);
             }
 
             $rows = $query->groupBy('A.AREA_CODIGO', 'A.AREA_DESCRIPCION')->get();
@@ -194,7 +207,8 @@ class OCModel extends Model
         string $dateStart,
         string $dateEnd,
         ?string $responsible = null,
-        ?string $type = null
+        ?string $type = null,
+        ?array $areaFilter = null
     ) {
         if ($type === 'OC') {
             $tables = ['COMOVC'];
@@ -207,6 +221,10 @@ class OCModel extends Model
         $results = collect();
 
         foreach ($tables as $table) {
+            if (is_array($areaFilter) && empty($areaFilter)) {
+                continue;
+            }
+
             $query = self::on($connectionName)
                 ->from($table)
                 ->join('REQUISC as R', function ($join) use ($table) {
@@ -231,6 +249,10 @@ class OCModel extends Model
                 $query->where("{$table}.OC_CSOLICT", $responsible);
             }
 
+            if (is_array($areaFilter)) {
+                $query->whereIn('R.AREA', $areaFilter);
+            }
+
             $rows = $query->groupBy('A.AREA_CODIGO', 'A.AREA_DESCRIPCION')->get();
 
             $results = $results->concat($rows);
@@ -253,7 +275,7 @@ class OCModel extends Model
         string $connectionName,
         ?string $type = null,
         ?string $responsible = null,
-        ?string $area = null,
+        ?array $areaFilter = null,
         int $monthsBack = 5
     ) {
         // Rango de fechas
@@ -270,11 +292,20 @@ class OCModel extends Model
             ->whereBetween('COMOVC.OC_DFECDOC', [$dateStart, $dateEnd]);
 
         if ($responsible) $ocQuery->where('COMOVC.OC_CSOLICT', $responsible);
-        if ($area) $ocQuery->where('R.AREA', $area);
-
-        $ocData = $ocQuery->groupByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
-            ->orderByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
-            ->get();
+        if (is_array($areaFilter)) {
+            if (empty($areaFilter)) {
+                $ocData = collect();
+            } else {
+                $ocQuery->whereIn('R.AREA', $areaFilter);
+                $ocData = $ocQuery->groupByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
+                    ->orderByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
+                    ->get();
+            }
+        } else {
+            $ocData = $ocQuery->groupByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
+                ->orderByRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM')")
+                ->get();
+        }
 
         // --- Consulta OS ---
         $osQuery = self::on($connectionName)
@@ -286,11 +317,20 @@ class OCModel extends Model
             ->whereBetween('COMOVC_S.OC_DFECDOC', [$dateStart, $dateEnd]);
 
         if ($responsible) $osQuery->where('COMOVC_S.OC_CSOLICT', $responsible);
-        if ($area) $osQuery->where('R.AREA', $area);
-
-        $osData = $osQuery->groupByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
-            ->orderByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
-            ->get();
+        if (is_array($areaFilter)) {
+            if (empty($areaFilter)) {
+                $osData = collect();
+            } else {
+                $osQuery->whereIn('R.AREA', $areaFilter);
+                $osData = $osQuery->groupByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
+                    ->orderByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
+                    ->get();
+            }
+        } else {
+            $osData = $osQuery->groupByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
+                ->orderByRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM')")
+                ->get();
+        }
 
         // --- Combinar ambos ---
         $months = collect([...$ocData, ...$osData])

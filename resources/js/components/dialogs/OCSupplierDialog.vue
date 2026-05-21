@@ -282,7 +282,15 @@ function formatDate(fecha) {
                 <tr v-for="(item, index) in details.products" :key="index">
                   <td class="text-center">{{ item.REQITEM_REF }}</td>
                   <td>{{ item.OC_CCODIGO }}</td>
-                  <td>{{ item.OC_CDESREF }}</td>
+                  <td>
+                    <div>{{ item.OC_CDESREF }}</div>
+                    <div
+                      v-if="item.OC_GLOSA"
+                      class="text-caption text-medium-emphasis mt-1"
+                    >
+                      {{ item.OC_GLOSA }}
+                    </div>
+                  </td>
                   <td class="text-center">{{ item.OC_CUNIDAD }}</td>
                   <td class="text-center">
                     {{ formatCurrency(getItemQuantity(item)) }}

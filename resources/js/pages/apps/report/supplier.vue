@@ -1,13 +1,12 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 import { resolveCompanySelection, syncSelectedCompany } from "@/composables/useCompanySelection";
+import { useReportAccess } from "@/composables/useReportAccess";
 
 const router = useRouter()
 
 const userData = useCookie('userData')
-const isManagerOrAdmin = computed(() => 
-  ['GERENTE', 'ADMINISTRADOR'].includes(userData.value?.cargo)
-)
+const { isManagerOrAdmin, filterAreasForCompany, sanitizeSelectedArea } = useReportAccess()
 
 //Companies
 const selectedCompany = ref(resolveCompanySelection({ userData: userData.value }));
@@ -121,7 +120,9 @@ const fetchSuppliers = async () => {
 
     suppliers.value = res.data;
     maxMonto.value = res.maxMonto;
-    areas.value = res.areas;
+    const scopedAreas = filterAreasForCompany(selectedCompany.value, Array.isArray(res.areas) ? res.areas : [])
+    areas.value = scopedAreas;
+    selectedArea.value = sanitizeSelectedArea(selectedArea.value, scopedAreas)
   } catch (error) {
     suppliers.value = [];
     maxMonto.value = 1;

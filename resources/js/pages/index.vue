@@ -1,6 +1,7 @@
 <script setup>
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 import { resolveCompanySelection, syncSelectedCompany } from "@/composables/useCompanySelection";
+import { useReportAccess } from "@/composables/useReportAccess";
 
 import ApexChartExpenseRatio from "@/views/charts/apex-chart/ApexChartExpenseRatio.vue";
 import ApexChartHorizontalBar from '@/views/charts/apex-chart/ApexChartHorizontalBar.vue'
@@ -12,10 +13,7 @@ definePage({
 });
 
 const userData = useCookie("userData");
-
-const isManagerOrAdmin = computed(() =>
-  ["GERENTE", "ADMINISTRADOR"].includes(userData.value?.cargo)
-);
+const { isManagerOrAdmin, filterAreasForCompany, sanitizeSelectedArea } = useReportAccess()
 
 const selectedCompany = ref(resolveCompanySelection({ userData: userData.value }));
 const selectedType = ref("OC");
@@ -75,11 +73,12 @@ async function loadAreas() {
     }))
     : []
 
-  areas.value = areaList
+  // El backend ya recorta permisos, pero aquí mantenemos el select coherente
+  // para que el JEFE DE AREA nunca vea opciones fuera de su alcance.
+  const scopedAreas = filterAreasForCompany(selectedCompany.value, areaList)
 
-  if (!areaList.find(area => `${area.id}` === `${selectedArea.value}`)) {
-    selectedArea.value = null
-  }
+  areas.value = scopedAreas
+  selectedArea.value = sanitizeSelectedArea(selectedArea.value, scopedAreas)
 }
 
 loadCompanies();

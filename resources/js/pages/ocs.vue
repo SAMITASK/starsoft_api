@@ -448,6 +448,8 @@ const showSnackbar = ({ message, color = 'success' }) => {
     :type="selectedItem?.type"
     :module="selectedItem?.module"
     :status="normalizeStatus(selectedItem?.status)"
+    :pre-approved-by="selectedItem?.pre_approved_by"
+    :pre-approved-at="selectedItem?.pre_approved_at"
     @show-snackbar="showSnackbar"
     @refresh="fetchOcs"
   />

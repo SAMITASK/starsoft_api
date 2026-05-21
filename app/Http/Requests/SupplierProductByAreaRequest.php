@@ -46,7 +46,5 @@ class SupplierProductByAreaRequest extends FormRequest
     public function getType(): string
     {
         return $this->input('type', 'OC');
-
-        return $type === 'ALL' ? null : $type;
     }
 }

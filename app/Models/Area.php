@@ -21,7 +21,8 @@ class Area extends Model
         string $dateStart,
         string $dateEnd,
         ?string $responsible = null,
-        ?string $type = null
+        ?string $type = null,
+        ?array $areaFilter = null
     ) {
         if ($type === 'OC') {
             $tables = ['COMOVC'];
@@ -34,9 +35,21 @@ class Area extends Model
         $results = collect();
 
         foreach ($tables as $table) {
+            if (is_array($areaFilter) && empty($areaFilter)) {
+                continue;
+            }
+
             $rows = self::on($connectionName)
                 ->from($table)
-                ->join('REQUISC as R', "$table.OC_CNRODOCREF", '=', 'R.NROREQUI')
+                ->join('REQUISC as R', function ($join) use ($table) {
+                    $join->on("$table.OC_CNRODOCREF", '=', 'R.NROREQUI');
+
+                    if ($table === 'COMOVC') {
+                        $join->where('R.TIPOREQUI', '=', 'RQ');
+                    } else {
+                        $join->where('R.TIPOREQUI', '=', 'RS');
+                    }
+                })
                 ->join('AREA as A', 'R.AREA', '=', 'A.AREA_CODIGO')
                 ->select('A.AREA_CODIGO as id', 'A.AREA_DESCRIPCION as name')
                 ->whereIn("$table.OC_CSITORD", ['01', '03', '04'])
@@ -44,6 +57,10 @@ class Area extends Model
 
             if ($responsible) {
                 $rows->where("$table.OC_CSOLICT", $responsible);
+            }
+
+            if (is_array($areaFilter)) {
+                $rows->whereIn('R.AREA', $areaFilter);
             }
 
             $results = $results->concat($rows->distinct()->get());

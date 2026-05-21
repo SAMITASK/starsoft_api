@@ -12,6 +12,8 @@ const props = defineProps({
   module: String,
   status: String,
   userCargo: String,
+  preApprovedBy: String,
+  preApprovedAt: String,
 })
 
 const emit = defineEmits([
@@ -165,8 +167,12 @@ const
   }
 
 const approvalSummary = computed(() => ({
-  preApprovedBy: details.value?.pre_approved_by ?? '',
-  preApprovedAt: details.value?.pre_approved_at ? formatDateHour(details.value.pre_approved_at) : '',
+  preApprovedBy: props.preApprovedBy || details.value?.pre_approved_by || '',
+  preApprovedAt: props.preApprovedAt
+    ? formatDateHour(props.preApprovedAt)
+    : details.value?.pre_approved_at
+      ? formatDateHour(details.value.pre_approved_at)
+      : '',
 }))
 </script>
 
@@ -444,7 +450,15 @@ const approvalSummary = computed(() => ({
                     {{ item.REQITEM_REF }}
                   </td>
                   <td>{{ item.OC_CCODIGO }}</td>
-                  <td>{{ item.OC_CDESREF }}</td>
+                  <td>
+                    <div>{{ item.OC_CDESREF }}</div>
+                    <div
+                      v-if="item.OC_GLOSA"
+                      class="text-caption text-medium-emphasis mt-1"
+                    >
+                      {{ item.OC_GLOSA }}
+                    </div>
+                  </td>
                   <td class="text-center">
                     {{ item.OC_CUNIDAD }}
                   </td>
