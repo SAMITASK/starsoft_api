@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierProductByAreaRequest;
 use App\Models\Area;
-use App\Models\CompanyUserPivot;
 use App\Models\OCModel;
-use App\Models\ProductModel;
 use App\Services\SupplierReportService;
+use App\Services\UserPermissionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,46 +15,32 @@ use Illuminate\Support\Facades\Log;
 class ReportController extends Controller
 {
     public function __construct(
-        private SupplierReportService $reportService
+        private SupplierReportService $reportService,
+        private UserPermissionService $permissionService
     ) {}
 
     public function reportSuppliers(Request $request)
     {
         try {
-            $conexion = 'sqlsrv_' . $request->input('company', '003');
-            $dateRange = $request->input('date');
-            $type = $request->input('type', 'OC');
-            $area = $request->input('area');
-            $staff = $request->input('staff');
+            $context = $this->resolveReportContext($request);
 
-            if (strpos($dateRange, ' a ') !== false) {
-                [$start, $end] = explode(' a ', $dateRange);
-                $start = Carbon::parse(trim($start))->format('Y-m-d');
-                $end = Carbon::parse(trim($end))->format('Y-m-d');
+            $result = OCModel::getOrdersSummary(
+                $context['connection'],
+                $context['start_date'],
+                $context['end_date'],
+                $context['responsible'],
+                $context['type'],
+                $context['area_filter'],
+            );
 
-                if ($start > $end) {
-                    [$start, $end] = [$end, $start];
-                }
-            }
-
-            $responsible = null;
-
-            if (auth()->check()) {
-                $user = auth()->user();
-
-                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
-                    $responsible = $staff;
-                } else {
-                    $userCode = CompanyUserPivot::where('user_id', $user->id)
-                        ->where('company_id', $request->input('company', '003'))
-                        ->value('user_code');
-
-                    $responsible = $userCode;
-                }
-            }
-
-            $result = OCModel::getOrdersSummary($conexion, $start, $end, $responsible, $type, $area);
-            $areas = Area::getAvailableAreas($conexion, $start, $end, $responsible, $type);
+            $areas = Area::getAvailableAreas(
+                $context['connection'],
+                $context['start_date'],
+                $context['end_date'],
+                $context['responsible'],
+                $context['type'],
+                $context['area_filter'],
+            );
 
             // Calcular monto máximo
             $maxMonto = $result->max(fn($item) => (float) $item->MONTO_TOTAL);
@@ -81,47 +66,15 @@ class ReportController extends Controller
     public function reportAreas(Request $request)
     {
         try {
-            $conexion = 'sqlsrv_' . $request->input('company', '003');
-            $dateRange = $request->input('date');
-            $type = $request->input('type', 'OC');
-            $staff = $request->input('staff');
-
-            if (strpos($dateRange, ' a ') !== false) {
-                [$start, $end] = explode(' a ', $dateRange);
-                $start = Carbon::parse(trim($start))->format('Y-m-d');
-                $end = Carbon::parse(trim($end))->format('Y-m-d');
-
-                if ($start > $end) {
-                    [$start, $end] = [$end, $start];
-                }
-            } else {
-                // fallback si solo llega una fecha
-                $start = Carbon::parse(trim($dateRange))->format('Y-m-d');
-                $end = $start;
-            }
-
-            $responsible = null;
-            if (auth()->check()) {
-
-                $user = auth()->user();
-
-                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
-                    $responsible = $staff;
-                } else {
-                    $userCode = CompanyUserPivot::where('user_id', $user->id)
-                        ->where('company_id', $request->input('company', '003'))
-                        ->value('user_code');
-
-                    $responsible = $userCode;
-                }
-            }
+            $context = $this->resolveReportContext($request);
 
             $result = OCModel::reportAreas(
-                $conexion,
-                $start,
-                $end,
-                $responsible,
-                $type
+                $context['connection'],
+                $context['start_date'],
+                $context['end_date'],
+                $context['responsible'],
+                $context['type'],
+                $context['area_filter'],
             );
 
             $maxMonto = $result->max(fn($item) => (float) $item->MONTO_TOTAL);
@@ -147,16 +100,37 @@ class ReportController extends Controller
         SupplierProductByAreaRequest $request
     ){
         try {
+            $company = $this->permissionService->resolveAuthorizedCompany($request->getCompany());
+            $areaFilter = $this->permissionService->resolveAreaFilter($company, $request->input('area'));
+
+            if (is_array($areaFilter) && empty($areaFilter)) {
+                return response()->json($this->reportService->formatResponse(collect(), [
+                    'company' => $company,
+                    'area' => null,
+                    'date' => $request->input('date'),
+                    'type' => $request->getType(),
+                ]));
+            }
+
+            $resolvedArea = is_array($areaFilter) && !empty($areaFilter)
+                ? $areaFilter[0]
+                : $request->input('area');
+
             $suppliers = $this->reportService->getSupplierProducts(
-                company: $request->getCompany(),
-                area: $request->input('area'),
+                company: $company,
+                area: $resolvedArea,
                 dateRange: $request->input('date'),
                 type: $request->getType()
             );
 
             $response = $this->reportService->formatResponse(
                 $suppliers,
-                $request->only(['area', 'date', 'type', 'company'])
+                [
+                    'company' => $company,
+                    'area' => $resolvedArea,
+                    'date' => $request->input('date'),
+                    'type' => $request->getType(),
+                ]
             );
 
             return response()->json($response);
@@ -184,47 +158,15 @@ class ReportController extends Controller
     public function reportAreasByOrders(Request $request)
     {
         try {
-            $conexion = 'sqlsrv_' . $request->input('company', '003');
-            $dateRange = $request->input('date');
-            $type = $request->input('type', 'OC');
-            $staff = $request->input('staff');
-
-            // Manejo de fechas
-            if (strpos($dateRange, ' a ') !== false) {
-                [$start, $end] = explode(' a ', $dateRange);
-                $start = Carbon::parse(trim($start))->format('Y-m-d');
-                $end = Carbon::parse(trim($end))->format('Y-m-d');
-
-                if ($start > $end) {
-                    [$start, $end] = [$end, $start];
-                }
-            } else {
-                $start = Carbon::parse(trim($dateRange))->format('Y-m-d');
-                $end = $start;
-            }
-
-            // Responsable
-            $responsible = null;
-            if (auth()->check()) {
-                $user = auth()->user();
-
-                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
-                    $responsible = $staff;
-                } else {
-                    $userCode = CompanyUserPivot::where('user_id', $user->id)
-                        ->where('company_id', $request->input('company', '003'))
-                        ->value('user_code');
-
-                    $responsible = $userCode;
-                }
-            }
+            $context = $this->resolveReportContext($request);
 
             $result = OCModel::reportAreasByOrders(
-                $conexion,
-                $start,
-                $end,
-                $responsible,
-                $type
+                $context['connection'],
+                $context['start_date'],
+                $context['end_date'],
+                $context['responsible'],
+                $context['type'],
+                $context['area_filter'],
             );
 
             $maxCantidad = $result->max(fn($item) => (int) $item->MONTO_TOTAL);
@@ -280,40 +222,15 @@ class ReportController extends Controller
     public function reportMonthlyExpenses(Request $request)
     {
         try {
-            // 1️⃣ Conexión a base de datos
-            $conexion = 'sqlsrv_' . $request->input('company', '003');
-
-            // 2️⃣ Parámetros de entrada
-            $type = $request->input('type'); // OC, OS o null (ambos)
-            $staff = $request->input('staff');
-            $area = $request->input('area'); // opcional
+            $context = $this->resolveReportContext($request);
             $monthsBack = $request->input('months', 5); // cantidad de meses atrás
 
-            // 3️⃣ Determinar responsable
-            $responsible = null;
-            if (auth()->check()) {
-                $user = auth()->user();
-
-                if (in_array(strtoupper($user->cargo), ['GERENTE', 'ADMINISTRADOR'])) {
-                    // Gerente o admin puede filtrar por otro responsable
-                    $responsible = $staff;
-                } else {
-                    // Usuarios normales usan su propio código
-                    $userCode = CompanyUserPivot::where('user_id', $user->id)
-                        ->where('company_id', $request->input('company', '003'))
-                        ->value('user_code');
-
-                    $responsible = $userCode;
-                }
-            }
-
-            // 4️⃣ Llamada al modelo
             $result = OCModel::reportMonthlyExpenses(
-                $conexion,
-                $type,
-                $responsible,
-                $area,
-                $monthsBack
+                $context['connection'],
+                $context['type'],
+                $context['responsible'],
+                $context['area_filter'],
+                $monthsBack,
             );
 
             // 5️⃣ Calcular total general
@@ -334,5 +251,44 @@ class ReportController extends Controller
                 'details' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Centraliza los permisos de reportes:
+     * empresa permitida, responsable aplicable y áreas visibles para el usuario.
+     */
+    private function resolveReportContext(Request $request): array
+    {
+        $company = $this->permissionService->resolveAuthorizedCompany($request->input('company'));
+        [$startDate, $endDate] = $this->parseDateRange($request->input('date'));
+
+        return [
+            'company' => $company,
+            'connection' => 'sqlsrv_' . $company,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'type' => $request->input('type', 'OC'),
+            'responsible' => $this->permissionService->resolveResponsibleUser($company, $request->input('staff')),
+            'area_filter' => $this->permissionService->resolveAreaFilter($company, $request->input('area')),
+        ];
+    }
+
+    private function parseDateRange(?string $dateRange): array
+    {
+        if (strpos((string) $dateRange, ' a ') !== false) {
+            [$start, $end] = explode(' a ', (string) $dateRange);
+            $start = Carbon::parse(trim($start))->format('Y-m-d');
+            $end = Carbon::parse(trim($end))->format('Y-m-d');
+
+            if ($start > $end) {
+                [$start, $end] = [$end, $start];
+            }
+
+            return [$start, $end];
+        }
+
+        $date = Carbon::parse(trim((string) $dateRange))->format('Y-m-d');
+
+        return [$date, $date];
     }
 }

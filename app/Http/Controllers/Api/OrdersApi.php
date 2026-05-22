@@ -382,7 +382,12 @@ class OrdersApi extends Controller
     private function applyEffectiveStatusFilter(Builder $query, Request $request, string $selectedStatus): void
     {
         if (in_array($selectedStatus, ['APROBADA', 'RECHAZADO'], true)) {
-            $query->where('estado', $selectedStatus === 'RECHAZADO' ? 'RECHAZADA' : $selectedStatus);
+            if ($selectedStatus === 'RECHAZADO') {
+                $query->whereIn('estado', ['RECHAZADO', 'RECHAZADA']);
+            } else {
+                $query->where('estado', $selectedStatus);
+            }
+
             return;
         }
 
