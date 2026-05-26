@@ -1,5 +1,5 @@
-export const staticPrimaryColor = '#666CFF'
-export const staticPrimaryDarkenColor = '#5C61E6'
+export const staticPrimaryColor = '#0066FF'
+export const staticPrimaryDarkenColor = '#0052CC'
 export const themes = {
   light: {
     dark: false,
