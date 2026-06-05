@@ -57,6 +57,9 @@ const { data: suppliersData, execute: fetchSuppliers } = await useApi(
 // 🧠 Datos derivados
 const suppliers = computed(() => suppliersData.value?.suppliers ?? []);
 const total = computed(() => suppliersData.value?.total ?? 0);
+const orderCounts = computed(() => suppliersData.value?.order_counts ?? {});
+const ocOrders = computed(() => Number(orderCounts.value.oc ?? 0));
+const osOrders = computed(() => Number(orderCounts.value.os ?? 0));
 
 const tSuppliers = computed(() => {
   const data = suppliers.value;
@@ -164,6 +167,8 @@ const getSupplierTotal = (items) => {
         :money="tMoney"
         :suppliers="tSuppliers"
         :products="total"
+        :oc-orders="ocOrders"
+        :os-orders="osOrders"
       />
     </VCol>
   </VRow>

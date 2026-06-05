@@ -1,0 +1,46 @@
+[
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "managers": [
+            {
+                "manager_name": "JEFE DE PRUEBA",
+                "email": "jefe@admin.com",
+                "areas": [
+                    {
+                        "code": "10",
+                        "name": "ADMINISTRACION"
+                    },
+                    {
+                        "code": "15",
+                        "name": "ALM. UNIFORMES"
+                    },
+                    {
+                        "code": "11",
+                        "name": "MANTENIMIENTO"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "managers": [
+            {
+                "manager_name": "JEFE DE PRUEBA",
+                "email": "jefe@admin.com",
+                "areas": [
+                    {
+                        "code": "00003",
+                        "name": "ALMACÉN CENTRAL"
+                    },
+                    {
+                        "code": "00017",
+                        "name": "BAR PALAPA"
+                    }
+                ]
+            }
+        ]
+    }
+]

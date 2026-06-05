@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\OCModel;
 use App\Models\ProductModel;
 use App\Utils\DateRangeParser;
 use App\Services\UserPermissionService;
@@ -39,6 +40,26 @@ class SupplierReportService
     );
 
     return collect($results);
+  }
+
+  public function getAreaOrderCounts(
+    string $company,
+    string $area,
+    string $dateRange,
+    ?string $type
+  ): array {
+    $conexion = "sqlsrv_{$company}";
+    [$startDate, $endDate] = $this->dateParser->parse($dateRange);
+    $responsible = $this->permissionService->getResponsibleUser($company);
+
+    return OCModel::countOrdersByArea(
+      $conexion,
+      $startDate,
+      $endDate,
+      $area,
+      $responsible,
+      $type
+    );
   }
 
   public function formatResponse(Collection $suppliers, array $filters): array
