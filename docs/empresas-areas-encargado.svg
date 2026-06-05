@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="432" viewBox="0 0 1600 432">
+<style>
+.title{font:700 30px Arial, sans-serif; fill:#ffffff;}
+.subtitle{font:15px Arial, sans-serif; fill:#E9EDFF;}
+.thead{font:700 16px Arial, sans-serif; fill:#1D2A44;}
+.cell{font:14px Arial, sans-serif; fill:#172033;}
+.muted{font:13px Arial, sans-serif; fill:#5B6475;}
+</style>
+<rect width="1600" height="432" fill="#F5F7FB"/>
+<rect x="40" y="20" width="1520" height="74" rx="24" fill="#4056F4"/>
+<text x="64" y="52" class="title">Empresas, Áreas y Encargados</text>
+<text x="64" y="78" class="subtitle">Referencia para identificar quién preaprueba las OCs por cada área.</text>
+<rect x="40" y="118" width="1520" height="290" rx="18" fill="#FFFFFF"/>
+<rect x="40" y="118" width="1520" height="46" rx="18" fill="#E9EDFF"/>
+<rect x="40" y="140" width="1520" height="24" fill="#E9EDFF"/>
+<text x="58" y="148" class="thead">Empresa</text>
+<text x="718" y="148" class="thead">Área</text>
+<text x="1278" y="148" class="thead">Encargado</text>
+<rect x="40" y="154" width="1520" height="38" fill="#FAFBFE"/>
+<line x1="40" y1="154" x2="1560" y2="154" stroke="#E7ECF5"/>
+<text x="58" y="176" class="cell">EQEQO S.A.C.</text>
+<text x="718" y="176" class="cell">ALMACÉN CENTRAL</text>
+<text x="1278" y="176" class="cell">JEFE DE PRUEBA</text>
+<line x1="40" y1="192" x2="1560" y2="192" stroke="#E7ECF5"/>
+<text x="58" y="214" class="cell">EQEQO S.A.C.</text>
+<text x="718" y="214" class="cell">BAR PALAPA</text>
+<text x="1278" y="214" class="cell">JEFE DE PRUEBA</text>
+<rect x="40" y="230" width="1520" height="54" fill="#FAFBFE"/>
+<line x1="40" y1="230" x2="1560" y2="230" stroke="#E7ECF5"/>
+<text x="58" y="252" class="cell">LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN</text>
+<text x="58" y="268" class="cell">VILLA S.A.</text>
+<text x="718" y="252" class="cell">ADMINISTRACION</text>
+<text x="1278" y="252" class="cell">JEFE DE PRUEBA</text>
+<line x1="40" y1="284" x2="1560" y2="284" stroke="#E7ECF5"/>
+<text x="58" y="306" class="cell">LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN</text>
+<text x="58" y="322" class="cell">VILLA S.A.</text>
+<text x="718" y="306" class="cell">ALM. UNIFORMES</text>
+<text x="1278" y="306" class="cell">JEFE DE PRUEBA</text>
+<rect x="40" y="338" width="1520" height="54" fill="#FAFBFE"/>
+<line x1="40" y1="338" x2="1560" y2="338" stroke="#E7ECF5"/>
+<text x="58" y="360" class="cell">LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN</text>
+<text x="58" y="376" class="cell">VILLA S.A.</text>
+<text x="718" y="360" class="cell">MANTENIMIENTO</text>
+<text x="1278" y="360" class="cell">JEFE DE PRUEBA</text>
+<line x1="40" y1="392" x2="1560" y2="392" stroke="#E7ECF5"/>
+</svg>

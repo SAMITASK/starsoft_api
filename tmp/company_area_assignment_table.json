@@ -1,0 +1,499 @@
+[
+    {
+        "company_code": "|",
+        "company_name": "ENTRENAMIENTO",
+        "area_code": "",
+        "area_name": "No se pudo consultar áreas",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "10",
+        "area_name": "ADMINISTRACION",
+        "manager_name": "JEFE DE PRUEBA"
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "15",
+        "area_name": "ALM. UNIFORMES",
+        "manager_name": "JEFE DE PRUEBA"
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "5",
+        "area_name": "ALMACÉN CENTRAL",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "18",
+        "area_name": "COMERCIAL",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "8",
+        "area_name": "DISEÑO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "4",
+        "area_name": "EXÓTICOS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "9",
+        "area_name": "GERENCIA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "3",
+        "area_name": "GRANJA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "2",
+        "area_name": "LOGISTICA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "11",
+        "area_name": "MANTENIMIENTO",
+        "manager_name": "JEFE DE PRUEBA"
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "16",
+        "area_name": "MARKETING",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "12",
+        "area_name": "OBRAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "6",
+        "area_name": "OPERACIONES",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "7",
+        "area_name": "PALAPA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "17",
+        "area_name": "PARQUES Y JARDINES",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "14",
+        "area_name": "RRPP",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "1",
+        "area_name": "SISTEMAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "003",
+        "company_name": "LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN VILLA S.A.",
+        "area_code": "13",
+        "area_name": "TALENTO HUMANO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00011",
+        "area_name": "ADMINISTRACIÓN",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00003",
+        "area_name": "ALMACÉN CENTRAL",
+        "manager_name": "JEFE DE PRUEBA"
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00008",
+        "area_name": "ALMACÉN-ROPA DE BAÑO Y ACCES",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00017",
+        "area_name": "BAR PALAPA",
+        "manager_name": "JEFE DE PRUEBA"
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00007",
+        "area_name": "BAR PISCINA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00002",
+        "area_name": "CETICO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00006",
+        "area_name": "COMERCIAL",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00021",
+        "area_name": "CUMPLEAÑOS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00023",
+        "area_name": "EMPRESAS-NAVIDAD",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00010",
+        "area_name": "EVENTOS PALAPA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00004",
+        "area_name": "EXÓTICOS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00005",
+        "area_name": "GERENCIA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00012",
+        "area_name": "GRANJITA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00014",
+        "area_name": "KIOSKO DINO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00015",
+        "area_name": "KIOSKO INGRESO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00016",
+        "area_name": "KIOSKO PLAZA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00013",
+        "area_name": "KIOSKO TASKY",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00009",
+        "area_name": "KIOSKOS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00018",
+        "area_name": "LIMPIEZA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00019",
+        "area_name": "OPERACIONES",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00001",
+        "area_name": "PALAPA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00020",
+        "area_name": "SISTEMAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "004",
+        "company_name": "EQEQO S.A.C.",
+        "area_code": "00022",
+        "area_name": "TALENTO HUMANO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00001",
+        "area_name": "A&B",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00003",
+        "area_name": "ADM SA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00002",
+        "area_name": "ALMACEN CENTRAL",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00006",
+        "area_name": "CONTABILIDAD",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00008",
+        "area_name": "DISEÑO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00007",
+        "area_name": "OPERACIONES",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00005",
+        "area_name": "SISTEMAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "005",
+        "company_name": "CHAXRA S.A.C.",
+        "area_code": "00004",
+        "area_name": "TALENTO HUMANO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "006",
+        "company_name": "GIVA S.A.C.",
+        "area_code": "000001",
+        "area_name": "ADMINISTRACION",
+        "manager_name": ""
+    },
+    {
+        "company_code": "007",
+        "company_name": "SAMI TASK S.A.C.",
+        "area_code": "01",
+        "area_name": "ADMINISTRACION",
+        "manager_name": ""
+    },
+    {
+        "company_code": "007",
+        "company_name": "SAMI TASK S.A.C.",
+        "area_code": "05",
+        "area_name": "ALMACEN CENTRAL",
+        "manager_name": ""
+    },
+    {
+        "company_code": "007",
+        "company_name": "SAMI TASK S.A.C.",
+        "area_code": "02",
+        "area_name": "CONTABILIDAD",
+        "manager_name": ""
+    },
+    {
+        "company_code": "007",
+        "company_name": "SAMI TASK S.A.C.",
+        "area_code": "03",
+        "area_name": "SISTEMAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "007",
+        "company_name": "SAMI TASK S.A.C.",
+        "area_code": "04",
+        "area_name": "TALENTO HUMANO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "008",
+        "company_name": "SYVEC S.A.C",
+        "area_code": "10",
+        "area_name": "ADMINISTRACIÓN",
+        "manager_name": ""
+    },
+    {
+        "company_code": "009",
+        "company_name": "INVERSIONES TURISTICAS PERUANAS S.A.C",
+        "area_code": "0001",
+        "area_name": "ADM",
+        "manager_name": ""
+    },
+    {
+        "company_code": "009",
+        "company_name": "INVERSIONES TURISTICAS PERUANAS S.A.C",
+        "area_code": "0002",
+        "area_name": "ADMINISTRACION",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000007",
+        "area_name": "ADM AREQUIPA",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000003",
+        "area_name": "ADMINISTRACION",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000001",
+        "area_name": "ALQUILER - MANT",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000002",
+        "area_name": "CONTABILIDAD",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000006",
+        "area_name": "OPERACIONES",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000005",
+        "area_name": "SISTEMAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "010",
+        "company_name": "YAKU PARK S.A.C.",
+        "area_code": "000004",
+        "area_name": "TALENTO HUMANO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "011",
+        "company_name": "DREAMS COMPANY PERU S.A.C.",
+        "area_code": "00005",
+        "area_name": "ADMINISTRACION",
+        "manager_name": ""
+    },
+    {
+        "company_code": "011",
+        "company_name": "DREAMS COMPANY PERU S.A.C.",
+        "area_code": "00004",
+        "area_name": "DISEÑO",
+        "manager_name": ""
+    },
+    {
+        "company_code": "011",
+        "company_name": "DREAMS COMPANY PERU S.A.C.",
+        "area_code": "00001",
+        "area_name": "OPERACIONES JP",
+        "manager_name": ""
+    },
+    {
+        "company_code": "011",
+        "company_name": "DREAMS COMPANY PERU S.A.C.",
+        "area_code": "00002",
+        "area_name": "SISTEMAS",
+        "manager_name": ""
+    },
+    {
+        "company_code": "011",
+        "company_name": "DREAMS COMPANY PERU S.A.C.",
+        "area_code": "00003",
+        "area_name": "TALENTO HUMANO",
+        "manager_name": ""
+    }
+]

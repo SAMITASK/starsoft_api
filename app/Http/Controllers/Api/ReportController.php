@@ -123,6 +123,13 @@ class ReportController extends Controller
                 type: $request->getType()
             );
 
+            $orderCounts = $this->reportService->getAreaOrderCounts(
+                company: $company,
+                area: $resolvedArea,
+                dateRange: $request->input('date'),
+                type: $request->getType()
+            );
+
             $response = $this->reportService->formatResponse(
                 $suppliers,
                 [
@@ -132,6 +139,7 @@ class ReportController extends Controller
                     'type' => $request->getType(),
                 ]
             );
+            $response['order_counts'] = $orderCounts;
 
             return response()->json($response);
 

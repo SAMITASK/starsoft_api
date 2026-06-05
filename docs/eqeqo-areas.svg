@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1012" viewBox="0 0 1500 1012">
+<style>
+.title{font:700 28px Arial, sans-serif; fill:#ffffff;}
+.subtitle{font:15px Arial, sans-serif; fill:#E9EDFF;}
+.thead{font:700 15px Arial, sans-serif; fill:#1B2741;}
+.cell{font:14px Arial, sans-serif; fill:#172033;}
+</style>
+<rect width="1500" height="1012" fill="#F5F7FB"/>
+<rect x="32" y="20" width="1436" height="72" rx="24" fill="#4056F4"/>
+<text x="54" y="50" class="title">EQEQO S.A.C.</text>
+<text x="54" y="76" class="subtitle">Áreas obtenidas desde SQL. La columna Encargado queda libre para completar.</text>
+<rect x="32" y="126" width="1400" height="862" rx="18" fill="#FFFFFF"/>
+<rect x="32" y="126" width="1400" height="44" rx="18" fill="#E9EDFF"/>
+<rect x="32" y="146" width="1400" height="24" fill="#E9EDFF"/>
+<text x="48" y="154" class="thead">Empresa</text>
+<text x="608" y="154" class="thead">Área</text>
+<text x="1168" y="154" class="thead">Encargado</text>
+<rect x="32" y="168" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="168" x2="1432" y2="168" stroke="#E6EBF4"/>
+<text x="48" y="188" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="188" class="cell">ADMINISTRACIÓN (00011)</text>
+<text x="1168" y="188" class="cell"></text>
+<line x1="32" y1="202" x2="1432" y2="202" stroke="#E6EBF4"/>
+<text x="48" y="222" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="222" class="cell">ALMACÉN CENTRAL (00003)</text>
+<text x="1168" y="222" class="cell"></text>
+<rect x="32" y="236" width="1400" height="48" fill="#FAFBFE"/>
+<line x1="32" y1="236" x2="1432" y2="236" stroke="#E6EBF4"/>
+<text x="48" y="256" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="256" class="cell">ALMACÉN-ROPA DE BAÑO Y ACCES</text>
+<text x="608" y="270" class="cell">(00008)</text>
+<text x="1168" y="256" class="cell"></text>
+<line x1="32" y1="284" x2="1432" y2="284" stroke="#E6EBF4"/>
+<text x="48" y="304" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="304" class="cell">BAR PALAPA (00017)</text>
+<text x="1168" y="304" class="cell"></text>
+<rect x="32" y="318" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="318" x2="1432" y2="318" stroke="#E6EBF4"/>
+<text x="48" y="338" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="338" class="cell">BAR PISCINA (00007)</text>
+<text x="1168" y="338" class="cell"></text>
+<line x1="32" y1="352" x2="1432" y2="352" stroke="#E6EBF4"/>
+<text x="48" y="372" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="372" class="cell">CETICO (00002)</text>
+<text x="1168" y="372" class="cell"></text>
+<rect x="32" y="386" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="386" x2="1432" y2="386" stroke="#E6EBF4"/>
+<text x="48" y="406" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="406" class="cell">COMERCIAL (00006)</text>
+<text x="1168" y="406" class="cell"></text>
+<line x1="32" y1="420" x2="1432" y2="420" stroke="#E6EBF4"/>
+<text x="48" y="440" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="440" class="cell">CUMPLEAÑOS (00021)</text>
+<text x="1168" y="440" class="cell"></text>
+<rect x="32" y="454" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="454" x2="1432" y2="454" stroke="#E6EBF4"/>
+<text x="48" y="474" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="474" class="cell">EMPRESAS-NAVIDAD (00023)</text>
+<text x="1168" y="474" class="cell"></text>
+<line x1="32" y1="488" x2="1432" y2="488" stroke="#E6EBF4"/>
+<text x="48" y="508" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="508" class="cell">EVENTOS PALAPA (00010)</text>
+<text x="1168" y="508" class="cell"></text>
+<rect x="32" y="522" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="522" x2="1432" y2="522" stroke="#E6EBF4"/>
+<text x="48" y="542" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="542" class="cell">EXÓTICOS (00004)</text>
+<text x="1168" y="542" class="cell"></text>
+<line x1="32" y1="556" x2="1432" y2="556" stroke="#E6EBF4"/>
+<text x="48" y="576" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="576" class="cell">GERENCIA (00005)</text>
+<text x="1168" y="576" class="cell"></text>
+<rect x="32" y="590" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="590" x2="1432" y2="590" stroke="#E6EBF4"/>
+<text x="48" y="610" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="610" class="cell">GRANJITA (00012)</text>
+<text x="1168" y="610" class="cell"></text>
+<line x1="32" y1="624" x2="1432" y2="624" stroke="#E6EBF4"/>
+<text x="48" y="644" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="644" class="cell">KIOSKO DINO (00014)</text>
+<text x="1168" y="644" class="cell"></text>
+<rect x="32" y="658" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="658" x2="1432" y2="658" stroke="#E6EBF4"/>
+<text x="48" y="678" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="678" class="cell">KIOSKO INGRESO (00015)</text>
+<text x="1168" y="678" class="cell"></text>
+<line x1="32" y1="692" x2="1432" y2="692" stroke="#E6EBF4"/>
+<text x="48" y="712" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="712" class="cell">KIOSKO PLAZA (00016)</text>
+<text x="1168" y="712" class="cell"></text>
+<rect x="32" y="726" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="726" x2="1432" y2="726" stroke="#E6EBF4"/>
+<text x="48" y="746" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="746" class="cell">KIOSKO TASKY (00013)</text>
+<text x="1168" y="746" class="cell"></text>
+<line x1="32" y1="760" x2="1432" y2="760" stroke="#E6EBF4"/>
+<text x="48" y="780" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="780" class="cell">KIOSKOS (00009)</text>
+<text x="1168" y="780" class="cell"></text>
+<rect x="32" y="794" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="794" x2="1432" y2="794" stroke="#E6EBF4"/>
+<text x="48" y="814" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="814" class="cell">LIMPIEZA (00018)</text>
+<text x="1168" y="814" class="cell"></text>
+<line x1="32" y1="828" x2="1432" y2="828" stroke="#E6EBF4"/>
+<text x="48" y="848" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="848" class="cell">OPERACIONES (00019)</text>
+<text x="1168" y="848" class="cell"></text>
+<rect x="32" y="862" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="862" x2="1432" y2="862" stroke="#E6EBF4"/>
+<text x="48" y="882" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="882" class="cell">PALAPA (00001)</text>
+<text x="1168" y="882" class="cell"></text>
+<line x1="32" y1="896" x2="1432" y2="896" stroke="#E6EBF4"/>
+<text x="48" y="916" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="916" class="cell">SISTEMAS (00020)</text>
+<text x="1168" y="916" class="cell"></text>
+<rect x="32" y="930" width="1400" height="34" fill="#FAFBFE"/>
+<line x1="32" y1="930" x2="1432" y2="930" stroke="#E6EBF4"/>
+<text x="48" y="950" class="cell">EQEQO S.A.C.</text>
+<text x="608" y="950" class="cell">TALENTO HUMANO (00022)</text>
+<text x="1168" y="950" class="cell"></text>
+<line x1="32" y1="964" x2="1432" y2="964" stroke="#E6EBF4"/>
+</svg>

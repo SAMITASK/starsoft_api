@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="474" viewBox="0 0 1800 474">
+<style>
+.title{font:700 34px Arial, sans-serif; fill:#ffffff;}
+.subtitle{font:16px Arial, sans-serif; fill:#E9EDFF;}
+.company{font:700 22px Arial, sans-serif; fill:#4056F4;}
+.manager{font:700 18px Arial, sans-serif; fill:#172033;}
+.email{font:13px Arial, sans-serif; fill:#5B6475;}
+.chip{font:13px Arial, sans-serif; fill:#172033;}
+</style>
+<rect width="1800" height="474" fill="#F5F7FB"/>
+<rect x="56" y="24" width="1688" height="86" rx="28" fill="#4056F4"/>
+<text x="84" y="62" class="title">Jefes de Área por Empresa</text>
+<text x="86" y="92" class="subtitle">Referencia visual para identificar quién preaprueba las OCs según empresa y área.</text>
+<rect x="56" y="164" width="830" height="250" rx="24" fill="#FFFFFF"/>
+<rect x="56" y="164" width="830" height="56" rx="24" fill="#E9EDFF"/>
+<rect x="56" y="192" width="830" height="28" fill="#E9EDFF"/>
+<text x="74" y="192" class="company">003 · LA GRANJA VILLA Y SU MUNDO MAGICO S.A. - GRAN</text>
+<text x="74" y="216" class="company">VILLA S.A.</text>
+<text x="74" y="246" class="manager">JEFE DE PRUEBA</text>
+<text x="74" y="270" class="email">jefe@admin.com</text>
+<rect x="74" y="276" width="794" height="22" rx="11" fill="#EEF2F8" stroke="#D6DEEC"/>
+<text x="84" y="292" class="chip">ADMINISTRACION (10)</text>
+<rect x="74" y="306" width="794" height="22" rx="11" fill="#EEF2F8" stroke="#D6DEEC"/>
+<text x="84" y="322" class="chip">ALM. UNIFORMES (15)</text>
+<rect x="74" y="336" width="794" height="22" rx="11" fill="#EEF2F8" stroke="#D6DEEC"/>
+<text x="84" y="352" class="chip">MANTENIMIENTO (11)</text>
+<rect x="914" y="164" width="830" height="220" rx="24" fill="#FFFFFF"/>
+<rect x="914" y="164" width="830" height="56" rx="24" fill="#E9EDFF"/>
+<rect x="914" y="192" width="830" height="28" fill="#E9EDFF"/>
+<text x="932" y="192" class="company">004 · EQEQO S.A.C.</text>
+<text x="932" y="246" class="manager">JEFE DE PRUEBA</text>
+<text x="932" y="270" class="email">jefe@admin.com</text>
+<rect x="932" y="276" width="794" height="22" rx="11" fill="#EEF2F8" stroke="#D6DEEC"/>
+<text x="942" y="292" class="chip">ALMACÉN CENTRAL (00003)</text>
+<rect x="932" y="306" width="794" height="22" rx="11" fill="#EEF2F8" stroke="#D6DEEC"/>
+<text x="942" y="322" class="chip">BAR PALAPA (00017)</text>
+</svg>

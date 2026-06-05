@@ -5,6 +5,8 @@ const props = defineProps({
   products: Number,
   suppliers: Number,
   money: Number,
+  ocOrders: Number,
+  osOrders: Number,
 })
 
 const statistics = computed(() => {
@@ -29,6 +31,18 @@ const statistics = computed(() => {
       stats: props.products ?? 0,
       icon: "ri-shopping-cart-2-line",
       color: "info",
+    },
+    {
+      title: "Cantidad OC",
+      stats: props.ocOrders ?? 0,
+      icon: "ri-file-list-3-line",
+      color: "success",
+    },
+    {
+      title: "Cantidad OS",
+      stats: props.osOrders ?? 0,
+      icon: "ri-service-line",
+      color: "secondary",
     },
   ]
 })

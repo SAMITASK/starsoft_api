@@ -271,6 +271,55 @@ class OCModel extends Model
             ->values();
     }
 
+    public static function countOrdersByArea(
+        string $connectionName,
+        string $dateStart,
+        string $dateEnd,
+        string $area,
+        ?string $responsible = null,
+        ?string $type = null
+    ): array {
+        $tables = [];
+
+        if ($type === 'OC') {
+            $tables['oc'] = ['table' => 'COMOVC', 'tiporequi' => 'RQ'];
+        } elseif ($type === 'OS') {
+            $tables['os'] = ['table' => 'COMOVC_S', 'tiporequi' => 'RS'];
+        } else {
+            $tables = [
+                'oc' => ['table' => 'COMOVC', 'tiporequi' => 'RQ'],
+                'os' => ['table' => 'COMOVC_S', 'tiporequi' => 'RS'],
+            ];
+        }
+
+        $counts = [
+            'oc' => 0,
+            'os' => 0,
+        ];
+
+        foreach ($tables as $key => $config) {
+            $table = $config['table'];
+
+            $query = self::on($connectionName)
+                ->from($table)
+                ->join('REQUISC as R', "{$table}.OC_CNRODOCREF", '=', 'R.NROREQUI')
+                ->where('R.TIPOREQUI', $config['tiporequi'])
+                ->whereIn("{$table}.OC_CSITORD", ['01', '03', '04'])
+                ->whereBetween("{$table}.OC_DFECDOC", [$dateStart, $dateEnd])
+                ->whereRaw('CAST(R.AREA AS INT) = ?', [(int) $area]);
+
+            if ($responsible) {
+                $query->where("{$table}.OC_CSOLICT", $responsible);
+            }
+
+            $counts[$key] = (int) $query->distinct("{$table}.OC_CNUMORD")->count("{$table}.OC_CNUMORD");
+        }
+
+        $counts['total'] = $counts['oc'] + $counts['os'];
+
+        return $counts;
+    }
+
     public static function reportMonthlyExpenses(
         string $connectionName,
         ?string $type = null,
