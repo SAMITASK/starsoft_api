@@ -67,6 +67,9 @@ class SupplierReportService
     return [
       'suppliers' => $suppliers->toArray(),
       'total' => $suppliers->count(),
+      'money_total' => $suppliers
+        ->unique('proveedor_id')
+        ->sum(fn ($supplier) => $supplier['supplier_total'] ?? $supplier['total'] ?? 0),
     ];
   }
 }
