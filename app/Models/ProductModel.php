@@ -68,12 +68,14 @@ class ProductModel extends Model
             'detail' => 'COMOVD',
             'tiporequi' => 'RQ',
             'is_service' => false,
+            'order_type' => 'OC',
         ],
         'OS' => [
             'header' => 'COMOVC_S',
             'detail' => 'COMOVD_S',
             'tiporequi' => 'RS',
             'is_service' => true,
+            'order_type' => 'OS',
         ],
     ];
 
@@ -161,7 +163,7 @@ class ProductModel extends Model
             ->join("{$detail} as D", 'H.OC_CNUMORD', '=', 'D.OC_CNUMORD')
             ->join('MAEPROV as P', 'H.OC_CCODPRO', '=', 'P.PRVCCODIGO')
             ->join('REQUISC as R', 'H.OC_CNRODOCREF', '=', 'R.NROREQUI')
-            ->select(self::getSelectFields($config['is_service']))
+            ->select(self::getSelectFields($config['is_service'], $config['order_type']))
             ->whereIn('H.OC_CSITORD', ['01', '03', '04'])
             ->whereBetween('H.OC_DFECDOC', [$start, $end])
             ->whereRaw('CAST(R.AREA AS INT) = ?', [(int)$area])
@@ -177,11 +179,14 @@ class ProductModel extends Model
     /**
      * Define los campos SELECT según si es servicio o producto
      */
-    private static function getSelectFields(bool $isService): array
+    private static function getSelectFields(bool $isService, string $orderType): array
     {
         $baseFields = [
             'P.PRVCCODIGO as proveedor_id',
             'P.PRVCNOMBRE as proveedor_name',
+            'H.OC_CNUMORD as order_number',
+            'H.OC_NVENTA as order_total',
+            DB::raw("'{$orderType}' as order_type"),
         ];
 
         if ($isService) {
@@ -212,20 +217,33 @@ class ProductModel extends Model
      */
     private static function aggregateResults(Collection $results): Collection
     {
+        $supplierTotals = self::getSupplierTotals($results);
+
         return $results
             ->groupBy('proveedor_id')
-            ->flatMap(function ($providerItems) {
+            ->flatMap(function ($providerItems) use ($supplierTotals) {
                 $providerId = $providerItems->first()->proveedor_id;
                 $providerName = $providerItems->first()->proveedor_name;
+                $supplierTotal = $supplierTotals[$providerId] ?? $providerItems->sum('total');
 
                 return $providerItems
                     ->groupBy('product_id')
-                    ->map(function ($products) use ($providerId, $providerName) {
-                        return self::buildProductSummary($products, $providerId, $providerName);
+                    ->map(function ($products) use ($providerId, $providerName, $supplierTotal) {
+                        return self::buildProductSummary($products, $providerId, $providerName, $supplierTotal);
                     })
                     ->values();
             })
             ->values();
+    }
+
+    private static function getSupplierTotals(Collection $results): array
+    {
+        return $results
+            ->groupBy('proveedor_id')
+            ->map(fn ($items) => $items
+                ->unique(fn ($item) => $item->order_type . '|' . $item->order_number)
+                ->sum('order_total'))
+            ->toArray();
     }
 
     /**
@@ -234,7 +252,8 @@ class ProductModel extends Model
     private static function buildProductSummary(
         Collection $products,
         string $providerId,
-        string $providerName
+        string $providerName,
+        float $supplierTotal
     ): array {
         $first = $products->first();
         $totalCantidad = $products->sum('cantidad');
@@ -257,6 +276,7 @@ class ProductModel extends Model
             'precio_unitario' => round($precioPromedio, 2),
             'precio_igv' => $precioConIgv,
             'total' => round($totalMonto, 2),
+            'supplier_total' => round($supplierTotal, 2),
         ];
     }
 }

@@ -67,7 +67,7 @@ const tSuppliers = computed(() => {
 });
 
 const tMoney = computed(() =>
-  suppliers.value.reduce((sum, i) => sum + (i.total || 0), 0)
+  Number(suppliersData.value?.money_total ?? suppliers.value.reduce((sum, i) => sum + (i.total || 0), 0))
 );
 
 // 📑 Control tabla
@@ -108,7 +108,9 @@ const goToProduct = (item) => {
 };
 
 const getSupplierTotal = (items) => {
-  const sum = items.reduce((acc, i) => acc + (i.raw.total || 0), 0);
+  const sum = items?.[0]?.raw?.supplier_total
+    ?? items.reduce((acc, i) => acc + (i.raw.total || 0), 0);
+
   return sum.toLocaleString("es-PE", {
     style: "currency",
     currency: "PEN",
