@@ -61,6 +61,15 @@ class OCModel extends Model
             ->get();
     }
 
+    private static function amountInSolesExpression(string $table): string
+    {
+        return "CASE
+            WHEN {$table}.OC_CCODMON = 'ME'
+                THEN {$table}.OC_NVENTA * COALESCE(NULLIF({$table}.OC_NTIPCAM, 0), 1)
+            ELSE {$table}.OC_NVENTA
+        END";
+    }
+
     public static function getOrdersSummary(
         string $connectionName,
         string $dateStart,
@@ -84,6 +93,8 @@ class OCModel extends Model
                 continue;
             }
 
+            $amountInSoles = self::amountInSolesExpression($table);
+
             $rows = self::on($connectionName)
                 ->from($table)
                 ->join('MAEPROV as P', "$table.OC_CCODPRO", '=', 'P.PRVCCODIGO');
@@ -101,7 +112,7 @@ class OCModel extends Model
                 P.PRVCCODIGO as PROVEEDOR,
                 P.PRVCNOMBRE as NOMBRE_PROVEEDOR,
                 R.AREA as AREA,
-                SUM(' . $table . '.OC_NVENTA) as MONTO_TOTAL
+                SUM(' . $amountInSoles . ') as MONTO_TOTAL
             ')
                 ->whereIn("$table.OC_CSITORD", ['01', '03', '04'])
                 ->whereBetween("$table.OC_DFECDOC", [$dateStart, $dateEnd]);
@@ -156,6 +167,8 @@ class OCModel extends Model
                 continue;
             }
 
+            $amountInSoles = self::amountInSolesExpression($table);
+
             $query = self::on($connectionName)
                 ->from($table)
                 ->join('REQUISC as R', function ($join) use ($table) {
@@ -171,7 +184,7 @@ class OCModel extends Model
                 ->selectRaw("
             A.AREA_CODIGO as id,
             A.AREA_DESCRIPCION as name,
-            SUM({$table}.OC_NVENTA) as MONTO_TOTAL
+            SUM({$amountInSoles}) as MONTO_TOTAL
         ")
                 ->whereIn("{$table}.OC_CSITORD", ['01', '03', '04'])
                 ->whereBetween("{$table}.OC_DFECDOC", [$dateStart, $dateEnd]);
@@ -332,11 +345,12 @@ class OCModel extends Model
         $dateStart = now()->subMonths($monthsBack - 1)->startOfMonth()->toDateString();
 
         // --- Consulta OC ---
+        $ocAmountInSoles = self::amountInSolesExpression('COMOVC');
         $ocQuery = self::on($connectionName)
             ->from('COMOVC')
             ->join('REQUISC as R', 'COMOVC.OC_CNRODOCREF', '=', 'R.NROREQUI')
             ->where('R.TIPOREQUI', 'RQ')
-            ->selectRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM') as month, SUM(COMOVC.OC_NVENTA) as oc_total")
+            ->selectRaw("FORMAT(COMOVC.OC_DFECDOC, 'yyyy-MM') as month, SUM({$ocAmountInSoles}) as oc_total")
             ->whereIn('COMOVC.OC_CSITORD', ['01', '03', '04'])
             ->whereBetween('COMOVC.OC_DFECDOC', [$dateStart, $dateEnd]);
 
@@ -357,11 +371,12 @@ class OCModel extends Model
         }
 
         // --- Consulta OS ---
+        $osAmountInSoles = self::amountInSolesExpression('COMOVC_S');
         $osQuery = self::on($connectionName)
             ->from('COMOVC_S')
             ->join('REQUISC as R', 'COMOVC_S.OC_CNRODOCREF', '=', 'R.NROREQUI')
             ->where('R.TIPOREQUI', 'RS')
-            ->selectRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM') as month, SUM(COMOVC_S.OC_NVENTA) as os_total")
+            ->selectRaw("FORMAT(COMOVC_S.OC_DFECDOC, 'yyyy-MM') as month, SUM({$osAmountInSoles}) as os_total")
             ->whereIn('COMOVC_S.OC_CSITORD', ['01', '03', '04'])
             ->whereBetween('COMOVC_S.OC_DFECDOC', [$dateStart, $dateEnd]);
 
