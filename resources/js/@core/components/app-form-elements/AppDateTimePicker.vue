@@ -437,9 +437,20 @@ input[altinputclass="inlinePicker"] {
 
 // Month and year section
 .flatpickr-current-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  block-size: 38px;
+  inline-size: calc(100% - 76px);
+  inset-inline-start: 38px;
+  padding-block: 0;
+
   .flatpickr-monthDropdown-months {
     appearance: none;
     block-size: 24px;
+    inline-size: auto;
+    min-inline-size: 5rem;
   }
 
   .flatpickr-monthDropdown-months,
@@ -462,6 +473,21 @@ input[altinputclass="inlinePicker"] {
     .flatpickr-monthDropdown-month {
       background-color: rgb(var(--v-theme-surface));
     }
+  }
+
+  .numInputWrapper {
+    display: inline-flex;
+    flex: 0 0 4.25rem;
+    inline-size: 4.25rem;
+  }
+
+  input.cur-year {
+    display: block;
+    inline-size: 100%;
+    padding: 0;
+    color: $heading-color;
+    opacity: 1;
+    text-align: center;
   }
 }
 

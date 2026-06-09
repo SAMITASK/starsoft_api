@@ -181,35 +181,52 @@ class ProductModel extends Model
      */
     private static function getSelectFields(bool $isService, string $orderType): array
     {
+        $orderTotal = self::amountInSolesExpression('H', 'H.OC_NVENTA');
+
         $baseFields = [
             'P.PRVCCODIGO as proveedor_id',
             'P.PRVCNOMBRE as proveedor_name',
             'H.OC_CNUMORD as order_number',
-            'H.OC_NVENTA as order_total',
+            DB::raw("{$orderTotal} as order_total"),
             DB::raw("'{$orderType}' as order_type"),
         ];
 
         if ($isService) {
+            $unitPrice = self::amountInSolesExpression('H', 'D.OC_NPREUNI');
+            $total = self::amountInSolesExpression('H', 'D.OC_NPRENET');
+
             return array_merge($baseFields, [
                 'D.OC_CODSERVICIO as product_id',
                 'D.OC_CDESREF as product_name',
                 DB::raw("'UND' as unidad"),
                 'D.OC_CANT as cantidad',
-                'D.OC_NPREUNI as precio_unitario',
-                'D.OC_NPRENET as total',
+                DB::raw("{$unitPrice} as precio_unitario"),
+                DB::raw("{$total} as total"),
                 'D.OC_NIGV as igv',
             ]);
         }
+
+        $unitPrice = self::amountInSolesExpression('H', 'D.OC_NPREUNI');
+        $total = self::amountInSolesExpression('H', 'D.OC_NTOTNET');
 
         return array_merge($baseFields, [
             'D.OC_CCODIGO as product_id',
             'D.OC_CDESREF as product_name',
             'D.OC_CUNIDAD as unidad',
             'D.OC_NCANTID as cantidad',
-            'D.OC_NPREUNI as precio_unitario',
-            'D.OC_NTOTNET as total',
+            DB::raw("{$unitPrice} as precio_unitario"),
+            DB::raw("{$total} as total"),
             'D.OC_NIGV as igv',
         ]);
+    }
+
+    private static function amountInSolesExpression(string $headerAlias, string $amountField): string
+    {
+        return "CASE
+            WHEN {$headerAlias}.OC_CCODMON = 'ME'
+                THEN {$amountField} * COALESCE(NULLIF({$headerAlias}.OC_NTIPCAM, 0), 1)
+            ELSE {$amountField}
+        END";
     }
 
     /**
